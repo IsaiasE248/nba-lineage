@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NBA LINEAGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;600;800&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --court: #6b3410;
+    --court-dark: #3d1d08;
+    --court-glow: #c97a3a;
+    --line: #f4e4c1;
+    --paint: #c9532b;
+    --bg: #0a0908;
+    --bg-2: #15110d;
+    --ink: #f4e4c1;
+    --ink-dim: #8a7a5c;
+    --green: #4ade80;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --shadow: 0 0 0 1px rgba(244,228,193,.08), 0 20px 60px -20px rgba(0,0,0,.8);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Oswald', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* hardwood backdrop */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at top, rgba(201,122,58,.12), transparent 60%),
+      repeating-linear-gradient(
+        90deg,
+        var(--court-dark) 0px,
+        var(--court-dark) 80px,
+        rgba(107,52,16,.4) 80px,
+        rgba(107,52,16,.4) 81px,
+        var(--court-dark) 81px,
+        var(--court-dark) 160px
+      ),
+      var(--bg);
+    opacity: .25;
+    z-index: -2;
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,.015) 1px, transparent 1px),
+      radial-gradient(circle at 70% 80%, rgba(255,255,255,.015) 1px, transparent 1px);
+    background-size: 4px 4px, 6px 6px;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+
+  /* SCOREBOARD HEADER */
+  .scoreboard {
+    border: 2px solid var(--line);
+    background: linear-gradient(180deg, #1a1410 0%, #0e0a07 100%);
+    padding: 18px 24px;
+    margin-bottom: 24px;
+    position: relative;
+    box-shadow: var(--shadow);
+  }
+  .scoreboard::before {
+    content: '';
+    position: absolute; inset: 4px;
+    border: 1px solid rgba(244,228,193,.15);
+    pointer-events: none;
+  }
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 6vw, 56px);
+    letter-spacing: .04em;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .logo .accent { color: var(--paint); }
+  .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+    text-align: right;
+    line-height: 1.6;
+  }
+  .meta b { color: var(--ink); font-weight: 600; }
+
+  /* PUZZLE PAIR */
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: stretch;
+    margin-bottom: 24px;
+  }
+  .player-card {
+    border: 1.5px solid var(--line);
+    background:
+      radial-gradient(ellipse at top left, rgba(201,122,58,.15), transparent 50%),
+      linear-gradient(180deg, #1c1612 0%, #100b07 100%);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .player-card.start { border-color: var(--paint); }
+  .player-card.end { border-color: var(--court-glow); }
+  .player-card .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .25em;
+    color: var(--ink-dim);
+    margin-bottom: 8px;
+  }
+  .player-card .name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(22px, 3.5vw, 32px);
+    letter-spacing: .02em;
+    line-height: 1.05;
+  }
+  .player-card .team {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+    margin-top: 8px;
+  }
+  .vs {
+    align-self: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--paint);
+    letter-spacing: .1em;
+  }
+
+  @media (max-width: 600px) {
+    .pair { grid-template-columns: 1fr; }
+    .vs { padding: 4px 0; text-align: center; }
+  }
+
+  /* CHAIN */
+  .chain-section {
+    margin-bottom: 24px;
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed rgba(244,228,193,.2);
+  }
+  .section-head h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: .15em;
+  }
+  .stat-row {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+  }
+  .stat-row b { color: var(--paint); font-weight: 600; }
+
+  .chain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    min-height: 50px;
+    padding: 12px;
+    border: 1px dashed rgba(244,228,193,.15);
+    background: rgba(0,0,0,.3);
+  }
+  .link {
+    display: inline-flex;
+    flex-direction: column;
+    padding: 8px 14px;
+    background: var(--court-dark);
+    border: 1px solid var(--court-glow);
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    position: relative;
+    animation: pop .3s ease-out;
+  }
+  .link.start { background: var(--paint); border-color: var(--paint); color: #fff; }
+  .link.end { background: var(--court-glow); border-color: var(--court-glow); color: #1a0e05; }
+  .link .small {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .1em;
+    opacity: .7;
+    margin-top: 2px;
+  }
+  .arrow {
+    color: var(--paint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 800;
+  }
+  @keyframes pop {
+    from { transform: scale(.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* INPUT + SEARCH */
+  .input-wrap {
+    margin-top: 16px;
+    position: relative;
+  }
+  .search-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: #0e0a07;
+    border: 1.5px solid rgba(244,228,193,.25);
+    color: var(--ink);
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    letter-spacing: .02em;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .search-input:focus {
+    border-color: var(--paint);
+    box-shadow: 0 0 0 3px rgba(201,83,43,.15);
+  }
+  .search-input::placeholder { color: var(--ink-dim); }
+  .search-input:disabled { opacity: .5; cursor: not-allowed; }
+
+  .results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #0e0a07;
+    border: 1px solid rgba(244,228,193,.25);
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+  }
+  .results.show { display: block; }
+  .result-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(244,228,193,.06);
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .result-item:hover, .result-item.active { background: rgba(201,83,43,.15); }
+  .result-item .pos {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-dim);
+  }
+
+  /* STATUS / FEEDBACK */
+  .status {
+    margin-top: 10px;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .04em;
+    min-height: 38px;
+    border-left: 3px solid var(--ink-dim);
+    background: rgba(0,0,0,.3);
+    color: var(--ink-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .status.ok { border-color: var(--green); color: var(--green); }
+  .status.bad { border-color: var(--red); color: var(--red); }
+  .status.warn { border-color: var(--yellow); color: var(--yellow); }
+  .status.thinking { border-color: var(--paint); color: var(--paint); }
+  .status .spinner {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+  .btn {
+    padding: 10px 18px;
+    background: transparent;
+    border: 1.5px solid var(--ink-dim);
+    color: var(--ink);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: .15em;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn:hover { border-color: var(--paint); color: var(--paint); background: rgba(201,83,43,.08); }
+  .btn.primary { background: var(--paint); border-color: var(--paint); color: #fff; }
+  .btn.primary:hover { background: #d65f33; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle input { accent-color: var(--paint); }
+
+  /* RESULT MODAL */
+  .complete {
+    margin-top: 20px;
+    border: 2px solid var(--green);
+    background: linear-gradient(180deg, rgba(74,222,128,.08), rgba(74,222,128,.02));
+    padding: 24px;
+    display: none;
+  }
+  .complete.show { display: block; animation: pop .4s ease-out; }
+  .complete h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    color: var(--green);
+    letter-spacing: .08em;
+  }
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+  }
+  .score-cell {
+    border: 1px solid rgba(244,228,193,.15);
+    padding: 12px;
+    background: rgba(0,0,0,.3);
+  }
+  .score-cell .k {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .2em;
+    color: var(--ink-dim);
+  }
+  .score-cell .v {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    color: var(--paint);
+    margin-top: 4px;
+  }
+  .score-cell.total .v { color: var(--green); font-size: 32px; }
+
+  /* loading skeleton */
+  .skel {
+    display: inline-block;
+    height: 20px;
+    width: 140px;
+    background: linear-gradient(90deg, rgba(244,228,193,.05), rgba(244,228,193,.15), rgba(244,228,193,.05));
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  footer {
+    margin-top: 30px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-dim);
+    letter-spacing: .1em;
+  }
+  footer a { color: var(--paint); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="scoreboard">
+    <div class="top-row">
+      <div class="logo">NBA <span class="accent">LINEAGE</span></div>
+      <div class="meta">
+        DAILY <b id="daily-date">—</b><br>
+        PUZZLE #<b id="puzzle-num">—</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAILY PAIR -->
+  <div class="pair" id="pair">
+    <div class="player-card start">
+      <div class="label">START</div>
+      <div class="name" id="start-name"><span class="skel"></span></div>
+      <div class="team" id="start-team">—</div>
+    </div>
+    <div class="vs">→ CONNECT →</div>
+    <div class="player-card end">
+      <div class="label">END</div>
+      <div class="name" id="end-name"><span class="skel"></span></div>
+      <div class="team" id="end-team">—</div>
+    </div>
+  </div>
+
+  <!-- CHAIN AREA -->
+  <div class="chain-section">
+    <div class="section-head">
+      <h2>YOUR CHAIN</h2>
+      <div class="stat-row">
+        STEPS <b id="step-count">0</b> · RARITY <b id="rarity-score">0</b>
+      </div>
+    </div>
+    <div class="chain" id="chain"></div>
+
+    <div class="input-wrap">
+      <input
+        id="search"
+        class="search-input"
+        type="text"
+        placeholder="TYPE A PLAYER NAME WHO PLAYED WITH THE LAST PLAYER IN THE CHAIN…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <div class="results" id="results"></div>
+    </div>
+
+    <div class="status" id="status">
+      <span>READY. TYPE A PLAYER WHO WAS A TEAMMATE OF THE START PLAYER.</span>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="undo-btn">UNDO</button>
+      <button class="btn" id="reset-btn">RESET</button>
+      <label class="toggle">
+        <input type="checkbox" id="full-history" />
+        FULL HISTORY (PRE-2000)
+      </label>
+    </div>
+
+    <div class="complete" id="complete">
+      <h3>CHAIN COMPLETE</h3>
+      <div class="score-grid">
+        <div class="score-cell"><div class="k">STEPS</div><div class="v" id="r-steps">—</div></div>
+        <div class="score-cell"><div class="k">RARITY</div><div class="v" id="r-rarity">—</div></div>
+        <div class="score-cell"><div class="k">EFFICIENCY</div><div class="v" id="r-eff">—</div></div>
+        <div class="score-cell total"><div class="k">FINAL SCORE</div><div class="v" id="r-total">—</div></div>
+      </div>
+      <div class="controls" style="margin-top:18px">
+        <button class="btn primary" id="share-btn">COPY SHARE</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    DATA · BALLDONTLIE.IO ·
+    TEAMMATE = SAME TEAM, SAME SEASON ·
+    <a href="#" id="how-link">HOW TO PLAY</a>
+  </footer>
+</div>
+
+<script>
+/* =========================================================================
+   NBA LINEAGE — game logic
+   ========================================================================= */
+
+// ---------- CURATED DAILY POOL ----------
+// Each pair is solvable via a chain. Names get resolved to live API IDs
+// at load time so we never carry stale IDs.
+// Format: [first_name, last_name] — the search uses last_name for accuracy.
+const DAILY_POOL = [
+  { a: ["LeBron", "James"],          b: ["Kevin", "Durant"] },
+  { a: ["Stephen", "Curry"],         b: ["Damian", "Lillard"] },
+  { a: ["Giannis", "Antetokounmpo"], b: ["Jimmy", "Butler"] },
+  { a: ["Kawhi", "Leonard"],         b: ["Russell", "Westbrook"] },
+  { a: ["Jimmy", "Butler"],          b: ["LeBron", "James"] },
+  { a: ["Russell", "Westbrook"],     b: ["Kevin", "Durant"] },
+  { a: ["Stephen", "Curry"],         b: ["LeBron", "James"] },
+  { a: ["Kawhi", "Leonard"],         b: ["Stephen", "Curry"] },
+  { a: ["Giannis", "Antetokounmpo"], b: ["Damian", "Lillard"] },
+  { a: ["Kevin", "Durant"],          b: ["Jimmy", "Butler"] },
+  { a: ["Chris", "Paul"],            b: ["LeBron", "James"] },
+  { a: ["Anthony", "Davis"],         b: ["Kevin", "Durant"] },
+  { a: ["Paul", "George"],           b: ["Stephen", "Curry"] },
+  { a: ["Kyrie", "Irving"],          b: ["Jimmy", "Butler"] },
+];
+
+// ---------- DAILY SEEDING ----------
+function dayIndex() {
+  // Days since 2024-01-01 — keeps puzzle # and pair selection in sync.
+  const epoch = Date.UTC(2024, 0, 1);
+  const now = Date.now();
+  return Math.floor((now - epoch) / 86400000);
+}
+function todayPuzzle() {
+  const idx = dayIndex();
+  return { num: idx, pair: DAILY_POOL[idx % DAILY_POOL.length] };
+}
+function todayDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// ---------- API CLIENT ----------
+const api = {
+  async search(q) {
+    const r = await fetch(`/api/players?search=${encodeURIComponent(q)}`);
+    if (!r.ok) throw new Error("search failed");
+    return (await r.json()).data || [];
+  },
+  async player(id) {
+    const r = await fetch(`/api/player?id=${encodeURIComponent(id)}`);
+    if (!r.ok) throw new Error("player fetch failed");
+    return (await r.json()).data || null;
+  },
+  async teammates(id1, id2, fullHistory) {
+    const full = fullHistory ? "&full=1" : "";
+    const r = await fetch(`/api/teammates?id1=${id1}&id2=${id2}${full}`);
+    if (!r.ok) throw new Error("teammate check failed");
+    return await r.json();
+  },
+  async seasons(id, fullHistory) {
+    const full = fullHistory ? "&full=1" : "";
+    const r = await fetch(`/api/seasons?id=${id}${full}`);
+    if (!r.ok) throw new Error("seasons failed");
+    return (await r.json()).data || [];
+  },
+  // Resolve "Stephen Curry" → balldontlie player ID via search.
+  // Picks the best match: exact last_name match wins; else first result.
+  async resolveByName(first, last) {
+    const results = await this.search(last);
+    const exact = results.find(p =>
+      p.first_name?.toLowerCase() === first.toLowerCase() &&
+      p.last_name?.toLowerCase() === last.toLowerCase()
+    );
+    return exact || results[0] || null;
+  }
+};
+
+// ---------- STATE ----------
+const state = {
+  puzzle: todayPuzzle(),
+  startPlayer: null,
+  endPlayer: null,
+  chain: [],         // [{id, name, team, seasonsCount}]
+  used: new Set(),
+  fullHistory: false,
+  complete: false,
+  searchTimer: null,
+  resultsList: [],
+  activeIdx: -1,
+};
+
+// ---------- ELEMENTS ----------
+const $ = (id) => document.getElementById(id);
+const els = {
+  date: $("daily-date"),
+  num: $("puzzle-num"),
+  startName: $("start-name"),
+  startTeam: $("start-team"),
+  endName: $("end-name"),
+  endTeam: $("end-team"),
+  chain: $("chain"),
+  search: $("search"),
+  results: $("results"),
+  status: $("status"),
+  stepCount: $("step-count"),
+  rarityScore: $("rarity-score"),
+  undoBtn: $("undo-btn"),
+  resetBtn: $("reset-btn"),
+  fullHistory: $("full-history"),
+  complete: $("complete"),
+  rSteps: $("r-steps"),
+  rRarity: $("r-rarity"),
+  rEff: $("r-eff"),
+  rTotal: $("r-total"),
+  shareBtn: $("share-btn"),
+};
+
+// ---------- STATUS HELPERS ----------
+function setStatus(msg, kind) {
+  els.status.className = "status" + (kind ? " " + kind : "");
+  els.status.innerHTML = (kind === "thinking" ? '<span class="spinner"></span>' : '') + `<span>${msg}</span>`;
+}
+
+// ---------- BOOT ----------
+async function boot() {
+  els.date.textContent = todayDate();
+  els.num.textContent = state.puzzle.num;
+
+  setStatus("LOADING TODAY'S PAIR…", "thinking");
+  try {
+    const [aFirst, aLast] = state.puzzle.pair.a;
+    const [bFirst, bLast] = state.puzzle.pair.b;
+
+    // Resolve names → IDs via live API search
+    const [aMatch, bMatch] = await Promise.all([
+      api.resolveByName(aFirst, aLast),
+      api.resolveByName(bFirst, bLast),
+    ]);
+    if (!aMatch || !bMatch) {
+      throw new Error(`Could not resolve daily players (${aLast} / ${bLast})`);
+    }
+
+    // Then fetch their full records for team display
+    const [a, b] = await Promise.all([
+      api.player(aMatch.id),
+      api.player(bMatch.id),
+    ]);
+    state.startPlayer = a;
+    state.endPlayer = b;
+    renderPair();
+    state.chain.push({
+      id: a.id,
+      name: `${a.first_name} ${a.last_name}`,
+      team: a.team,
+      role: "start",
+    });
+    state.used.add(a.id);
+    renderChain();
+    setStatus("TYPE A PLAYER WHO WAS A TEAMMATE OF " + a.last_name.toUpperCase() + ".");
+
+    // Background warmup — pre-cache season data for both endpoint players
+    // so the first teammate check is instant on the second leg.
+    Promise.all([
+      api.seasons(a.id, state.fullHistory),
+      api.seasons(b.id, state.fullHistory),
+    ]).catch(() => { /* non-fatal */ });
+  } catch (e) {
+    setStatus("FAILED TO LOAD PUZZLE: " + e.message, "bad");
+  }
+}
+
+function renderPair() {
+  els.startName.textContent = `${state.startPlayer.first_name} ${state.startPlayer.last_name}`;
+  els.endName.textContent = `${state.endPlayer.first_name} ${state.endPlayer.last_name}`;
+  els.startTeam.textContent = state.startPlayer.team?.full_name || "—";
+  els.endTeam.textContent = state.endPlayer.team?.full_name || "—";
+}
+
+function renderChain() {
+  els.chain.innerHTML = "";
+  state.chain.forEach((p, i) => {
+    if (i > 0) {
+      const arrow = document.createElement("span");
+      arrow.className = "arrow";
+      arrow.textContent = "→";
+      els.chain.appendChild(arrow);
+    }
+    const node = document.createElement("div");
+    node.className = "link" + (p.role ? " " + p.role : "");
+    const teamAbbr = p.team?.abbreviation || "";
+    node.innerHTML = `${p.name}${teamAbbr ? `<span class="small">${teamAbbr}</span>` : ""}`;
+    els.chain.appendChild(node);
+  });
+  els.stepCount.textContent = Math.max(0, state.chain.length - 1);
+  els.rarityScore.textContent = state.chain.reduce((s, p) => s + (p.rarity || 0), 0);
+}
+
+// ---------- SEARCH ----------
+els.search.addEventListener("input", () => {
+  const q = els.search.value.trim();
+  clearTimeout(state.searchTimer);
+  if (q.length < 2) { hideResults(); return; }
+  state.searchTimer = setTimeout(() => doSearch(q), 220);
+});
+
+els.search.addEventListener("keydown", (e) => {
+  if (!state.resultsList.length) return;
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    state.activeIdx = Math.min(state.activeIdx + 1, state.resultsList.length - 1);
+    paintActive();
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    state.activeIdx = Math.max(state.activeIdx - 1, 0);
+    paintActive();
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    if (state.activeIdx >= 0) pickPlayer(state.resultsList[state.activeIdx]);
+    else if (state.resultsList[0]) pickPlayer(state.resultsList[0]);
+  } else if (e.key === "Escape") {
+    hideResults();
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (!els.results.contains(e.target) && e.target !== els.search) hideResults();
+});
+
+async function doSearch(q) {
+  try {
+    const results = await api.search(q);
+    state.resultsList = results.filter(p => !state.used.has(p.id));
+    state.activeIdx = -1;
+    renderResults();
+  } catch {
+    hideResults();
+  }
+}
+
+function renderResults() {
+  if (!state.resultsList.length) { hideResults(); return; }
+  els.results.innerHTML = state.resultsList.slice(0, 12).map((p, i) => `
+    <div class="result-item" data-idx="${i}">
+      <span>${p.first_name} ${p.last_name}${p.team ? ` <span class="pos">· ${p.team.abbreviation}</span>` : ""}</span>
+      <span class="pos">${p.position || ""}</span>
+    </div>
+  `).join("");
+  els.results.classList.add("show");
+  els.results.querySelectorAll(".result-item").forEach((el, i) => {
+    el.addEventListener("mousedown", (e) => { e.preventDefault(); pickPlayer(state.resultsList[i]); });
+    el.addEventListener("mouseenter", () => { state.activeIdx = i; paintActive(); });
+  });
+}
+function paintActive() {
+  els.results.querySelectorAll(".result-item").forEach((el, i) => {
+    el.classList.toggle("active", i === state.activeIdx);
+  });
+}
+function hideResults() {
+  els.results.classList.remove("show");
+  state.resultsList = [];
+  state.activeIdx = -1;
+}
+
+// ---------- PICK & VALIDATE ----------
+async function pickPlayer(player) {
+  if (state.complete) return;
+  hideResults();
+  els.search.value = "";
+  els.search.disabled = true;
+
+  const last = state.chain[state.chain.length - 1];
+  setStatus(`CHECKING ${player.first_name} ${player.last_name} ↔ ${last.name}…`, "thinking");
+
+  try {
+    const res = await api.teammates(last.id, player.id, state.fullHistory);
+    if (!res.teammates) {
+      const lastName = last.name.split(" ").slice(-1)[0].toUpperCase();
+      setStatus(`✗ ${player.last_name.toUpperCase()} WAS NEVER A TEAMMATE OF ${lastName}.`, "bad");
+      els.search.disabled = false;
+      els.search.focus();
+      return;
+    }
+
+    // Use the seasons we already fetched for rarity (avoid extra round trip).
+    // The /teammates response includes b_seasons (count) — that's the player
+    // we just picked. We need full season data to count distinct seasons,
+    // but the count alone is a fine proxy.
+    const seasonCount = res.b_seasons || 0;
+    const rarity = Math.max(1, Math.round(20 - Math.min(seasonCount, 20)));
+
+    const node = {
+      id: player.id,
+      name: `${player.first_name} ${player.last_name}`,
+      team: player.team,
+      seasonCount,
+      rarity,
+      role: null,
+    };
+    state.chain.push(node);
+    state.used.add(player.id);
+
+    // Did we reach the end?
+    setStatus(`✓ LINKED. CHECKING IF ${player.last_name.toUpperCase()} CONNECTS TO ${state.endPlayer.last_name.toUpperCase()}…`, "thinking");
+    const reachedEnd = await api.teammates(player.id, state.endPlayer.id, state.fullHistory);
+    if (reachedEnd.teammates) {
+      state.chain.push({
+        id: state.endPlayer.id,
+        name: `${state.endPlayer.first_name} ${state.endPlayer.last_name}`,
+        team: state.endPlayer.team,
+        role: "end",
+      });
+      state.used.add(state.endPlayer.id);
+      state.complete = true;
+      renderChain();
+      finishGame();
+      return;
+    }
+
+    renderChain();
+    setStatus(`✓ ${player.last_name.toUpperCase()} IS LINKED. NOW FIND A TEAMMATE OF ${player.last_name.toUpperCase()}.`, "ok");
+    els.search.disabled = false;
+    els.search.focus();
+  } catch (e) {
+    setStatus("ERROR: " + e.message, "bad");
+    els.search.disabled = false;
+  }
+}
+
+// ---------- FINISH & SCORING ----------
+function finishGame() {
+  els.search.disabled = true;
+  const steps = state.chain.length - 1;             // edges traveled
+  const rarity = state.chain.reduce((s, p) => s + (p.rarity || 0), 0);
+  // Efficiency: fewer steps = higher. Optimal=2 (start→middle→end) gives max.
+  const eff = Math.max(0, Math.round(1000 / Math.pow(steps, 1.4)));
+  const total = eff + rarity * 25;
+
+  els.rSteps.textContent = steps;
+  els.rRarity.textContent = rarity;
+  els.rEff.textContent = eff;
+  els.rTotal.textContent = total;
+  els.complete.classList.add("show");
+  setStatus("CHAIN LOCKED. WELL PLAYED.", "ok");
+
+  // Persist best score for this puzzle
+  const key = `lineage:${state.puzzle.num}`;
+  const prev = JSON.parse(localStorage.getItem(key) || "null");
+  if (!prev || total > prev.total) {
+    localStorage.setItem(key, JSON.stringify({ total, steps, rarity, chain: state.chain.map(p => p.name) }));
+  }
+}
+
+// ---------- CONTROLS ----------
+els.undoBtn.addEventListener("click", () => {
+  if (state.complete) return;
+  if (state.chain.length <= 1) return;
+  const removed = state.chain.pop();
+  state.used.delete(removed.id);
+  renderChain();
+  const last = state.chain[state.chain.length - 1];
+  setStatus(`UNDONE. NOW CONNECTING FROM ${last.name.toUpperCase()}.`, "warn");
+  els.search.disabled = false;
+  els.search.focus();
+});
+
+els.resetBtn.addEventListener("click", () => {
+  if (!confirm("Reset the chain?")) return;
+  state.chain = state.chain.slice(0, 1);
+  state.used = new Set([state.chain[0].id]);
+  state.complete = false;
+  els.complete.classList.remove("show");
+  els.search.disabled = false;
+  els.search.value = "";
+  renderChain();
+  setStatus("RESET. TYPE A TEAMMATE OF THE START PLAYER.");
+  els.search.focus();
+});
+
+els.fullHistory.addEventListener("change", (e) => {
+  state.fullHistory = e.target.checked;
+  setStatus(state.fullHistory ? "FULL HISTORY ON — PRE-2000 PLAYERS ALLOWED." : "MODERN ERA ONLY (2000+).", "warn");
+});
+
+els.shareBtn.addEventListener("click", () => {
+  const txt = [
+    `NBA LINEAGE #${state.puzzle.num}`,
+    `${state.chain[0].name} → ${state.chain[state.chain.length - 1].name}`,
+    `Steps: ${state.chain.length - 1} · Score: ${els.rTotal.textContent}`,
+    state.chain.map(p => p.name).join(" → "),
+  ].join("\n");
+  navigator.clipboard.writeText(txt).then(() => {
+    els.shareBtn.textContent = "COPIED ✓";
+    setTimeout(() => { els.shareBtn.textContent = "COPY SHARE"; }, 1500);
+  });
+});
+
+$("how-link").addEventListener("click", (e) => {
+  e.preventDefault();
+  alert(
+    "NBA LINEAGE\n\n" +
+    "Connect the START player to the END player by typing the names of NBA players who played on the same team in the same season as the previous player in your chain.\n\n" +
+    "• Each link = same team, same season (strict).\n" +
+    "• Shorter chains = higher efficiency score.\n" +
+    "• Rarer players (shorter careers) = bonus rarity points.\n" +
+    "• Final score = efficiency + rarity × 25.\n\n" +
+    "New puzzle every day."
+  );
+});
+
+// kick off
+boot();
+</script>
+</body>
+</html>
