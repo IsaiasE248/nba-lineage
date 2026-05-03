@@ -14,13 +14,16 @@
     --court-glow: #c97a3a;
     --line: #f4e4c1;
     --paint: #c9532b;
-    --bg: #0a0908;
+    --bg: #0d0a07;
     --bg-2: #15110d;
+    --nav-bg: rgba(13, 10, 7, 0.78);
     --ink: #f4e4c1;
     --ink-dim: #8a7a5c;
     --green: #4ade80;
     --red: #f87171;
     --yellow: #fbbf24;
+    --logo-1: #c97a3a;
+    --logo-2: #f4a460;
     --shadow: 0 0 0 1px rgba(244,228,193,.08), 0 20px 60px -20px rgba(0,0,0,.8);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,67 +34,191 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
+
+  /* HARDWOOD COURT FLOOR — layered gradients build realistic plank look */
   body::before {
     content: '';
-    position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse at top, rgba(201,122,58,.12), transparent 60%),
+    position: fixed; inset: 0; z-index: -2;
+    background-color: #5a2f10;
+    background-image:
+      /* Subtle vertical grain streaks */
       repeating-linear-gradient(
         90deg,
-        var(--court-dark) 0px,
-        var(--court-dark) 80px,
-        rgba(107,52,16,.4) 80px,
-        rgba(107,52,16,.4) 81px,
-        var(--court-dark) 81px,
-        var(--court-dark) 160px
+        transparent 0px,
+        rgba(0, 0, 0, 0.05) 1px,
+        transparent 2px,
+        transparent 7px,
+        rgba(255, 245, 220, 0.03) 8px,
+        transparent 9px,
+        transparent 19px
       ),
-      var(--bg);
-    opacity: .25;
-    z-index: -2;
-    pointer-events: none;
+      /* Horizontal plank seams */
+      repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.4) 0px,
+        rgba(0, 0, 0, 0.4) 1px,
+        transparent 2px,
+        transparent 42px
+      ),
+      /* Plank-to-plank tone variation */
+      repeating-linear-gradient(
+        90deg,
+        rgba(139, 78, 38, 0.55) 0px,
+        rgba(139, 78, 38, 0.55) 130px,
+        rgba(101, 53, 22, 0.55) 130px,
+        rgba(101, 53, 22, 0.55) 260px,
+        rgba(122, 65, 28, 0.55) 260px,
+        rgba(122, 65, 28, 0.55) 390px,
+        rgba(95, 49, 20, 0.55) 390px,
+        rgba(95, 49, 20, 0.55) 520px
+      ),
+      linear-gradient(180deg, #6b3a18 0%, #4a2810 100%);
   }
+  /* Darkening overlay so text stays readable over the wood */
   body::after {
     content: '';
-    position: fixed; inset: 0;
-    background-image:
-      radial-gradient(circle at 20% 30%, rgba(255,255,255,.015) 1px, transparent 1px),
-      radial-gradient(circle at 70% 80%, rgba(255,255,255,.015) 1px, transparent 1px);
-    background-size: 4px 4px, 6px 6px;
-    z-index: -1;
+    position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(ellipse at center top, rgba(0,0,0,0.3), rgba(0,0,0,0.85)),
+      linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.75) 100%);
     pointer-events: none;
   }
+
+  /* TOP NAVIGATION */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--nav-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(244,228,193,.1);
+  }
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: .04em;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--logo-1), var(--logo-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    flex-shrink: 0;
+  }
+  .brand-icon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--logo-1), var(--logo-2));
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    color: #1a0e05;
+    font-weight: 800;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    -webkit-text-fill-color: #1a0e05;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(201,122,58,.4);
+  }
+  .nav-links {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .nav-link {
+    padding: 7px 12px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-dim);
+    text-decoration: none;
+    letter-spacing: .04em;
+    border-radius: 6px;
+    transition: all .15s;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+  }
+  .nav-link:hover { color: var(--ink); background: rgba(244,228,193,.05); }
+  .nav-link.active {
+    color: var(--paint);
+    background: rgba(201,83,43,.12);
+  }
+  .nav-link .badge {
+    margin-left: 5px;
+    font-size: 9px;
+    background: var(--paint);
+    color: #fff;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: .05em;
+  }
+
+  @media (max-width: 700px) {
+    .nav-inner { padding: 10px 16px; gap: 12px; }
+    .brand { font-size: 22px; }
+    .brand-icon { width: 26px; height: 26px; font-size: 14px; }
+    .nav-links { gap: 0; }
+    .nav-link { padding: 6px 8px; font-size: 11px; letter-spacing: 0; }
+    .nav-link .badge { display: none; }
+  }
+
   .wrap { max-width: 920px; margin: 0 auto; padding: 28px 20px 80px; }
 
-  .scoreboard {
-    border: 2px solid var(--line);
-    background: linear-gradient(180deg, #1a1410 0%, #0e0a07 100%);
-    padding: 18px 24px;
-    margin-bottom: 24px;
-    position: relative;
-    box-shadow: var(--shadow);
+  /* HERO HEADER */
+  .hero {
+    text-align: center;
+    margin-bottom: 28px;
+    padding: 28px 0 18px;
   }
-  .scoreboard::before {
-    content: '';
-    position: absolute; inset: 4px;
-    border: 1px solid rgba(244,228,193,.15);
-    pointer-events: none;
-  }
-  .top-row { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 12px; }
-  .logo {
+  .hero h1 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(36px, 6vw, 56px);
-    letter-spacing: .04em;
-    line-height: 1;
+    font-size: clamp(64px, 11vw, 108px);
+    line-height: .9;
+    letter-spacing: .02em;
+    background: linear-gradient(135deg, var(--logo-1) 0%, var(--logo-2) 50%, var(--paint) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 80px rgba(201,122,58,.25);
   }
-  .logo .accent { color: var(--paint); }
-  .meta {
+  .hero .tagline {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 300;
+    font-size: clamp(13px, 1.6vw, 16px);
+    color: var(--ink-dim);
+    margin-top: 4px;
+    letter-spacing: .03em;
+  }
+  .hero .puzzle-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+    padding: 7px 18px;
+    background: rgba(0,0,0,.5);
+    border: 1px solid rgba(244,228,193,.18);
+    border-radius: 999px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     color: var(--ink-dim);
-    text-align: right;
-    line-height: 1.6;
+    letter-spacing: .08em;
   }
-  .meta b { color: var(--ink); font-weight: 600; }
+  .hero .puzzle-meta b { color: var(--ink); font-weight: 600; }
+  .hero .puzzle-meta .sep { opacity: .35; }
 
   .pair {
     display: grid;
@@ -101,12 +228,15 @@
     margin-bottom: 24px;
   }
   .player-card {
-    border: 1.5px solid var(--line);
+    border: 1.5px solid rgba(244,228,193,.25);
     background:
-      radial-gradient(ellipse at top left, rgba(201,122,58,.15), transparent 50%),
-      linear-gradient(180deg, #1c1612 0%, #100b07 100%);
+      radial-gradient(ellipse at top left, rgba(201,122,58,.18), transparent 60%),
+      linear-gradient(180deg, rgba(28, 22, 18, 0.92) 0%, rgba(16, 11, 7, 0.95) 100%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: 20px;
     position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
   }
   .player-card.start { border-color: var(--paint); }
   .player-card.end { border-color: var(--court-glow); }
@@ -163,9 +293,12 @@
     gap: 8px;
     align-items: center;
     min-height: 50px;
-    padding: 12px;
-    border: 1px dashed rgba(244,228,193,.15);
-    background: rgba(0,0,0,.3);
+    padding: 14px;
+    border: 1px dashed rgba(244,228,193,.2);
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 4px;
   }
   .link {
     display: inline-flex;
@@ -218,6 +351,22 @@
     transition: border-color .15s, box-shadow .15s;
   }
   .search-input:focus { border-color: var(--paint); box-shadow: 0 0 0 3px rgba(201,83,43,.15); }
+  .search-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(14, 10, 7, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(244,228,193,.25);
+    color: var(--ink);
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    letter-spacing: .02em;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    border-radius: 4px;
+  }
+  .search-input:focus { border-color: var(--paint); box-shadow: 0 0 0 3px rgba(201,83,43,.15); }
   .search-input::placeholder { color: var(--ink-dim); }
   .search-input:disabled { opacity: .5; cursor: not-allowed; }
 
@@ -225,12 +374,16 @@
     position: absolute;
     top: calc(100% + 4px);
     left: 0; right: 0;
-    background: #0e0a07;
+    background: rgba(14, 10, 7, 0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(244,228,193,.25);
     max-height: 280px;
     overflow-y: auto;
     z-index: 10;
     display: none;
+    border-radius: 4px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.6);
   }
   .results.show { display: block; }
   .result-item {
@@ -254,11 +407,14 @@
     letter-spacing: .04em;
     min-height: 38px;
     border-left: 3px solid var(--ink-dim);
-    background: rgba(0,0,0,.3);
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     color: var(--ink-dim);
     display: flex;
     align-items: center;
     gap: 8px;
+    border-radius: 0 4px 4px 0;
   }
   .status.ok { border-color: var(--green); color: var(--green); }
   .status.bad { border-color: var(--red); color: var(--red); }
@@ -470,14 +626,29 @@
 </head>
 <body>
 
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="#" class="brand">
+      <span class="brand-icon">L</span>
+      <span>lineage</span>
+    </a>
+    <div class="nav-links">
+      <button class="nav-link active">Daily</button>
+      <button class="nav-link" id="nav-howto">How to Play</button>
+      <button class="nav-link" id="nav-scoring">Scoring</button>
+      <button class="nav-link" id="nav-stats">My Stats <span class="badge">NEW</span></button>
+    </div>
+  </div>
+</nav>
+
 <div class="wrap">
-  <div class="scoreboard">
-    <div class="top-row">
-      <div class="logo">NBA <span class="accent">LINEAGE</span></div>
-      <div class="meta">
-        DAILY <b id="daily-date">—</b><br>
-        PUZZLE #<b id="puzzle-num">—</b>
-      </div>
+  <div class="hero">
+    <h1>nba lineage</h1>
+    <div class="tagline">Connect two players through their teammates. Same team, same season.</div>
+    <div class="puzzle-meta">
+      <span>DAILY <b id="daily-date">—</b></span>
+      <span class="sep">|</span>
+      <span>PUZZLE #<b id="puzzle-num">—</b></span>
     </div>
   </div>
 
@@ -1055,6 +1226,43 @@ els.helpBtn.addEventListener("click", () => els.helpPopup.classList.add("show"))
 els.helpClose.addEventListener("click", () => els.helpPopup.classList.remove("show"));
 els.helpPopup.addEventListener("click", (e) => {
   if (e.target === els.helpPopup) els.helpPopup.classList.remove("show");
+});
+
+// Nav button hooks
+$("nav-howto")?.addEventListener("click", () => {
+  alert(
+    "NBA LINEAGE\n\n" +
+    "Connect the START player to the END player by adding teammates between them.\n\n" +
+    "• Each link must be: same team, same season.\n" +
+    "• Add players one at a time, then click CHECK CHAIN to validate.\n" +
+    "• Shorter chains and rarer players score higher.\n\n" +
+    "New puzzle every day."
+  );
+});
+$("nav-scoring")?.addEventListener("click", () => {
+  els.helpPopup.classList.add("show");
+});
+$("nav-stats")?.addEventListener("click", () => {
+  // Show personal best across recent puzzles from localStorage
+  const records = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("lineage:")) {
+      try {
+        const v = JSON.parse(localStorage.getItem(k));
+        records.push({ puzzle: k.split(":")[1], ...v });
+      } catch {}
+    }
+  }
+  if (!records.length) {
+    alert("No completed puzzles yet. Finish today's chain to start your record!");
+    return;
+  }
+  records.sort((a, b) => b.puzzle - a.puzzle);
+  const lines = records.slice(0, 10).map(r =>
+    `Puzzle #${r.puzzle}: ${r.steps} steps · score ${r.total}`
+  );
+  alert("YOUR RECENT PUZZLES\n\n" + lines.join("\n"));
 });
 
 els.shareBtn.addEventListener("click", () => {
