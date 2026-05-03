@@ -16,9 +16,9 @@ const HISTORY_START = 1996;
 const CURRENT_SEASON = 2025; // 2025-26 season
 
 // Concurrency limit. balldontlie ALL-STAR allows 60 req/min sliding window.
-// We fan out up to 12 in parallel — for a 25-season walk that uses ~25 calls
-// in roughly 1-2 seconds, well under the per-minute window.
-const CONCURRENCY = 12;
+// 6 in parallel keeps a single player walk to ~5s and leaves rate-limit
+// headroom for other calls (search, detail) happening alongside.
+const CONCURRENCY = 6;
 
 // Per-instance cache. 24h TTL — teammate graphs barely change mid-season.
 const cache = new Map();
@@ -40,10 +40,20 @@ async function bdl(path, key) {
   const r = await fetch(BASE + path, { headers: { Authorization: key } });
 
   if (r.status === 429) {
-    // Brief backoff + one retry
-    await new Promise(res => setTimeout(res, 1500));
+    // Rate limited. The 60/min window is sliding, so wait long enough to
+    // meaningfully clear, then retry once.
+    await new Promise(res => setTimeout(res, 4000));
     const r2 = await fetch(BASE + path, { headers: { Authorization: key } });
-    if (!r2.ok) throw new Error(`BDL ${r2.status}: rate limited`);
+    if (r2.status === 429) {
+      // Still rate limited — wait longer and try one more time
+      await new Promise(res => setTimeout(res, 8000));
+      const r3 = await fetch(BASE + path, { headers: { Authorization: key } });
+      if (!r3.ok) throw new Error(`BDL ${r3.status}: rate limited`);
+      const j = await r3.json();
+      cacheSet(ck, j);
+      return j;
+    }
+    if (!r2.ok) throw new Error(`BDL ${r2.status}: ${await r2.text().catch(() => "")}`);
     const j = await r2.json();
     cacheSet(ck, j);
     return j;

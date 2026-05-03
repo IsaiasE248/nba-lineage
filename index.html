@@ -451,7 +451,7 @@
         id="search"
         class="search-input"
         type="text"
-        placeholder="TYPE A PLAYER NAME WHO PLAYED WITH THE LAST PLAYER IN THE CHAIN…"
+        placeholder="TYPE 3+ LETTERS OF A PLAYER'S NAME…"
         autocomplete="off"
         spellcheck="false"
       />
@@ -651,13 +651,6 @@ async function boot() {
     state.used.add(a.id);
     renderChain();
     setStatus("TYPE A PLAYER WHO WAS A TEAMMATE OF " + a.last_name.toUpperCase() + ".");
-
-    // Background warmup — pre-cache season data for both endpoint players
-    // so the first teammate check is instant on the second leg.
-    Promise.all([
-      api.seasons(a.id, state.fullHistory),
-      api.seasons(b.id, state.fullHistory),
-    ]).catch(() => { /* non-fatal */ });
   } catch (e) {
     setStatus("FAILED TO LOAD PUZZLE: " + e.message, "bad");
   }
@@ -693,8 +686,8 @@ function renderChain() {
 els.search.addEventListener("input", () => {
   const q = els.search.value.trim();
   clearTimeout(state.searchTimer);
-  if (q.length < 2) { hideResults(); return; }
-  state.searchTimer = setTimeout(() => doSearch(q), 220);
+  if (q.length < 3) { hideResults(); return; }
+  state.searchTimer = setTimeout(() => doSearch(q), 400);
 });
 
 els.search.addEventListener("keydown", (e) => {
