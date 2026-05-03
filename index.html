@@ -498,24 +498,18 @@
    ========================================================================= */
 
 // ---------- CURATED DAILY POOL ----------
-// Each pair is solvable via a chain. Names get resolved to live API IDs
-// at load time so we never carry stale IDs.
-// Format: [first_name, last_name] — the search uses last_name for accuracy.
+// IDs verified against the live balldontlie ALL-STAR API.
 const DAILY_POOL = [
-  { a: ["LeBron", "James"],          b: ["Kevin", "Durant"] },
-  { a: ["Stephen", "Curry"],         b: ["Damian", "Lillard"] },
-  { a: ["Giannis", "Antetokounmpo"], b: ["Jimmy", "Butler"] },
-  { a: ["Kawhi", "Leonard"],         b: ["Russell", "Westbrook"] },
-  { a: ["Jimmy", "Butler"],          b: ["LeBron", "James"] },
-  { a: ["Russell", "Westbrook"],     b: ["Kevin", "Durant"] },
-  { a: ["Stephen", "Curry"],         b: ["LeBron", "James"] },
-  { a: ["Kawhi", "Leonard"],         b: ["Stephen", "Curry"] },
-  { a: ["Giannis", "Antetokounmpo"], b: ["Damian", "Lillard"] },
-  { a: ["Kevin", "Durant"],          b: ["Jimmy", "Butler"] },
-  { a: ["Chris", "Paul"],            b: ["LeBron", "James"] },
-  { a: ["Anthony", "Davis"],         b: ["Kevin", "Durant"] },
-  { a: ["Paul", "George"],           b: ["Stephen", "Curry"] },
-  { a: ["Kyrie", "Irving"],          b: ["Jimmy", "Butler"] },
+  { a: { id: 237, name: "LeBron James" },          b: { id: 140, name: "Kevin Durant" } },
+  { a: { id: 115, name: "Stephen Curry" },         b: { id: 278, name: "Damian Lillard" } },
+  { a: { id: 15,  name: "Giannis Antetokounmpo" }, b: { id: 79,  name: "Jimmy Butler" } },
+  { a: { id: 274, name: "Kawhi Leonard" },         b: { id: 472, name: "Russell Westbrook" } },
+  { a: { id: 79,  name: "Jimmy Butler" },          b: { id: 237, name: "LeBron James" } },
+  { a: { id: 472, name: "Russell Westbrook" },     b: { id: 140, name: "Kevin Durant" } },
+  { a: { id: 115, name: "Stephen Curry" },         b: { id: 237, name: "LeBron James" } },
+  { a: { id: 274, name: "Kawhi Leonard" },         b: { id: 115, name: "Stephen Curry" } },
+  { a: { id: 15,  name: "Giannis Antetokounmpo" }, b: { id: 278, name: "Damian Lillard" } },
+  { a: { id: 140, name: "Kevin Durant" },          b: { id: 79,  name: "Jimmy Butler" } },
 ];
 
 // ---------- DAILY SEEDING ----------
@@ -622,23 +616,13 @@ async function boot() {
 
   setStatus("LOADING TODAY'S PAIR…", "thinking");
   try {
-    const [aFirst, aLast] = state.puzzle.pair.a;
-    const [bFirst, bLast] = state.puzzle.pair.b;
-
-    // Resolve names → IDs via live API search
-    const [aMatch, bMatch] = await Promise.all([
-      api.resolveByName(aFirst, aLast),
-      api.resolveByName(bFirst, bLast),
-    ]);
-    if (!aMatch || !bMatch) {
-      throw new Error(`Could not resolve daily players (${aLast} / ${bLast})`);
-    }
-
-    // Then fetch their full records for team display
+    // Fetch both endpoint players in parallel — only 2 API calls total
     const [a, b] = await Promise.all([
-      api.player(aMatch.id),
-      api.player(bMatch.id),
+      api.player(state.puzzle.pair.a.id),
+      api.player(state.puzzle.pair.b.id),
     ]);
+    if (!a || !b) throw new Error("Player data missing from API response");
+
     state.startPlayer = a;
     state.endPlayer = b;
     renderPair();
