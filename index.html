@@ -180,6 +180,17 @@
   }
   .link.start { background: var(--paint); border-color: var(--paint); color: #fff; }
   .link.end { background: var(--court-glow); border-color: var(--court-glow); color: #1a0e05; }
+  .link.invalid {
+    background: rgba(248,113,113,.15);
+    border-color: var(--red);
+    color: var(--red);
+    animation: shake .4s ease-in-out;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
   .link .small {
     font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
@@ -319,6 +330,133 @@
   }
   @keyframes shimmer { to { background-position: -200% 0; } }
 
+  /* AVATARS — circular initials with court-tone gradients */
+  .avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: .04em;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,.4);
+    border: 1.5px solid rgba(244,228,193,.2);
+    overflow: hidden;
+    position: relative;
+  }
+  .avatar.sm { width: 32px; height: 32px; font-size: 13px; }
+  .avatar.md { width: 40px; height: 40px; font-size: 15px; }
+  .avatar.lg { width: 64px; height: 64px; font-size: 22px; border-width: 2px; }
+
+  /* Pair card layout with avatar */
+  .player-card .card-body {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .player-card .card-text { min-width: 0; flex: 1; }
+
+  /* Search result row with avatar */
+  .result-item .left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+  .result-item .name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Chain link with avatar above name */
+  .link {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 6px;
+  }
+  .link .link-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Scoring help button + popup */
+  .help-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(244,228,193,.15);
+    color: var(--ink-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    margin-left: 6px;
+    transition: all .15s;
+  }
+  .help-btn:hover { background: var(--paint); color: #fff; }
+
+  .help-popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .help-popup.show { display: flex; animation: fadeIn .2s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .help-popup .inner {
+    max-width: 480px;
+    background: linear-gradient(180deg, #1a1410 0%, #0e0a07 100%);
+    border: 2px solid var(--paint);
+    padding: 28px;
+    color: var(--ink);
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .help-popup h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    color: var(--paint);
+    letter-spacing: .1em;
+    margin-bottom: 14px;
+  }
+  .help-popup .section {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed rgba(244,228,193,.15);
+  }
+  .help-popup .section:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .help-popup .label {
+    font-family: 'Bebas Neue', sans-serif;
+    color: var(--court-glow);
+    letter-spacing: .12em;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .help-popup code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,0,0,.5);
+    padding: 1px 6px;
+    color: var(--court-glow);
+    font-size: 12px;
+  }
+  .help-popup .close {
+    margin-top: 18px;
+    width: 100%;
+  }
+
   footer {
     margin-top: 30px;
     text-align: center;
@@ -346,14 +484,24 @@
   <div class="pair" id="pair">
     <div class="player-card start">
       <div class="label">START</div>
-      <div class="name" id="start-name"><span class="skel"></span></div>
-      <div class="team" id="start-team">—</div>
+      <div class="card-body">
+        <div class="avatar lg" id="start-avatar"></div>
+        <div class="card-text">
+          <div class="name" id="start-name"><span class="skel"></span></div>
+          <div class="team" id="start-team">—</div>
+        </div>
+      </div>
     </div>
     <div class="vs">→ CONNECT →</div>
     <div class="player-card end">
       <div class="label">END</div>
-      <div class="name" id="end-name"><span class="skel"></span></div>
-      <div class="team" id="end-team">—</div>
+      <div class="card-body">
+        <div class="avatar lg" id="end-avatar"></div>
+        <div class="card-text">
+          <div class="name" id="end-name"><span class="skel"></span></div>
+          <div class="team" id="end-team">—</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -361,7 +509,7 @@
     <div class="section-head">
       <h2>YOUR CHAIN</h2>
       <div class="stat-row">
-        STEPS <b id="step-count">0</b> · RARITY <b id="rarity-score">0</b>
+        STEPS <b id="step-count">0</b> · RARITY <b id="rarity-score">0</b><button class="help-btn" id="help-btn" title="How scoring works">?</button>
       </div>
     </div>
     <div class="chain" id="chain"></div>
@@ -385,6 +533,7 @@
     </div>
 
     <div class="controls">
+      <button class="btn primary" id="check-btn" disabled>CHECK CHAIN</button>
       <button class="btn" id="undo-btn">UNDO</button>
       <button class="btn" id="reset-btn">RESET</button>
     </div>
@@ -400,6 +549,32 @@
       <div class="controls" style="margin-top:18px">
         <button class="btn primary" id="share-btn">COPY SHARE</button>
       </div>
+    </div>
+  </div>
+
+  <div class="help-popup" id="help-popup">
+    <div class="inner">
+      <h3>HOW SCORING WORKS</h3>
+      <div class="section">
+        <div class="label">STEPS</div>
+        Number of links between START and END. A direct connection (start → bridge → end) is 2 steps.
+      </div>
+      <div class="section">
+        <div class="label">EFFICIENCY</div>
+        <code>1000 ÷ steps^1.4</code><br>
+        Fewer hops = higher score. 2 steps gives ~378, 3 steps gives ~214, 4 steps gives ~144. Longer chains lose points fast.
+      </div>
+      <div class="section">
+        <div class="label">RARITY</div>
+        <code>20 − distinct seasons played</code><br>
+        Each player in your chain (except endpoints) adds rarity points based on how short their NBA career was. A 5-year journeyman gives 15 points; a 20-year vet gives 0–1.
+      </div>
+      <div class="section">
+        <div class="label">FINAL SCORE</div>
+        <code>efficiency + (rarity × 25)</code><br>
+        The shortest possible chain with the most obscure bridge players wins. Rarity often matters more than length.
+      </div>
+      <button class="btn primary close" id="help-close">GOT IT</button>
     </div>
   </div>
 
@@ -456,16 +631,49 @@ const els = {
   date: $("daily-date"), num: $("puzzle-num"),
   startName: $("start-name"), startTeam: $("start-team"),
   endName: $("end-name"), endTeam: $("end-team"),
+  startAvatar: $("start-avatar"), endAvatar: $("end-avatar"),
   chain: $("chain"),
   search: $("search"),
   results: $("results"),
   status: $("status"),
   stepCount: $("step-count"), rarityScore: $("rarity-score"),
+  checkBtn: $("check-btn"),
   undoBtn: $("undo-btn"), resetBtn: $("reset-btn"),
   complete: $("complete"),
   rSteps: $("r-steps"), rRarity: $("r-rarity"), rEff: $("r-eff"), rTotal: $("r-total"),
   shareBtn: $("share-btn"),
+  helpBtn: $("help-btn"), helpPopup: $("help-popup"), helpClose: $("help-close"),
 };
+
+// ---------- AVATAR HELPERS ----------
+// Generate a deterministic court-toned gradient from a player ID so each
+// player has a consistent unique color across the UI.
+function avatarColors(id) {
+  // Hash the ID to a hue band that stays in court/sunset/clay range
+  const h = (id * 2654435761) % 360;
+  const hue = ((h % 60) + 5); // 5°-65°: oranges, ambers, browns
+  const c1 = `hsl(${hue}, 65%, 38%)`;
+  const c2 = `hsl(${(hue + 20) % 360}, 70%, 22%)`;
+  return [c1, c2];
+}
+function initials(first, last) {
+  const f = (first || "").trim().charAt(0).toUpperCase();
+  const l = (last || "").trim().charAt(0).toUpperCase();
+  return f + l;
+}
+function renderAvatar(el, player, size) {
+  if (!el) return;
+  const [c1, c2] = avatarColors(player.id);
+  el.className = "avatar " + (size || "md");
+  el.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+  el.textContent = initials(player.first_name, player.last_name);
+}
+// Build an avatar element from scratch (for chain links and search rows)
+function makeAvatar(player, size) {
+  const el = document.createElement("div");
+  renderAvatar(el, player, size);
+  return el;
+}
 
 function setStatus(msg, kind) {
   els.status.className = "status" + (kind ? " " + kind : "");
@@ -549,7 +757,7 @@ async function boot() {
     renderChain();
 
     els.search.disabled = false;
-    setStatus(`TYPE A PLAYER WHO WAS A TEAMMATE OF ${a.last_name.toUpperCase()}.`);
+    setStatus(`ADD PLAYERS WHO BRIDGE ${a.last_name.toUpperCase()} TO ${b.last_name.toUpperCase()}, THEN CLICK CHECK CHAIN.`);
     els.search.focus();
   } catch (e) {
     setStatus("FAILED TO LOAD: " + e.message, "bad");
@@ -570,6 +778,8 @@ function renderPair() {
   const endTeam = latestTeam(state.endPlayer);
   els.startTeam.textContent = startTeam?.full_name || "—";
   els.endTeam.textContent = endTeam?.full_name || "—";
+  renderAvatar(els.startAvatar, state.startPlayer, "lg");
+  renderAvatar(els.endAvatar, state.endPlayer, "lg");
 }
 
 function renderChain() {
@@ -582,13 +792,20 @@ function renderChain() {
       els.chain.appendChild(arrow);
     }
     const node = document.createElement("div");
-    node.className = "link" + (p.role ? " " + p.role : "");
+    node.className = "link" + (p.role ? " " + p.role : "") + (p.invalid ? " invalid" : "");
+    const avatar = makeAvatar(p._ref || { id: p.id, first_name: p.name.split(" ")[0], last_name: p.name.split(" ").slice(-1)[0] }, "sm");
+    node.appendChild(avatar);
+    const text = document.createElement("div");
+    text.className = "link-text";
     const teamAbbr = p.team?.abbreviation || "";
-    node.innerHTML = `${p.name}${teamAbbr ? `<span class="small">${teamAbbr}</span>` : ""}`;
+    text.innerHTML = `<span>${p.name}</span>${teamAbbr ? `<span class="small">${teamAbbr}</span>` : ""}`;
+    node.appendChild(text);
     els.chain.appendChild(node);
   });
   els.stepCount.textContent = Math.max(0, state.chain.length - 1);
   els.rarityScore.textContent = state.chain.reduce((s, p) => s + (p.rarity || 0), 0);
+  // Enable check button only when there's at least one bridge player
+  els.checkBtn.disabled = state.chain.length < 2 || state.complete;
 }
 
 // ---------- SEARCH ----------
@@ -643,17 +860,32 @@ function doSearch(q) {
 
 function renderResults() {
   if (!state.resultsList.length) { hideResults(); return; }
-  els.results.innerHTML = state.resultsList.map((p, i) => `
-    <div class="result-item" data-idx="${i}">
-      <span>${p.full}</span>
-      <span class="pos">${p.position || ""}</span>
-    </div>
-  `).join("");
-  els.results.classList.add("show");
-  els.results.querySelectorAll(".result-item").forEach((el, i) => {
-    el.addEventListener("mousedown", (e) => { e.preventDefault(); pickPlayer(state.resultsList[i].ref); });
-    el.addEventListener("mouseenter", () => { state.activeIdx = i; paintActive(); });
+  els.results.innerHTML = "";
+  state.resultsList.forEach((p, i) => {
+    const item = document.createElement("div");
+    item.className = "result-item";
+    item.dataset.idx = i;
+
+    const left = document.createElement("div");
+    left.className = "left";
+    left.appendChild(makeAvatar(p.ref, "sm"));
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "name-text";
+    nameSpan.innerHTML = `${p.full}${p.ref.team_seasons?.length ? ` <span class="pos">· ${new Set(p.ref.team_seasons.map(t => t.season)).size}y</span>` : ""}`;
+    left.appendChild(nameSpan);
+
+    const pos = document.createElement("span");
+    pos.className = "pos";
+    pos.textContent = p.position || "";
+
+    item.appendChild(left);
+    item.appendChild(pos);
+
+    item.addEventListener("mousedown", (e) => { e.preventDefault(); pickPlayer(p.ref); });
+    item.addEventListener("mouseenter", () => { state.activeIdx = i; paintActive(); });
+    els.results.appendChild(item);
   });
+  els.results.classList.add("show");
 }
 function paintActive() {
   els.results.querySelectorAll(".result-item").forEach((el, i) => {
@@ -667,33 +899,24 @@ function hideResults() {
 }
 
 // ---------- PICK & VALIDATE ----------
+// Just adds a player to the chain without auto-completing.
+// The user clicks CHECK CHAIN when they think they're done.
 function pickPlayer(player) {
   if (state.complete) return;
   hideResults();
   els.search.value = "";
 
-  const last = state.chain[state.chain.length - 1];
-  const lastRef = last._ref;
+  // Clear any previous invalid markers (user is re-trying)
+  state.chain.forEach(p => { delete p.invalid; });
 
-  const overlap = shareTeamSeason(lastRef, player);
-  if (!overlap.length) {
-    setStatus(`✗ ${player.last_name.toUpperCase()} WAS NEVER A TEAMMATE OF ${last.name.split(" ").slice(-1)[0].toUpperCase()}.`, "bad");
-    els.search.focus();
-    return;
-  }
-
-  // Use the most recent overlap season for displaying the team badge
-  const best = overlap.reduce((acc, t) => t.season > acc.season ? t : acc, overlap[0]);
-  const team = state.data.teams[best.team_id];
-
-  // Rarity: fewer total seasons = rarer. Use distinct seasons count.
+  // Rarity: fewer total seasons = rarer.
   const seasonCount = new Set(player.team_seasons.map(t => t.season)).size;
   const rarity = Math.max(1, Math.round(20 - Math.min(seasonCount, 20)));
 
   const node = {
     id: player.id,
     name: `${player.first_name} ${player.last_name}`,
-    team,
+    team: latestTeam(player),  // fallback team; updated on validation
     seasonCount,
     rarity,
     role: null,
@@ -702,27 +925,75 @@ function pickPlayer(player) {
   state.chain.push(node);
   state.used.add(player.id);
 
-  // Did we reach the end?
-  const reachOverlap = shareTeamSeason(player, state.endPlayer);
-  if (reachOverlap.length) {
-    const finalTeam = state.data.teams[reachOverlap.reduce((a, t) => t.season > a.season ? t : a, reachOverlap[0]).team_id];
-    state.chain.push({
-      id: state.endPlayer.id,
-      name: `${state.endPlayer.first_name} ${state.endPlayer.last_name}`,
-      team: finalTeam || latestTeam(state.endPlayer),
-      role: "end",
-      _ref: state.endPlayer,
-    });
-    state.used.add(state.endPlayer.id);
-    state.complete = true;
-    renderChain();
-    finishGame();
+  renderChain();
+  setStatus(`✓ ${player.last_name.toUpperCase()} ADDED. ADD MORE OR CLICK "CHECK CHAIN" TO VALIDATE.`, "ok");
+  els.search.focus();
+}
+
+// Validate the entire chain end-to-end. Walks each consecutive pair
+// and checks teammate overlap. If all valid AND last bridge connects
+// to END, complete the game. Otherwise, mark the broken links.
+function checkChain() {
+  if (state.complete) return;
+  if (state.chain.length < 2) {
+    setStatus("ADD AT LEAST ONE PLAYER BEFORE CHECKING.", "warn");
     return;
   }
 
+  // Build the full ordered list: [start, ...bridges, end]
+  const sequence = [...state.chain.map(n => n._ref), state.endPlayer];
+
+  // Walk pairs; collect break points
+  let firstBreak = -1;
+  const overlaps = [];
+  for (let i = 0; i < sequence.length - 1; i++) {
+    const a = sequence[i];
+    const b = sequence[i + 1];
+    const overlap = shareTeamSeason(a, b);
+    overlaps.push(overlap);
+    if (!overlap.length && firstBreak < 0) {
+      firstBreak = i;
+    }
+  }
+
+  if (firstBreak >= 0) {
+    // Break in the chain — tell the user which connection failed
+    const a = sequence[firstBreak];
+    const b = sequence[firstBreak + 1];
+    const aName = `${a.first_name} ${a.last_name}`;
+    const bName = `${b.first_name} ${b.last_name}`;
+    setStatus(`✗ BROKEN LINK: ${aName.toUpperCase()} AND ${bName.toUpperCase()} WERE NEVER TEAMMATES.`, "bad");
+    // Mark the offending bridge player visually
+    if (firstBreak + 1 < state.chain.length) {
+      state.chain[firstBreak + 1].invalid = true;
+    } else if (firstBreak < state.chain.length) {
+      state.chain[firstBreak].invalid = true;
+    }
+    renderChain();
+    return;
+  }
+
+  // All connections valid! Update each bridge's team to its overlap team,
+  // append the END player, and finish.
+  for (let i = 1; i < state.chain.length; i++) {
+    const ov = overlaps[i - 1];
+    const best = ov.reduce((acc, t) => t.season > acc.season ? t : acc, ov[0]);
+    state.chain[i].team = state.data.teams[best.team_id];
+  }
+  // Append END player using the final overlap's team
+  const lastOv = overlaps[overlaps.length - 1];
+  const finalBest = lastOv.reduce((acc, t) => t.season > acc.season ? t : acc, lastOv[0]);
+  state.chain.push({
+    id: state.endPlayer.id,
+    name: `${state.endPlayer.first_name} ${state.endPlayer.last_name}`,
+    team: state.data.teams[finalBest.team_id] || latestTeam(state.endPlayer),
+    role: "end",
+    _ref: state.endPlayer,
+  });
+  state.used.add(state.endPlayer.id);
+  state.complete = true;
   renderChain();
-  setStatus(`✓ LINKED VIA ${team?.abbreviation || "?"} ${best.season}-${(best.season + 1).toString().slice(-2)}. NOW FIND A TEAMMATE OF ${player.last_name.toUpperCase()}.`, "ok");
-  els.search.focus();
+  finishGame();
 }
 
 // ---------- FINISH & SCORING ----------
@@ -750,28 +1021,40 @@ function finishGame() {
 }
 
 // ---------- CONTROLS ----------
+els.checkBtn.addEventListener("click", checkChain);
+
 els.undoBtn.addEventListener("click", () => {
   if (state.complete) return;
   if (state.chain.length <= 1) return;
+  // Clear any "invalid" flags first
+  state.chain.forEach(p => { delete p.invalid; });
   const removed = state.chain.pop();
   state.used.delete(removed.id);
   renderChain();
   const last = state.chain[state.chain.length - 1];
-  setStatus(`UNDONE. NOW CONNECTING FROM ${last.name.toUpperCase()}.`, "warn");
+  setStatus(`UNDONE. CHAIN NOW ENDS AT ${last.name.toUpperCase()}.`, "warn");
   els.search.focus();
 });
 
 els.resetBtn.addEventListener("click", () => {
   if (!confirm("Reset the chain?")) return;
   state.chain = state.chain.slice(0, 1);
+  state.chain.forEach(p => { delete p.invalid; });
   state.used = new Set([state.chain[0].id]);
   state.complete = false;
   els.complete.classList.remove("show");
   els.search.disabled = false;
   els.search.value = "";
   renderChain();
-  setStatus("RESET. TYPE A TEAMMATE OF THE START PLAYER.");
+  setStatus("RESET. ADD PLAYERS TO BUILD YOUR CHAIN, THEN CLICK CHECK CHAIN.");
   els.search.focus();
+});
+
+// Help popup
+els.helpBtn.addEventListener("click", () => els.helpPopup.classList.add("show"));
+els.helpClose.addEventListener("click", () => els.helpPopup.classList.remove("show"));
+els.helpPopup.addEventListener("click", (e) => {
+  if (e.target === els.helpPopup) els.helpPopup.classList.remove("show");
 });
 
 els.shareBtn.addEventListener("click", () => {
