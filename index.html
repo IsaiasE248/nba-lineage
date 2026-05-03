@@ -23,9 +23,7 @@
     --yellow: #fbbf24;
     --shadow: 0 0 0 1px rgba(244,228,193,.08), 0 20px 60px -20px rgba(0,0,0,.8);
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   html, body {
     background: var(--bg);
     color: var(--ink);
@@ -33,8 +31,6 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-
-  /* hardwood backdrop */
   body::before {
     content: '';
     position: fixed; inset: 0;
@@ -64,14 +60,8 @@
     z-index: -1;
     pointer-events: none;
   }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 28px 20px 80px; }
 
-  .wrap {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 28px 20px 80px;
-  }
-
-  /* SCOREBOARD HEADER */
   .scoreboard {
     border: 2px solid var(--line);
     background: linear-gradient(180deg, #1a1410 0%, #0e0a07 100%);
@@ -86,19 +76,12 @@
     border: 1px solid rgba(244,228,193,.15);
     pointer-events: none;
   }
-  .top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
+  .top-row { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 12px; }
   .logo {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(36px, 6vw, 56px);
     letter-spacing: .04em;
     line-height: 1;
-    color: var(--ink);
   }
   .logo .accent { color: var(--paint); }
   .meta {
@@ -110,7 +93,6 @@
   }
   .meta b { color: var(--ink); font-weight: 600; }
 
-  /* PUZZLE PAIR */
   .pair {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -125,7 +107,6 @@
       linear-gradient(180deg, #1c1612 0%, #100b07 100%);
     padding: 20px;
     position: relative;
-    overflow: hidden;
   }
   .player-card.start { border-color: var(--paint); }
   .player-card.end { border-color: var(--court-glow); }
@@ -155,16 +136,12 @@
     color: var(--paint);
     letter-spacing: .1em;
   }
-
   @media (max-width: 600px) {
     .pair { grid-template-columns: 1fr; }
     .vs { padding: 4px 0; text-align: center; }
   }
 
-  /* CHAIN */
-  .chain-section {
-    margin-bottom: 24px;
-  }
+  .chain-section { margin-bottom: 24px; }
   .section-head {
     display: flex;
     justify-content: space-between;
@@ -178,13 +155,8 @@
     font-size: 18px;
     letter-spacing: .15em;
   }
-  .stat-row {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--ink-dim);
-  }
+  .stat-row { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); }
   .stat-row b { color: var(--paint); font-weight: 600; }
-
   .chain {
     display: flex;
     flex-wrap: wrap;
@@ -204,7 +176,6 @@
     font-family: 'Oswald', sans-serif;
     font-size: 14px;
     color: var(--ink);
-    position: relative;
     animation: pop .3s ease-out;
   }
   .link.start { background: var(--paint); border-color: var(--paint); color: #fff; }
@@ -216,22 +187,13 @@
     opacity: .7;
     margin-top: 2px;
   }
-  .arrow {
-    color: var(--paint);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 16px;
-    font-weight: 800;
-  }
+  .arrow { color: var(--paint); font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; }
   @keyframes pop {
     from { transform: scale(.85); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
   }
 
-  /* INPUT + SEARCH */
-  .input-wrap {
-    margin-top: 16px;
-    position: relative;
-  }
+  .input-wrap { margin-top: 16px; position: relative; }
   .search-input {
     width: 100%;
     padding: 14px 16px;
@@ -244,10 +206,7 @@
     outline: none;
     transition: border-color .15s, box-shadow .15s;
   }
-  .search-input:focus {
-    border-color: var(--paint);
-    box-shadow: 0 0 0 3px rgba(201,83,43,.15);
-  }
+  .search-input:focus { border-color: var(--paint); box-shadow: 0 0 0 3px rgba(201,83,43,.15); }
   .search-input::placeholder { color: var(--ink-dim); }
   .search-input:disabled { opacity: .5; cursor: not-allowed; }
 
@@ -274,13 +233,8 @@
     gap: 12px;
   }
   .result-item:hover, .result-item.active { background: rgba(201,83,43,.15); }
-  .result-item .pos {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--ink-dim);
-  }
+  .result-item .pos { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim); }
 
-  /* STATUS / FEEDBACK */
   .status {
     margin-top: 10px;
     padding: 10px 14px;
@@ -309,13 +263,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* CONTROLS */
-  .controls {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 18px;
-  }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
   .btn {
     padding: 10px 18px;
     background: transparent;
@@ -332,19 +280,6 @@
   .btn.primary:hover { background: #d65f33; }
   .btn:disabled { opacity: .4; cursor: not-allowed; }
 
-  .toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--ink-dim);
-    cursor: pointer;
-    user-select: none;
-  }
-  .toggle input { accent-color: var(--paint); }
-
-  /* RESULT MODAL */
   .complete {
     margin-top: 20px;
     border: 2px solid var(--green);
@@ -370,21 +305,10 @@
     padding: 12px;
     background: rgba(0,0,0,.3);
   }
-  .score-cell .k {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    letter-spacing: .2em;
-    color: var(--ink-dim);
-  }
-  .score-cell .v {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    color: var(--paint);
-    margin-top: 4px;
-  }
+  .score-cell .k { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .2em; color: var(--ink-dim); }
+  .score-cell .v { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--paint); margin-top: 4px; }
   .score-cell.total .v { color: var(--green); font-size: 32px; }
 
-  /* loading skeleton */
   .skel {
     display: inline-block;
     height: 20px;
@@ -409,8 +333,6 @@
 <body>
 
 <div class="wrap">
-
-  <!-- HEADER -->
   <div class="scoreboard">
     <div class="top-row">
       <div class="logo">NBA <span class="accent">LINEAGE</span></div>
@@ -421,7 +343,6 @@
     </div>
   </div>
 
-  <!-- DAILY PAIR -->
   <div class="pair" id="pair">
     <div class="player-card start">
       <div class="label">START</div>
@@ -436,7 +357,6 @@
     </div>
   </div>
 
-  <!-- CHAIN AREA -->
   <div class="chain-section">
     <div class="section-head">
       <h2>YOUR CHAIN</h2>
@@ -451,24 +371,22 @@
         id="search"
         class="search-input"
         type="text"
-        placeholder="TYPE 3+ LETTERS OF A PLAYER'S NAME…"
+        placeholder="TYPE A PLAYER NAME…"
         autocomplete="off"
         spellcheck="false"
+        disabled
       />
       <div class="results" id="results"></div>
     </div>
 
     <div class="status" id="status">
-      <span>READY. TYPE A PLAYER WHO WAS A TEAMMATE OF THE START PLAYER.</span>
+      <span class="spinner"></span>
+      <span>LOADING DATABASE…</span>
     </div>
 
     <div class="controls">
       <button class="btn" id="undo-btn">UNDO</button>
       <button class="btn" id="reset-btn">RESET</button>
-      <label class="toggle">
-        <input type="checkbox" id="full-history" />
-        FULL HISTORY (PRE-2000)
-      </label>
     </div>
 
     <div class="complete" id="complete">
@@ -486,91 +404,46 @@
   </div>
 
   <footer>
-    DATA · BALLDONTLIE.IO ·
-    TEAMMATE = SAME TEAM, SAME SEASON ·
+    DATA · BALLDONTLIE.IO · TEAMMATE = SAME TEAM, SAME SEASON ·
     <a href="#" id="how-link">HOW TO PLAY</a>
   </footer>
 </div>
 
 <script>
 /* =========================================================================
-   NBA LINEAGE — game logic
+   NBA LINEAGE — offline edition
+   Loads bundled data.json. No API calls during gameplay.
    ========================================================================= */
 
-// ---------- CURATED DAILY POOL ----------
-// IDs verified against the live balldontlie ALL-STAR API.
+// ---------- DAILY POOL ----------
+// IDs to be matched against the loaded data.json. We pick from this
+// curated set of well-known players; if any are missing from the
+// dataset, we skip and fall back to the next index.
 const DAILY_POOL = [
-  { a: { id: 237, name: "LeBron James" },          b: { id: 140, name: "Kevin Durant" } },
-  { a: { id: 115, name: "Stephen Curry" },         b: { id: 278, name: "Damian Lillard" } },
-  { a: { id: 15,  name: "Giannis Antetokounmpo" }, b: { id: 79,  name: "Jimmy Butler" } },
-  { a: { id: 274, name: "Kawhi Leonard" },         b: { id: 472, name: "Russell Westbrook" } },
-  { a: { id: 79,  name: "Jimmy Butler" },          b: { id: 237, name: "LeBron James" } },
-  { a: { id: 472, name: "Russell Westbrook" },     b: { id: 140, name: "Kevin Durant" } },
-  { a: { id: 115, name: "Stephen Curry" },         b: { id: 237, name: "LeBron James" } },
-  { a: { id: 274, name: "Kawhi Leonard" },         b: { id: 115, name: "Stephen Curry" } },
-  { a: { id: 15,  name: "Giannis Antetokounmpo" }, b: { id: 278, name: "Damian Lillard" } },
-  { a: { id: 140, name: "Kevin Durant" },          b: { id: 79,  name: "Jimmy Butler" } },
+  { a: 237, b: 140 }, { a: 115, b: 278 }, { a: 15,  b: 79  },
+  { a: 274, b: 472 }, { a: 79,  b: 237 }, { a: 472, b: 140 },
+  { a: 115, b: 237 }, { a: 274, b: 115 }, { a: 15,  b: 278 },
+  { a: 140, b: 79  },
 ];
 
 // ---------- DAILY SEEDING ----------
 function dayIndex() {
-  // Days since 2024-01-01 — keeps puzzle # and pair selection in sync.
   const epoch = Date.UTC(2024, 0, 1);
-  const now = Date.now();
-  return Math.floor((now - epoch) / 86400000);
-}
-function todayPuzzle() {
-  const idx = dayIndex();
-  return { num: idx, pair: DAILY_POOL[idx % DAILY_POOL.length] };
+  return Math.floor((Date.now() - epoch) / 86400000);
 }
 function todayDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// ---------- API CLIENT ----------
-const api = {
-  async search(q) {
-    const r = await fetch(`/api/players?search=${encodeURIComponent(q)}`);
-    if (!r.ok) throw new Error("search failed");
-    return (await r.json()).data || [];
-  },
-  async player(id) {
-    const r = await fetch(`/api/player?id=${encodeURIComponent(id)}`);
-    if (!r.ok) throw new Error("player fetch failed");
-    return (await r.json()).data || null;
-  },
-  async teammates(id1, id2, fullHistory) {
-    const full = fullHistory ? "&full=1" : "";
-    const r = await fetch(`/api/teammates?id1=${id1}&id2=${id2}${full}`);
-    if (!r.ok) throw new Error("teammate check failed");
-    return await r.json();
-  },
-  async seasons(id, fullHistory) {
-    const full = fullHistory ? "&full=1" : "";
-    const r = await fetch(`/api/seasons?id=${id}${full}`);
-    if (!r.ok) throw new Error("seasons failed");
-    return (await r.json()).data || [];
-  },
-  // Resolve "Stephen Curry" → balldontlie player ID via search.
-  // Picks the best match: exact last_name match wins; else first result.
-  async resolveByName(first, last) {
-    const results = await this.search(last);
-    const exact = results.find(p =>
-      p.first_name?.toLowerCase() === first.toLowerCase() &&
-      p.last_name?.toLowerCase() === last.toLowerCase()
-    );
-    return exact || results[0] || null;
-  }
-};
-
 // ---------- STATE ----------
 const state = {
-  puzzle: todayPuzzle(),
+  data: null,            // {teams, players}
+  searchIndex: [],       // [{id, full, last, first, ref}] for fast search
+  puzzleNum: dayIndex(),
   startPlayer: null,
   endPlayer: null,
-  chain: [],         // [{id, name, team, seasonsCount}]
+  chain: [],
   used: new Set(),
-  fullHistory: false,
   complete: false,
   searchTimer: null,
   resultsList: [],
@@ -580,71 +453,123 @@ const state = {
 // ---------- ELEMENTS ----------
 const $ = (id) => document.getElementById(id);
 const els = {
-  date: $("daily-date"),
-  num: $("puzzle-num"),
-  startName: $("start-name"),
-  startTeam: $("start-team"),
-  endName: $("end-name"),
-  endTeam: $("end-team"),
+  date: $("daily-date"), num: $("puzzle-num"),
+  startName: $("start-name"), startTeam: $("start-team"),
+  endName: $("end-name"), endTeam: $("end-team"),
   chain: $("chain"),
   search: $("search"),
   results: $("results"),
   status: $("status"),
-  stepCount: $("step-count"),
-  rarityScore: $("rarity-score"),
-  undoBtn: $("undo-btn"),
-  resetBtn: $("reset-btn"),
-  fullHistory: $("full-history"),
+  stepCount: $("step-count"), rarityScore: $("rarity-score"),
+  undoBtn: $("undo-btn"), resetBtn: $("reset-btn"),
   complete: $("complete"),
-  rSteps: $("r-steps"),
-  rRarity: $("r-rarity"),
-  rEff: $("r-eff"),
-  rTotal: $("r-total"),
+  rSteps: $("r-steps"), rRarity: $("r-rarity"), rEff: $("r-eff"), rTotal: $("r-total"),
   shareBtn: $("share-btn"),
 };
 
-// ---------- STATUS HELPERS ----------
 function setStatus(msg, kind) {
   els.status.className = "status" + (kind ? " " + kind : "");
   els.status.innerHTML = (kind === "thinking" ? '<span class="spinner"></span>' : '') + `<span>${msg}</span>`;
 }
 
+// ---------- DATA LOADING ----------
+async function loadData() {
+  const r = await fetch("data.json");
+  if (!r.ok) throw new Error("Failed to load data.json");
+  return await r.json();
+}
+
+// Build a fast-search index over the player list
+function buildIndex(data) {
+  state.searchIndex = Object.values(data.players).map(p => ({
+    id: p.id,
+    full: `${p.first_name} ${p.last_name}`,
+    fullLower: `${p.first_name} ${p.last_name}`.toLowerCase(),
+    lastLower: p.last_name.toLowerCase(),
+    firstLower: p.first_name.toLowerCase(),
+    position: p.position,
+    ref: p,
+  }));
+}
+
+// ---------- TEAMMATE LOGIC ----------
+// Two players are teammates if their team_seasons share any (season, team_id).
+function shareTeamSeason(p1, p2) {
+  const set = new Set(p1.team_seasons.map(t => `${t.season}:${t.team_id}`));
+  const overlap = [];
+  for (const t of p2.team_seasons) {
+    if (set.has(`${t.season}:${t.team_id}`)) {
+      overlap.push(t);
+    }
+  }
+  return overlap;
+}
+
+// ---------- PUZZLE SELECTION ----------
+function pickDailyPair() {
+  // Walk the pool starting at today's index. Use the first pair whose
+  // both endpoints exist in the dataset.
+  const start = state.puzzleNum % DAILY_POOL.length;
+  for (let off = 0; off < DAILY_POOL.length; off++) {
+    const p = DAILY_POOL[(start + off) % DAILY_POOL.length];
+    if (state.data.players[p.a] && state.data.players[p.b]) {
+      return p;
+    }
+  }
+  // Fallback: pick the two players with the most team-seasons (usually stars)
+  const sorted = Object.values(state.data.players)
+    .sort((x, y) => y.team_seasons.length - x.team_seasons.length);
+  return { a: sorted[0].id, b: sorted[1].id };
+}
+
 // ---------- BOOT ----------
 async function boot() {
   els.date.textContent = todayDate();
-  els.num.textContent = state.puzzle.num;
+  els.num.textContent = state.puzzleNum;
 
-  setStatus("LOADING TODAY'S PAIR…", "thinking");
   try {
-    // Fetch both endpoint players in parallel — only 2 API calls total
-    const [a, b] = await Promise.all([
-      api.player(state.puzzle.pair.a.id),
-      api.player(state.puzzle.pair.b.id),
-    ]);
-    if (!a || !b) throw new Error("Player data missing from API response");
+    state.data = await loadData();
+    buildIndex(state.data);
 
+    const pair = pickDailyPair();
+    const a = state.data.players[pair.a];
+    const b = state.data.players[pair.b];
     state.startPlayer = a;
     state.endPlayer = b;
+
     renderPair();
     state.chain.push({
       id: a.id,
       name: `${a.first_name} ${a.last_name}`,
-      team: a.team,
+      team: latestTeam(a),
       role: "start",
+      _ref: a,
     });
     state.used.add(a.id);
     renderChain();
-    setStatus("TYPE A PLAYER WHO WAS A TEAMMATE OF " + a.last_name.toUpperCase() + ".");
+
+    els.search.disabled = false;
+    setStatus(`TYPE A PLAYER WHO WAS A TEAMMATE OF ${a.last_name.toUpperCase()}.`);
+    els.search.focus();
   } catch (e) {
-    setStatus("FAILED TO LOAD PUZZLE: " + e.message, "bad");
+    setStatus("FAILED TO LOAD: " + e.message, "bad");
   }
+}
+
+function latestTeam(p) {
+  if (!p.team_seasons.length) return null;
+  const latest = p.team_seasons.reduce((acc, t) => t.season > acc.season ? t : acc, p.team_seasons[0]);
+  const team = state.data.teams[latest.team_id];
+  return team || null;
 }
 
 function renderPair() {
   els.startName.textContent = `${state.startPlayer.first_name} ${state.startPlayer.last_name}`;
   els.endName.textContent = `${state.endPlayer.first_name} ${state.endPlayer.last_name}`;
-  els.startTeam.textContent = state.startPlayer.team?.full_name || "—";
-  els.endTeam.textContent = state.endPlayer.team?.full_name || "—";
+  const startTeam = latestTeam(state.startPlayer);
+  const endTeam = latestTeam(state.endPlayer);
+  els.startTeam.textContent = startTeam?.full_name || "—";
+  els.endTeam.textContent = endTeam?.full_name || "—";
 }
 
 function renderChain() {
@@ -670,8 +595,9 @@ function renderChain() {
 els.search.addEventListener("input", () => {
   const q = els.search.value.trim();
   clearTimeout(state.searchTimer);
-  if (q.length < 3) { hideResults(); return; }
-  state.searchTimer = setTimeout(() => doSearch(q), 400);
+  if (q.length < 2) { hideResults(); return; }
+  // No debounce needed — search is purely local
+  doSearch(q);
 });
 
 els.search.addEventListener("keydown", (e) => {
@@ -686,8 +612,8 @@ els.search.addEventListener("keydown", (e) => {
     paintActive();
   } else if (e.key === "Enter") {
     e.preventDefault();
-    if (state.activeIdx >= 0) pickPlayer(state.resultsList[state.activeIdx]);
-    else if (state.resultsList[0]) pickPlayer(state.resultsList[0]);
+    if (state.activeIdx >= 0) pickPlayer(state.resultsList[state.activeIdx].ref);
+    else if (state.resultsList[0]) pickPlayer(state.resultsList[0].ref);
   } else if (e.key === "Escape") {
     hideResults();
   }
@@ -697,28 +623,35 @@ document.addEventListener("click", (e) => {
   if (!els.results.contains(e.target) && e.target !== els.search) hideResults();
 });
 
-async function doSearch(q) {
-  try {
-    const results = await api.search(q);
-    state.resultsList = results.filter(p => !state.used.has(p.id));
-    state.activeIdx = -1;
-    renderResults();
-  } catch {
-    hideResults();
+function doSearch(q) {
+  const lower = q.toLowerCase();
+  // Prefer players whose name starts with the query, then includes
+  const startsWith = [];
+  const includes = [];
+  for (const p of state.searchIndex) {
+    if (state.used.has(p.id)) continue;
+    if (p.fullLower.startsWith(lower) || p.lastLower.startsWith(lower)) {
+      startsWith.push(p);
+    } else if (p.fullLower.includes(lower)) {
+      includes.push(p);
+    }
   }
+  state.resultsList = [...startsWith, ...includes].slice(0, 12);
+  state.activeIdx = -1;
+  renderResults();
 }
 
 function renderResults() {
   if (!state.resultsList.length) { hideResults(); return; }
-  els.results.innerHTML = state.resultsList.slice(0, 12).map((p, i) => `
+  els.results.innerHTML = state.resultsList.map((p, i) => `
     <div class="result-item" data-idx="${i}">
-      <span>${p.first_name} ${p.last_name}${p.team ? ` <span class="pos">· ${p.team.abbreviation}</span>` : ""}</span>
+      <span>${p.full}</span>
       <span class="pos">${p.position || ""}</span>
     </div>
   `).join("");
   els.results.classList.add("show");
   els.results.querySelectorAll(".result-item").forEach((el, i) => {
-    el.addEventListener("mousedown", (e) => { e.preventDefault(); pickPlayer(state.resultsList[i]); });
+    el.addEventListener("mousedown", (e) => { e.preventDefault(); pickPlayer(state.resultsList[i].ref); });
     el.addEventListener("mouseenter", () => { state.activeIdx = i; paintActive(); });
   });
 }
@@ -734,76 +667,69 @@ function hideResults() {
 }
 
 // ---------- PICK & VALIDATE ----------
-async function pickPlayer(player) {
+function pickPlayer(player) {
   if (state.complete) return;
   hideResults();
   els.search.value = "";
-  els.search.disabled = true;
 
   const last = state.chain[state.chain.length - 1];
-  setStatus(`CHECKING ${player.first_name} ${player.last_name} ↔ ${last.name}…`, "thinking");
+  const lastRef = last._ref;
 
-  try {
-    const res = await api.teammates(last.id, player.id, state.fullHistory);
-    if (!res.teammates) {
-      const lastName = last.name.split(" ").slice(-1)[0].toUpperCase();
-      setStatus(`✗ ${player.last_name.toUpperCase()} WAS NEVER A TEAMMATE OF ${lastName}.`, "bad");
-      els.search.disabled = false;
-      els.search.focus();
-      return;
-    }
-
-    // Use the seasons we already fetched for rarity (avoid extra round trip).
-    // The /teammates response includes b_seasons (count) — that's the player
-    // we just picked. We need full season data to count distinct seasons,
-    // but the count alone is a fine proxy.
-    const seasonCount = res.b_seasons || 0;
-    const rarity = Math.max(1, Math.round(20 - Math.min(seasonCount, 20)));
-
-    const node = {
-      id: player.id,
-      name: `${player.first_name} ${player.last_name}`,
-      team: player.team,
-      seasonCount,
-      rarity,
-      role: null,
-    };
-    state.chain.push(node);
-    state.used.add(player.id);
-
-    // Did we reach the end?
-    setStatus(`✓ LINKED. CHECKING IF ${player.last_name.toUpperCase()} CONNECTS TO ${state.endPlayer.last_name.toUpperCase()}…`, "thinking");
-    const reachedEnd = await api.teammates(player.id, state.endPlayer.id, state.fullHistory);
-    if (reachedEnd.teammates) {
-      state.chain.push({
-        id: state.endPlayer.id,
-        name: `${state.endPlayer.first_name} ${state.endPlayer.last_name}`,
-        team: state.endPlayer.team,
-        role: "end",
-      });
-      state.used.add(state.endPlayer.id);
-      state.complete = true;
-      renderChain();
-      finishGame();
-      return;
-    }
-
-    renderChain();
-    setStatus(`✓ ${player.last_name.toUpperCase()} IS LINKED. NOW FIND A TEAMMATE OF ${player.last_name.toUpperCase()}.`, "ok");
-    els.search.disabled = false;
+  const overlap = shareTeamSeason(lastRef, player);
+  if (!overlap.length) {
+    setStatus(`✗ ${player.last_name.toUpperCase()} WAS NEVER A TEAMMATE OF ${last.name.split(" ").slice(-1)[0].toUpperCase()}.`, "bad");
     els.search.focus();
-  } catch (e) {
-    setStatus("ERROR: " + e.message, "bad");
-    els.search.disabled = false;
+    return;
   }
+
+  // Use the most recent overlap season for displaying the team badge
+  const best = overlap.reduce((acc, t) => t.season > acc.season ? t : acc, overlap[0]);
+  const team = state.data.teams[best.team_id];
+
+  // Rarity: fewer total seasons = rarer. Use distinct seasons count.
+  const seasonCount = new Set(player.team_seasons.map(t => t.season)).size;
+  const rarity = Math.max(1, Math.round(20 - Math.min(seasonCount, 20)));
+
+  const node = {
+    id: player.id,
+    name: `${player.first_name} ${player.last_name}`,
+    team,
+    seasonCount,
+    rarity,
+    role: null,
+    _ref: player,
+  };
+  state.chain.push(node);
+  state.used.add(player.id);
+
+  // Did we reach the end?
+  const reachOverlap = shareTeamSeason(player, state.endPlayer);
+  if (reachOverlap.length) {
+    const finalTeam = state.data.teams[reachOverlap.reduce((a, t) => t.season > a.season ? t : a, reachOverlap[0]).team_id];
+    state.chain.push({
+      id: state.endPlayer.id,
+      name: `${state.endPlayer.first_name} ${state.endPlayer.last_name}`,
+      team: finalTeam || latestTeam(state.endPlayer),
+      role: "end",
+      _ref: state.endPlayer,
+    });
+    state.used.add(state.endPlayer.id);
+    state.complete = true;
+    renderChain();
+    finishGame();
+    return;
+  }
+
+  renderChain();
+  setStatus(`✓ LINKED VIA ${team?.abbreviation || "?"} ${best.season}-${(best.season + 1).toString().slice(-2)}. NOW FIND A TEAMMATE OF ${player.last_name.toUpperCase()}.`, "ok");
+  els.search.focus();
 }
 
 // ---------- FINISH & SCORING ----------
 function finishGame() {
   els.search.disabled = true;
-  const steps = state.chain.length - 1;             // edges traveled
+  const steps = state.chain.length - 1;
   const rarity = state.chain.reduce((s, p) => s + (p.rarity || 0), 0);
-  // Efficiency: fewer steps = higher. Optimal=2 (start→middle→end) gives max.
   const eff = Math.max(0, Math.round(1000 / Math.pow(steps, 1.4)));
   const total = eff + rarity * 25;
 
@@ -814,11 +740,12 @@ function finishGame() {
   els.complete.classList.add("show");
   setStatus("CHAIN LOCKED. WELL PLAYED.", "ok");
 
-  // Persist best score for this puzzle
-  const key = `lineage:${state.puzzle.num}`;
+  const key = `lineage:${state.puzzleNum}`;
   const prev = JSON.parse(localStorage.getItem(key) || "null");
   if (!prev || total > prev.total) {
-    localStorage.setItem(key, JSON.stringify({ total, steps, rarity, chain: state.chain.map(p => p.name) }));
+    localStorage.setItem(key, JSON.stringify({
+      total, steps, rarity, chain: state.chain.map(p => p.name),
+    }));
   }
 }
 
@@ -831,7 +758,6 @@ els.undoBtn.addEventListener("click", () => {
   renderChain();
   const last = state.chain[state.chain.length - 1];
   setStatus(`UNDONE. NOW CONNECTING FROM ${last.name.toUpperCase()}.`, "warn");
-  els.search.disabled = false;
   els.search.focus();
 });
 
@@ -848,14 +774,9 @@ els.resetBtn.addEventListener("click", () => {
   els.search.focus();
 });
 
-els.fullHistory.addEventListener("change", (e) => {
-  state.fullHistory = e.target.checked;
-  setStatus(state.fullHistory ? "FULL HISTORY ON — PRE-2000 PLAYERS ALLOWED." : "MODERN ERA ONLY (2000+).", "warn");
-});
-
 els.shareBtn.addEventListener("click", () => {
   const txt = [
-    `NBA LINEAGE #${state.puzzle.num}`,
+    `NBA LINEAGE #${state.puzzleNum}`,
     `${state.chain[0].name} → ${state.chain[state.chain.length - 1].name}`,
     `Steps: ${state.chain.length - 1} · Score: ${els.rTotal.textContent}`,
     state.chain.map(p => p.name).join(" → "),
@@ -879,7 +800,6 @@ $("how-link").addEventListener("click", (e) => {
   );
 });
 
-// kick off
 boot();
 </script>
 </body>
