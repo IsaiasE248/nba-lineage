@@ -3,101 +3,103 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NBA LINEAGE</title>
+<title>NBA Lineage</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;600;800&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --court: #6b3410;
-    --court-dark: #3d1d08;
-    --court-glow: #c97a3a;
-    --line: #f4e4c1;
-    --paint: #c9532b;
-    --bg: #0d0a07;
-    --bg-2: #15110d;
-    --nav-bg: rgba(13, 10, 7, 0.78);
-    --ink: #f4e4c1;
-    --ink-dim: #8a7a5c;
+    /* Deep dark base — navy with a charcoal lean */
+    --bg: #0b0d12;
+    --bg-2: #11141b;
+    --surface: #161a23;
+    --surface-2: #1c212c;
+    --surface-3: #232938;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.14);
+ 
+    /* Text */
+    --ink: #e7e9ee;
+    --ink-2: #b6bbc6;
+    --ink-3: #7a8194;
+    --ink-faint: #4a5163;
+ 
+    /* Accents */
+    --accent: #ff6b35;        /* vibrant orange */
+    --accent-soft: #ff8a5e;
+    --accent-glow: rgba(255, 107, 53, 0.18);
+    --accent-line: rgba(255, 107, 53, 0.4);
+ 
+    /* States */
     --green: #4ade80;
+    --green-bg: rgba(74, 222, 128, 0.1);
     --red: #f87171;
+    --red-bg: rgba(248, 113, 113, 0.1);
     --yellow: #fbbf24;
-    --logo-1: #c97a3a;
-    --logo-2: #f4a460;
-    --shadow: 0 0 0 1px rgba(244,228,193,.08), 0 20px 60px -20px rgba(0,0,0,.8);
+    --yellow-bg: rgba(251, 191, 36, 0.1);
+ 
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
   }
+ 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
   html, body {
     background: var(--bg);
     color: var(--ink);
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
-
-  /* HARDWOOD COURT FLOOR — layered gradients build realistic plank look */
+ 
+  /* Subtle court-line motif — barely-there decoration far from content */
   body::before {
     content: '';
-    position: fixed; inset: 0; z-index: -2;
-    background-color: #5a2f10;
-    background-image:
-      /* Subtle vertical grain streaks */
-      repeating-linear-gradient(
-        90deg,
-        transparent 0px,
-        rgba(0, 0, 0, 0.05) 1px,
-        transparent 2px,
-        transparent 7px,
-        rgba(255, 245, 220, 0.03) 8px,
-        transparent 9px,
-        transparent 19px
-      ),
-      /* Horizontal plank seams */
-      repeating-linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.4) 0px,
-        rgba(0, 0, 0, 0.4) 1px,
-        transparent 2px,
-        transparent 42px
-      ),
-      /* Plank-to-plank tone variation */
-      repeating-linear-gradient(
-        90deg,
-        rgba(139, 78, 38, 0.55) 0px,
-        rgba(139, 78, 38, 0.55) 130px,
-        rgba(101, 53, 22, 0.55) 130px,
-        rgba(101, 53, 22, 0.55) 260px,
-        rgba(122, 65, 28, 0.55) 260px,
-        rgba(122, 65, 28, 0.55) 390px,
-        rgba(95, 49, 20, 0.55) 390px,
-        rgba(95, 49, 20, 0.55) 520px
-      ),
-      linear-gradient(180deg, #6b3a18 0%, #4a2810 100%);
+    position: fixed;
+    top: 50%;
+    left: -200px;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.5;
   }
-  /* Darkening overlay so text stays readable over the wood */
   body::after {
     content: '';
-    position: fixed; inset: 0; z-index: -1;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
     background:
-      radial-gradient(ellipse at center top, rgba(0,0,0,0.3), rgba(0,0,0,0.85)),
-      linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.75) 100%);
+      radial-gradient(ellipse at top right, rgba(255, 107, 53, 0.06), transparent 50%),
+      radial-gradient(ellipse at bottom left, rgba(99, 102, 241, 0.04), transparent 50%);
     pointer-events: none;
+    z-index: -1;
   }
-
+ 
   /* TOP NAVIGATION */
   .navbar {
     position: sticky;
     top: 0;
     z-index: 50;
-    background: var(--nav-bg);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(244,228,193,.1);
+    background: rgba(11, 13, 18, 0.8);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--border);
   }
   .nav-inner {
-    max-width: 1200px;
+    max-width: 1140px;
     margin: 0 auto;
-    padding: 12px 22px;
+    padding: 14px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -107,413 +109,367 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 26px;
-    letter-spacing: .04em;
     text-decoration: none;
-    background: linear-gradient(135deg, var(--logo-1), var(--logo-2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    flex-shrink: 0;
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
   .brand-icon {
-    width: 30px; height: 30px;
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--logo-1), var(--logo-2));
-    display: inline-flex;
-    align-items: center; justify-content: center;
-    color: #1a0e05;
-    font-weight: 800;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 16px;
-    -webkit-text-fill-color: #1a0e05;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.3), 0 4px 16px rgba(255, 107, 53, 0.25);
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(201,122,58,.4);
+  }
+  .brand-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: #1a0e05;
+    stroke-width: 1.5;
   }
   .nav-links {
     display: flex;
-    gap: 2px;
     align-items: center;
-    flex-wrap: wrap;
+    gap: 4px;
   }
   .nav-link {
-    padding: 7px 12px;
-    font-family: 'Oswald', sans-serif;
+    padding: 8px 14px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--ink-dim);
-    text-decoration: none;
-    letter-spacing: .04em;
-    border-radius: 6px;
-    transition: all .15s;
-    cursor: pointer;
+    color: var(--ink-3);
     background: transparent;
     border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
   }
-  .nav-link:hover { color: var(--ink); background: rgba(244,228,193,.05); }
-  .nav-link.active {
-    color: var(--paint);
-    background: rgba(201,83,43,.12);
+  .nav-link:hover { color: var(--ink); background: var(--surface); }
+  .nav-link.active { color: var(--ink); background: var(--surface-2); }
+ 
+  /* MAIN LAYOUT */
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
   }
-  .nav-link .badge {
-    margin-left: 5px;
-    font-size: 9px;
-    background: var(--paint);
-    color: #fff;
-    padding: 1px 6px;
-    border-radius: 8px;
-    font-weight: 600;
-    letter-spacing: .05em;
-  }
-
-  @media (max-width: 700px) {
-    .nav-inner { padding: 10px 16px; gap: 12px; }
-    .brand { font-size: 22px; }
-    .brand-icon { width: 26px; height: 26px; font-size: 14px; }
-    .nav-links { gap: 0; }
-    .nav-link { padding: 6px 8px; font-size: 11px; letter-spacing: 0; }
-    .nav-link .badge { display: none; }
-  }
-
-  .wrap { max-width: 920px; margin: 0 auto; padding: 28px 20px 80px; }
-
-  /* HERO HEADER */
+ 
+  /* HERO */
   .hero {
     text-align: center;
-    margin-bottom: 28px;
-    padding: 28px 0 18px;
+    margin-bottom: 48px;
+  }
+  .hero .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--ink-2);
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+  .hero .eyebrow .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
   }
   .hero h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(64px, 11vw, 108px);
-    line-height: .9;
-    letter-spacing: .02em;
-    background: linear-gradient(135deg, var(--logo-1) 0%, var(--logo-2) 50%, var(--paint) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 80px rgba(201,122,58,.25);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(40px, 7vw, 64px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: 12px;
   }
-  .hero .tagline {
-    font-family: 'Oswald', sans-serif;
-    font-weight: 300;
-    font-size: clamp(13px, 1.6vw, 16px);
-    color: var(--ink-dim);
-    margin-top: 4px;
-    letter-spacing: .03em;
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
   }
-  .hero .puzzle-meta {
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-    margin-top: 14px;
-    padding: 7px 18px;
-    background: rgba(0,0,0,.5);
-    border: 1px solid rgba(244,228,193,.18);
-    border-radius: 999px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--ink-dim);
-    letter-spacing: .08em;
+  .hero p {
+    font-size: 16px;
+    color: var(--ink-2);
+    max-width: 480px;
+    margin: 0 auto;
   }
-  .hero .puzzle-meta b { color: var(--ink); font-weight: 600; }
-  .hero .puzzle-meta .sep { opacity: .35; }
-
+ 
+  /* PUZZLE PAIR */
   .pair {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr 56px 1fr;
     gap: 16px;
     align-items: stretch;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
   }
   .player-card {
-    border: 1.5px solid rgba(244,228,193,.25);
-    background:
-      radial-gradient(ellipse at top left, rgba(201,122,58,.18), transparent 60%),
-      linear-gradient(180deg, rgba(28, 22, 18, 0.92) 0%, rgba(16, 11, 7, 0.95) 100%);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     padding: 20px;
     position: relative;
-    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    transition: border-color 0.2s;
   }
-  .player-card.start { border-color: var(--paint); }
-  .player-card.end { border-color: var(--court-glow); }
+  .player-card.start::before,
+  .player-card.end::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 16px;
+    width: 24px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 0 0 2px 2px;
+  }
+  .player-card.end::before { background: var(--ink-2); }
+ 
   .player-card .label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: .25em;
-    color: var(--ink-dim);
-    margin-bottom: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .player-card .card-body {
+    display: flex;
+    align-items: center;
+    gap: 14px;
   }
   .player-card .name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(22px, 3.5vw, 32px);
-    letter-spacing: .02em;
-    line-height: 1.05;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(20px, 3vw, 26px);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--ink);
   }
   .player-card .team {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--ink-dim);
-    margin-top: 8px;
+    font-size: 13px;
+    color: var(--ink-3);
+    margin-top: 4px;
   }
-  .vs {
+  .pair-arrow {
     align-self: center;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    color: var(--paint);
-    letter-spacing: .1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-3);
+    font-size: 20px;
   }
+ 
   @media (max-width: 600px) {
     .pair { grid-template-columns: 1fr; }
-    .vs { padding: 4px 0; text-align: center; }
+    .pair-arrow {
+      transform: rotate(90deg);
+      padding: 4px 0;
+    }
   }
-
-  .chain-section { margin-bottom: 24px; }
-  .section-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px dashed rgba(244,228,193,.2);
-  }
-  .section-head h2 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: .15em;
-  }
-  .stat-row { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); }
-  .stat-row b { color: var(--paint); font-weight: 600; }
-  .chain {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-    min-height: 50px;
-    padding: 14px;
-    border: 1px dashed rgba(244,228,193,.2);
-    background: rgba(0,0,0,.55);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    border-radius: 4px;
-  }
-  .link {
-    display: inline-flex;
-    flex-direction: column;
-    padding: 8px 14px;
-    background: var(--court-dark);
-    border: 1px solid var(--court-glow);
-    font-family: 'Oswald', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    animation: pop .3s ease-out;
-  }
-  .link.start { background: var(--paint); border-color: var(--paint); color: #fff; }
-  .link.end { background: var(--court-glow); border-color: var(--court-glow); color: #1a0e05; }
-  .link.invalid {
-    background: rgba(248,113,113,.15);
-    border-color: var(--red);
-    color: var(--red);
-    animation: shake .4s ease-in-out;
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-4px); }
-    75% { transform: translateX(4px); }
-  }
-  .link .small {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    letter-spacing: .1em;
-    opacity: .7;
-    margin-top: 2px;
-  }
-  .arrow { color: var(--paint); font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; }
-  @keyframes pop {
-    from { transform: scale(.85); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-
-  .input-wrap { margin-top: 16px; position: relative; }
-  .search-input {
-    width: 100%;
-    padding: 14px 16px;
-    background: #0e0a07;
-    border: 1.5px solid rgba(244,228,193,.25);
-    color: var(--ink);
-    font-family: 'Oswald', sans-serif;
-    font-size: 16px;
-    letter-spacing: .02em;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .search-input:focus { border-color: var(--paint); box-shadow: 0 0 0 3px rgba(201,83,43,.15); }
-  .search-input {
-    width: 100%;
-    padding: 14px 16px;
-    background: rgba(14, 10, 7, 0.92);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1.5px solid rgba(244,228,193,.25);
-    color: var(--ink);
-    font-family: 'Oswald', sans-serif;
-    font-size: 16px;
-    letter-spacing: .02em;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s;
-    border-radius: 4px;
-  }
-  .search-input:focus { border-color: var(--paint); box-shadow: 0 0 0 3px rgba(201,83,43,.15); }
-  .search-input::placeholder { color: var(--ink-dim); }
-  .search-input:disabled { opacity: .5; cursor: not-allowed; }
-
-  .results {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0; right: 0;
-    background: rgba(14, 10, 7, 0.97);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(244,228,193,.25);
-    max-height: 280px;
-    overflow-y: auto;
-    z-index: 10;
-    display: none;
-    border-radius: 4px;
-    box-shadow: 0 12px 40px rgba(0,0,0,.6);
-  }
-  .results.show { display: block; }
-  .result-item {
-    padding: 10px 14px;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(244,228,193,.06);
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-  }
-  .result-item:hover, .result-item.active { background: rgba(201,83,43,.15); }
-  .result-item .pos { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim); }
-
-  .status {
-    margin-top: 10px;
-    padding: 10px 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    letter-spacing: .04em;
-    min-height: 38px;
-    border-left: 3px solid var(--ink-dim);
-    background: rgba(0,0,0,.55);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    color: var(--ink-dim);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-radius: 0 4px 4px 0;
-  }
-  .status.ok { border-color: var(--green); color: var(--green); }
-  .status.bad { border-color: var(--red); color: var(--red); }
-  .status.warn { border-color: var(--yellow); color: var(--yellow); }
-  .status.thinking { border-color: var(--paint); color: var(--paint); }
-  .status .spinner {
-    display: inline-block;
-    width: 10px; height: 10px;
-    border: 2px solid currentColor;
-    border-right-color: transparent;
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
-  .btn {
-    padding: 10px 18px;
-    background: transparent;
-    border: 1.5px solid var(--ink-dim);
-    color: var(--ink);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 15px;
-    letter-spacing: .15em;
-    cursor: pointer;
-    transition: all .15s;
-  }
-  .btn:hover { border-color: var(--paint); color: var(--paint); background: rgba(201,83,43,.08); }
-  .btn.primary { background: var(--paint); border-color: var(--paint); color: #fff; }
-  .btn.primary:hover { background: #d65f33; }
-  .btn:disabled { opacity: .4; cursor: not-allowed; }
-
-  .complete {
-    margin-top: 20px;
-    border: 2px solid var(--green);
-    background: linear-gradient(180deg, rgba(74,222,128,.08), rgba(74,222,128,.02));
-    padding: 24px;
-    display: none;
-  }
-  .complete.show { display: block; animation: pop .4s ease-out; }
-  .complete h3 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 30px;
-    color: var(--green);
-    letter-spacing: .08em;
-  }
-  .score-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 14px;
-    margin-top: 16px;
-  }
-  .score-cell {
-    border: 1px solid rgba(244,228,193,.15);
-    padding: 12px;
-    background: rgba(0,0,0,.3);
-  }
-  .score-cell .k { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .2em; color: var(--ink-dim); }
-  .score-cell .v { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--paint); margin-top: 4px; }
-  .score-cell.total .v { color: var(--green); font-size: 32px; }
-
-  .skel {
-    display: inline-block;
-    height: 20px;
-    width: 140px;
-    background: linear-gradient(90deg, rgba(244,228,193,.05), rgba(244,228,193,.15), rgba(244,228,193,.05));
-    background-size: 200% 100%;
-    animation: shimmer 1.4s linear infinite;
-  }
-  @keyframes shimmer { to { background-position: -200% 0; } }
-
-  /* AVATARS — circular initials with court-tone gradients */
+ 
+  /* AVATARS */
   .avatar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     border-radius: 50%;
-    font-family: 'Bebas Neue', sans-serif;
-    letter-spacing: .04em;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
     color: #fff;
-    text-shadow: 0 1px 2px rgba(0,0,0,.4);
-    border: 1.5px solid rgba(244,228,193,.2);
+    letter-spacing: -0.01em;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
     position: relative;
   }
-  .avatar.sm { width: 32px; height: 32px; font-size: 13px; }
-  .avatar.md { width: 40px; height: 40px; font-size: 15px; }
-  .avatar.lg { width: 64px; height: 64px; font-size: 22px; border-width: 2px; }
-
-  /* Pair card layout with avatar */
-  .player-card .card-body {
+  .avatar.sm { width: 28px; height: 28px; font-size: 11px; }
+  .avatar.md { width: 36px; height: 36px; font-size: 13px; }
+  .avatar.lg { width: 56px; height: 56px; font-size: 18px; }
+ 
+  /* SECTION HEADERS */
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .section-head h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .stat-row {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--ink-3);
   }
-  .player-card .card-text { min-width: 0; flex: 1; }
-
-  /* Search result row with avatar */
+  .stat-row .stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stat-row .stat b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .stat-row .accent { color: var(--accent); }
+  .help-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--ink-3);
+    border: none;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .help-btn:hover { background: var(--accent); color: #fff; }
+ 
+  /* CHAIN AREA */
+  .chain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    min-height: 64px;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .chain-empty {
+    color: var(--ink-faint);
+    font-size: 13px;
+    font-style: italic;
+    padding: 8px;
+  }
+  .link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    animation: pop 0.25s ease-out;
+    transition: all 0.15s;
+  }
+  .link:hover { border-color: var(--accent-line); }
+  .link .link-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+  .link .small {
+    font-size: 10px;
+    color: var(--ink-3);
+    margin-top: 1px;
+    letter-spacing: 0.04em;
+  }
+  .link.start {
+    background: rgba(255, 107, 53, 0.12);
+    border-color: var(--accent-line);
+    color: var(--accent-soft);
+  }
+  .link.start .small { color: rgba(255, 138, 94, 0.7); }
+  .link.end {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--border-strong);
+    color: var(--ink);
+  }
+  .link.invalid {
+    background: var(--red-bg);
+    border-color: var(--red);
+    color: var(--red);
+    animation: shake 0.4s ease-in-out;
+  }
+  @keyframes pop {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+  .arrow {
+    color: var(--ink-faint);
+    font-size: 14px;
+    user-select: none;
+  }
+ 
+  /* SEARCH INPUT */
+  .input-wrap {
+    margin-top: 16px;
+    position: relative;
+  }
+  .search-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+    border-radius: var(--radius);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-glow);
+  }
+  .search-input::placeholder { color: var(--ink-faint); }
+  .search-input:disabled { opacity: 0.5; cursor: not-allowed; }
+ 
+  .results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+  .results.show { display: block; }
+  .result-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .result-item:last-child { border-bottom: none; }
+  .result-item:hover, .result-item.active { background: var(--surface-2); }
   .result-item .left {
     display: flex;
     align-items: center;
@@ -522,269 +478,401 @@
     flex: 1;
   }
   .result-item .name-text {
+    font-size: 14px;
+    color: var(--ink);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  /* Chain link with avatar above name */
-  .link {
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px 6px 6px;
+  .result-item .pos {
+    font-size: 11px;
+    color: var(--ink-3);
+    flex-shrink: 0;
   }
-  .link .link-text {
+ 
+  /* STATUS BAR */
+  .status {
+    margin-top: 12px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.45;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink-2);
+    border-left: 3px solid var(--ink-faint);
+    min-height: 44px;
     display: flex;
-    flex-direction: column;
-  }
-
-  /* Scoring help button + popup */
-  .help-btn {
-    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: rgba(244,228,193,.15);
-    color: var(--ink-dim);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    margin-left: 6px;
-    transition: all .15s;
+    gap: 10px;
   }
-  .help-btn:hover { background: var(--paint); color: #fff; }
-
+  .status.ok { border-left-color: var(--green); background: var(--green-bg); color: #86efac; }
+  .status.bad { border-left-color: var(--red); background: var(--red-bg); color: #fca5a5; }
+  .status.warn { border-left-color: var(--yellow); background: var(--yellow-bg); color: #fcd34d; }
+  .status.thinking { border-left-color: var(--accent); background: var(--accent-glow); color: var(--accent-soft); }
+  .status .spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+ 
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+  .btn {
+    padding: 10px 18px;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s;
+  }
+  .btn:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: var(--surface-2);
+  }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(255, 107, 53, 0.25);
+  }
+  .btn.primary:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent-soft);
+  }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .btn:disabled:hover { background: transparent; border-color: var(--border-strong); }
+ 
+  /* COMPLETION CARD */
+  .complete {
+    margin-top: 24px;
+    padding: 28px;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    display: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .complete::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .complete.show { display: block; animation: pop 0.4s ease-out; }
+  .complete h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .complete .sub {
+    font-size: 14px;
+    color: var(--ink-3);
+    margin-bottom: 20px;
+  }
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 12px;
+  }
+  .score-cell {
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .score-cell .k {
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .score-cell .v {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .score-cell.total {
+    background: var(--accent-glow);
+    border-color: var(--accent-line);
+  }
+  .score-cell.total .v { color: var(--accent-soft); font-size: 32px; }
+ 
+  /* SKELETON */
+  .skel {
+    display: inline-block;
+    height: 22px;
+    width: 160px;
+    background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2));
+    background-size: 200% 100%;
+    border-radius: 4px;
+    animation: shimmer 1.4s linear infinite;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+ 
+  /* HELP MODAL */
   .help-popup {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.85);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 100;
     padding: 20px;
+    z-index: 100;
   }
-  .help-popup.show { display: flex; animation: fadeIn .2s ease-out; }
+  .help-popup.show { display: flex; animation: fadeIn 0.2s ease-out; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .help-popup .inner {
-    max-width: 480px;
-    background: linear-gradient(180deg, #1a1410 0%, #0e0a07 100%);
-    border: 2px solid var(--paint);
+    max-width: 460px;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
     padding: 28px;
-    color: var(--ink);
-    font-family: 'Oswald', sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
   }
   .help-popup h3 {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Fraunces', Georgia, serif;
     font-size: 24px;
-    color: var(--paint);
-    letter-spacing: .1em;
-    margin-bottom: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
   }
-  .help-popup .section {
-    margin-bottom: 14px;
-    padding-bottom: 14px;
-    border-bottom: 1px dashed rgba(244,228,193,.15);
-  }
-  .help-popup .section:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .help-popup .label {
-    font-family: 'Bebas Neue', sans-serif;
-    color: var(--court-glow);
-    letter-spacing: .12em;
+  .help-popup .lead {
     font-size: 14px;
-    margin-bottom: 4px;
+    color: var(--ink-3);
+    margin-bottom: 20px;
+  }
+  .help-popup .item {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .help-popup .item:last-of-type { border-bottom: none; padding-bottom: 8px; }
+  .help-popup .item-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .help-popup .item-body {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.5;
   }
   .help-popup code {
-    font-family: 'JetBrains Mono', monospace;
-    background: rgba(0,0,0,.5);
-    padding: 1px 6px;
-    color: var(--court-glow);
-    font-size: 12px;
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--surface-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent-soft);
   }
   .help-popup .close {
-    margin-top: 18px;
+    margin-top: 20px;
     width: 100%;
   }
-
+ 
   footer {
-    margin-top: 30px;
+    margin-top: 56px;
     text-align: center;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--ink-dim);
-    letter-spacing: .1em;
+    font-size: 12px;
+    color: var(--ink-faint);
   }
-  footer a { color: var(--paint); text-decoration: none; }
+  footer a { color: var(--ink-3); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
 </style>
 </head>
 <body>
-
+ 
 <nav class="navbar">
   <div class="nav-inner">
     <a href="#" class="brand">
-      <span class="brand-icon">L</span>
-      <span>lineage</span>
+      <span class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5 5c4 4 10 4 14 0M5 19c4-4 10-4 14 0"/></svg>
+      </span>
+      <span>Lineage</span>
     </a>
     <div class="nav-links">
       <button class="nav-link active">Daily</button>
-      <button class="nav-link" id="nav-howto">How to Play</button>
+      <button class="nav-link" id="nav-howto">How to play</button>
       <button class="nav-link" id="nav-scoring">Scoring</button>
-      <button class="nav-link" id="nav-stats">My Stats <span class="badge">NEW</span></button>
+      <button class="nav-link" id="nav-stats">Stats</button>
     </div>
   </div>
 </nav>
-
+ 
 <div class="wrap">
+ 
   <div class="hero">
-    <h1>nba lineage</h1>
-    <div class="tagline">Connect two players through their teammates. Same team, same season.</div>
-    <div class="puzzle-meta">
-      <span>DAILY <b id="daily-date">—</b></span>
-      <span class="sep">|</span>
-      <span>PUZZLE #<b id="puzzle-num">—</b></span>
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Daily <span id="daily-date">—</span> · Puzzle <span id="puzzle-num">—</span></span>
     </div>
+    <h1>Two players, <em>one chain</em>.</h1>
+    <p>Connect them through teammates who shared a team for at least one season.</p>
   </div>
-
+ 
   <div class="pair" id="pair">
     <div class="player-card start">
-      <div class="label">START</div>
+      <div class="label">Start</div>
       <div class="card-body">
         <div class="avatar lg" id="start-avatar"></div>
-        <div class="card-text">
+        <div>
           <div class="name" id="start-name"><span class="skel"></span></div>
           <div class="team" id="start-team">—</div>
         </div>
       </div>
     </div>
-    <div class="vs">→ CONNECT →</div>
+    <div class="pair-arrow">→</div>
     <div class="player-card end">
-      <div class="label">END</div>
+      <div class="label">End</div>
       <div class="card-body">
         <div class="avatar lg" id="end-avatar"></div>
-        <div class="card-text">
+        <div>
           <div class="name" id="end-name"><span class="skel"></span></div>
           <div class="team" id="end-team">—</div>
         </div>
       </div>
     </div>
   </div>
-
-  <div class="chain-section">
-    <div class="section-head">
-      <h2>YOUR CHAIN</h2>
-      <div class="stat-row">
-        STEPS <b id="step-count">0</b> · RARITY <b id="rarity-score">0</b><button class="help-btn" id="help-btn" title="How scoring works">?</button>
-      </div>
-    </div>
-    <div class="chain" id="chain"></div>
-
-    <div class="input-wrap">
-      <input
-        id="search"
-        class="search-input"
-        type="text"
-        placeholder="TYPE A PLAYER NAME…"
-        autocomplete="off"
-        spellcheck="false"
-        disabled
-      />
-      <div class="results" id="results"></div>
-    </div>
-
-    <div class="status" id="status">
-      <span class="spinner"></span>
-      <span>LOADING DATABASE…</span>
-    </div>
-
-    <div class="controls">
-      <button class="btn primary" id="check-btn" disabled>CHECK CHAIN</button>
-      <button class="btn" id="undo-btn">UNDO</button>
-      <button class="btn" id="reset-btn">RESET</button>
-    </div>
-
-    <div class="complete" id="complete">
-      <h3>CHAIN COMPLETE</h3>
-      <div class="score-grid">
-        <div class="score-cell"><div class="k">STEPS</div><div class="v" id="r-steps">—</div></div>
-        <div class="score-cell"><div class="k">RARITY</div><div class="v" id="r-rarity">—</div></div>
-        <div class="score-cell"><div class="k">EFFICIENCY</div><div class="v" id="r-eff">—</div></div>
-        <div class="score-cell total"><div class="k">FINAL SCORE</div><div class="v" id="r-total">—</div></div>
-      </div>
-      <div class="controls" style="margin-top:18px">
-        <button class="btn primary" id="share-btn">COPY SHARE</button>
-      </div>
+ 
+  <div class="section-head">
+    <h2>Your chain</h2>
+    <div class="stat-row">
+      <span class="stat"><b id="step-count">0</b> steps</span>
+      <span class="stat accent"><b id="rarity-score">0</b> rarity</span>
+      <button class="help-btn" id="help-btn" title="How scoring works">?</button>
     </div>
   </div>
-
-  <div class="help-popup" id="help-popup">
-    <div class="inner">
-      <h3>HOW SCORING WORKS</h3>
-      <div class="section">
-        <div class="label">STEPS</div>
-        Number of links between START and END. A direct connection (start → bridge → end) is 2 steps.
-      </div>
-      <div class="section">
-        <div class="label">EFFICIENCY</div>
-        <code>1000 ÷ steps^1.4</code><br>
-        Fewer hops = higher score. 2 steps gives ~378, 3 steps gives ~214, 4 steps gives ~144. Longer chains lose points fast.
-      </div>
-      <div class="section">
-        <div class="label">RARITY</div>
-        <code>20 − distinct seasons played</code><br>
-        Each player in your chain (except endpoints) adds rarity points based on how short their NBA career was. A 5-year journeyman gives 15 points; a 20-year vet gives 0–1.
-      </div>
-      <div class="section">
-        <div class="label">FINAL SCORE</div>
-        <code>efficiency + (rarity × 25)</code><br>
-        The shortest possible chain with the most obscure bridge players wins. Rarity often matters more than length.
-      </div>
-      <button class="btn primary close" id="help-close">GOT IT</button>
+ 
+  <div class="chain" id="chain"></div>
+ 
+  <div class="input-wrap">
+    <input
+      id="search"
+      class="search-input"
+      type="text"
+      placeholder="Type a player name…"
+      autocomplete="off"
+      spellcheck="false"
+      disabled
+    />
+    <div class="results" id="results"></div>
+  </div>
+ 
+  <div class="status" id="status">
+    <span class="spinner"></span>
+    <span>Loading database…</span>
+  </div>
+ 
+  <div class="controls">
+    <button class="btn primary" id="check-btn" disabled>Check chain</button>
+    <button class="btn" id="undo-btn">Undo</button>
+    <button class="btn" id="reset-btn">Reset</button>
+  </div>
+ 
+  <div class="complete" id="complete">
+    <h3>Chain complete</h3>
+    <div class="sub">Nicely done. Here's how you scored.</div>
+    <div class="score-grid">
+      <div class="score-cell"><div class="k">Steps</div><div class="v" id="r-steps">—</div></div>
+      <div class="score-cell"><div class="k">Rarity</div><div class="v" id="r-rarity">—</div></div>
+      <div class="score-cell"><div class="k">Efficiency</div><div class="v" id="r-eff">—</div></div>
+      <div class="score-cell total"><div class="k">Final score</div><div class="v" id="r-total">—</div></div>
+    </div>
+    <div class="controls" style="margin-top: 20px;">
+      <button class="btn primary" id="share-btn">Copy share</button>
     </div>
   </div>
-
+ 
   <footer>
-    DATA · BALLDONTLIE.IO · TEAMMATE = SAME TEAM, SAME SEASON ·
-    <a href="#" id="how-link">HOW TO PLAY</a>
+    Data: balldontlie.io · Strict same-team-same-season ·
+    <a href="#" id="how-link">How to play</a>
   </footer>
 </div>
-
+ 
+<div class="help-popup" id="help-popup">
+  <div class="inner">
+    <h3>How scoring works</h3>
+    <div class="lead">Two factors: how short your chain is, and how rare the bridge players are.</div>
+ 
+    <div class="item">
+      <div class="item-label">Steps</div>
+      <div class="item-body">Number of links from Start to End. Minimum is 2 (start → bridge → end).</div>
+    </div>
+    <div class="item">
+      <div class="item-label">Efficiency</div>
+      <div class="item-body"><code>1000 ÷ steps^1.4</code><br>Fewer hops = higher score. 2 steps gives ~378, 3 gives ~214, 4 gives ~144.</div>
+    </div>
+    <div class="item">
+      <div class="item-label">Rarity</div>
+      <div class="item-body"><code>20 − distinct seasons played</code><br>Each bridge player adds points based on career length. A 5-year journeyman gives 15; a 20-year vet gives 0–1.</div>
+    </div>
+    <div class="item">
+      <div class="item-label">Final score</div>
+      <div class="item-body"><code>efficiency + (rarity × 25)</code><br>Rarity is heavily weighted — a deep-bench connector usually beats a famous one.</div>
+    </div>
+ 
+    <button class="btn primary close" id="help-close">Got it</button>
+  </div>
+</div>
+ 
 <script>
 /* =========================================================================
-   NBA LINEAGE — offline edition
-   Loads bundled data.json. No API calls during gameplay.
+   NBA LINEAGE — offline edition (modern dark redesign)
    ========================================================================= */
-
+ 
 // ---------- DAILY POOL ----------
-// IDs to be matched against the loaded data.json. We pick from this
-// curated set of well-known players; if any are missing from the
-// dataset, we skip and fall back to the next index.
 const DAILY_POOL = [
   { a: 237, b: 140 }, { a: 115, b: 278 }, { a: 15,  b: 79  },
   { a: 274, b: 472 }, { a: 79,  b: 237 }, { a: 472, b: 140 },
   { a: 115, b: 237 }, { a: 274, b: 115 }, { a: 15,  b: 278 },
   { a: 140, b: 79  },
 ];
-
-// ---------- DAILY SEEDING ----------
+ 
 function dayIndex() {
   const epoch = Date.UTC(2024, 0, 1);
   return Math.floor((Date.now() - epoch) / 86400000);
 }
 function todayDate() {
-  return new Date().toISOString().slice(0, 10);
+  return new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
-
+ 
 // ---------- STATE ----------
 const state = {
-  data: null,            // {teams, players}
-  searchIndex: [],       // [{id, full, last, first, ref}] for fast search
+  data: null,
+  searchIndex: [],
   puzzleNum: dayIndex(),
   startPlayer: null,
   endPlayer: null,
@@ -795,8 +883,7 @@ const state = {
   resultsList: [],
   activeIdx: -1,
 };
-
-// ---------- ELEMENTS ----------
+ 
 const $ = (id) => document.getElementById(id);
 const els = {
   date: $("daily-date"), num: $("puzzle-num"),
@@ -815,17 +902,25 @@ const els = {
   shareBtn: $("share-btn"),
   helpBtn: $("help-btn"), helpPopup: $("help-popup"), helpClose: $("help-close"),
 };
-
-// ---------- AVATAR HELPERS ----------
-// Generate a deterministic court-toned gradient from a player ID so each
-// player has a consistent unique color across the UI.
+ 
+// ---------- AVATARS ----------
 function avatarColors(id) {
-  // Hash the ID to a hue band that stays in court/sunset/clay range
   const h = (id * 2654435761) % 360;
-  const hue = ((h % 60) + 5); // 5°-65°: oranges, ambers, browns
-  const c1 = `hsl(${hue}, 65%, 38%)`;
-  const c2 = `hsl(${(hue + 20) % 360}, 70%, 22%)`;
-  return [c1, c2];
+  const hue = ((h % 360) + 360) % 360;
+  // Modern palette: blues, indigos, oranges, teals — avoid washed-out greens
+  const palettes = [
+    ['#4f46e5', '#7c3aed'], // indigo to violet
+    ['#0891b2', '#0e7490'], // cyan
+    ['#ea580c', '#c2410c'], // orange
+    ['#dc2626', '#b91c1c'], // red
+    ['#059669', '#047857'], // emerald
+    ['#7c2d12', '#9a3412'], // dark amber
+    ['#1e40af', '#1e3a8a'], // royal blue
+    ['#be185d', '#9d174d'], // pink
+    ['#0f766e', '#115e59'], // teal
+    ['#a16207', '#854d0e'], // gold
+  ];
+  return palettes[Math.floor(hue / 36)];
 }
 function initials(first, last) {
   const f = (first || "").trim().charAt(0).toUpperCase();
@@ -839,26 +934,18 @@ function renderAvatar(el, player, size) {
   el.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
   el.textContent = initials(player.first_name, player.last_name);
 }
-// Build an avatar element from scratch (for chain links and search rows)
 function makeAvatar(player, size) {
   const el = document.createElement("div");
   renderAvatar(el, player, size);
   return el;
 }
-
-function setStatus(msg, kind) {
-  els.status.className = "status" + (kind ? " " + kind : "");
-  els.status.innerHTML = (kind === "thinking" ? '<span class="spinner"></span>' : '') + `<span>${msg}</span>`;
-}
-
-// ---------- DATA LOADING ----------
+ 
+// ---------- DATA ----------
 async function loadData() {
   const r = await fetch("data.json");
   if (!r.ok) throw new Error("Failed to load data.json");
   return await r.json();
 }
-
-// Build a fast-search index over the player list
 function buildIndex(data) {
   state.searchIndex = Object.values(data.players).map(p => ({
     id: p.id,
@@ -870,52 +957,55 @@ function buildIndex(data) {
     ref: p,
   }));
 }
-
+ 
 // ---------- TEAMMATE LOGIC ----------
-// Two players are teammates if their team_seasons share any (season, team_id).
 function shareTeamSeason(p1, p2) {
   const set = new Set(p1.team_seasons.map(t => `${t.season}:${t.team_id}`));
   const overlap = [];
   for (const t of p2.team_seasons) {
-    if (set.has(`${t.season}:${t.team_id}`)) {
-      overlap.push(t);
-    }
+    if (set.has(`${t.season}:${t.team_id}`)) overlap.push(t);
   }
   return overlap;
 }
-
-// ---------- PUZZLE SELECTION ----------
+ 
+// ---------- PUZZLE PICK ----------
 function pickDailyPair() {
-  // Walk the pool starting at today's index. Use the first pair whose
-  // both endpoints exist in the dataset.
   const start = state.puzzleNum % DAILY_POOL.length;
   for (let off = 0; off < DAILY_POOL.length; off++) {
     const p = DAILY_POOL[(start + off) % DAILY_POOL.length];
-    if (state.data.players[p.a] && state.data.players[p.b]) {
-      return p;
-    }
+    if (state.data.players[p.a] && state.data.players[p.b]) return p;
   }
-  // Fallback: pick the two players with the most team-seasons (usually stars)
   const sorted = Object.values(state.data.players)
     .sort((x, y) => y.team_seasons.length - x.team_seasons.length);
   return { a: sorted[0].id, b: sorted[1].id };
 }
-
+ 
+function latestTeam(p) {
+  if (!p.team_seasons.length) return null;
+  const latest = p.team_seasons.reduce((acc, t) => t.season > acc.season ? t : acc, p.team_seasons[0]);
+  return state.data.teams[latest.team_id] || null;
+}
+ 
+function setStatus(msg, kind) {
+  els.status.className = "status" + (kind ? " " + kind : "");
+  els.status.innerHTML = (kind === "thinking" ? '<span class="spinner"></span>' : '') + `<span>${msg}</span>`;
+}
+ 
 // ---------- BOOT ----------
 async function boot() {
   els.date.textContent = todayDate();
-  els.num.textContent = state.puzzleNum;
-
+  els.num.textContent = "#" + state.puzzleNum;
+ 
   try {
     state.data = await loadData();
     buildIndex(state.data);
-
+ 
     const pair = pickDailyPair();
     const a = state.data.players[pair.a];
     const b = state.data.players[pair.b];
     state.startPlayer = a;
     state.endPlayer = b;
-
+ 
     renderPair();
     state.chain.push({
       id: a.id,
@@ -926,35 +1016,33 @@ async function boot() {
     });
     state.used.add(a.id);
     renderChain();
-
+ 
     els.search.disabled = false;
-    setStatus(`ADD PLAYERS WHO BRIDGE ${a.last_name.toUpperCase()} TO ${b.last_name.toUpperCase()}, THEN CLICK CHECK CHAIN.`);
+    setStatus(`Add players who connect ${a.last_name} to ${b.last_name}, then click Check chain.`);
     els.search.focus();
   } catch (e) {
-    setStatus("FAILED TO LOAD: " + e.message, "bad");
+    setStatus("Failed to load: " + e.message, "bad");
   }
 }
-
-function latestTeam(p) {
-  if (!p.team_seasons.length) return null;
-  const latest = p.team_seasons.reduce((acc, t) => t.season > acc.season ? t : acc, p.team_seasons[0]);
-  const team = state.data.teams[latest.team_id];
-  return team || null;
-}
-
+ 
 function renderPair() {
   els.startName.textContent = `${state.startPlayer.first_name} ${state.startPlayer.last_name}`;
   els.endName.textContent = `${state.endPlayer.first_name} ${state.endPlayer.last_name}`;
-  const startTeam = latestTeam(state.startPlayer);
-  const endTeam = latestTeam(state.endPlayer);
-  els.startTeam.textContent = startTeam?.full_name || "—";
-  els.endTeam.textContent = endTeam?.full_name || "—";
+  els.startTeam.textContent = latestTeam(state.startPlayer)?.full_name || "—";
+  els.endTeam.textContent = latestTeam(state.endPlayer)?.full_name || "—";
   renderAvatar(els.startAvatar, state.startPlayer, "lg");
   renderAvatar(els.endAvatar, state.endPlayer, "lg");
 }
-
+ 
 function renderChain() {
   els.chain.innerHTML = "";
+  if (state.chain.length === 0) {
+    const empty = document.createElement("span");
+    empty.className = "chain-empty";
+    empty.textContent = "Empty chain";
+    els.chain.appendChild(empty);
+    return;
+  }
   state.chain.forEach((p, i) => {
     if (i > 0) {
       const arrow = document.createElement("span");
@@ -964,8 +1052,8 @@ function renderChain() {
     }
     const node = document.createElement("div");
     node.className = "link" + (p.role ? " " + p.role : "") + (p.invalid ? " invalid" : "");
-    const avatar = makeAvatar(p._ref || { id: p.id, first_name: p.name.split(" ")[0], last_name: p.name.split(" ").slice(-1)[0] }, "sm");
-    node.appendChild(avatar);
+    const ref = p._ref || { id: p.id, first_name: p.name.split(" ")[0], last_name: p.name.split(" ").slice(-1)[0] };
+    node.appendChild(makeAvatar(ref, "sm"));
     const text = document.createElement("div");
     text.className = "link-text";
     const teamAbbr = p.team?.abbreviation || "";
@@ -975,19 +1063,17 @@ function renderChain() {
   });
   els.stepCount.textContent = Math.max(0, state.chain.length - 1);
   els.rarityScore.textContent = state.chain.reduce((s, p) => s + (p.rarity || 0), 0);
-  // Enable check button only when there's at least one bridge player
   els.checkBtn.disabled = state.chain.length < 2 || state.complete;
 }
-
+ 
 // ---------- SEARCH ----------
 els.search.addEventListener("input", () => {
   const q = els.search.value.trim();
   clearTimeout(state.searchTimer);
   if (q.length < 2) { hideResults(); return; }
-  // No debounce needed — search is purely local
   doSearch(q);
 });
-
+ 
 els.search.addEventListener("keydown", (e) => {
   if (!state.resultsList.length) return;
   if (e.key === "ArrowDown") {
@@ -1006,29 +1092,25 @@ els.search.addEventListener("keydown", (e) => {
     hideResults();
   }
 });
-
+ 
 document.addEventListener("click", (e) => {
   if (!els.results.contains(e.target) && e.target !== els.search) hideResults();
 });
-
+ 
 function doSearch(q) {
   const lower = q.toLowerCase();
-  // Prefer players whose name starts with the query, then includes
   const startsWith = [];
   const includes = [];
   for (const p of state.searchIndex) {
     if (state.used.has(p.id)) continue;
-    if (p.fullLower.startsWith(lower) || p.lastLower.startsWith(lower)) {
-      startsWith.push(p);
-    } else if (p.fullLower.includes(lower)) {
-      includes.push(p);
-    }
+    if (p.fullLower.startsWith(lower) || p.lastLower.startsWith(lower)) startsWith.push(p);
+    else if (p.fullLower.includes(lower)) includes.push(p);
   }
   state.resultsList = [...startsWith, ...includes].slice(0, 12);
   state.activeIdx = -1;
   renderResults();
 }
-
+ 
 function renderResults() {
   if (!state.resultsList.length) { hideResults(); return; }
   els.results.innerHTML = "";
@@ -1036,22 +1118,23 @@ function renderResults() {
     const item = document.createElement("div");
     item.className = "result-item";
     item.dataset.idx = i;
-
+ 
     const left = document.createElement("div");
     left.className = "left";
     left.appendChild(makeAvatar(p.ref, "sm"));
     const nameSpan = document.createElement("span");
     nameSpan.className = "name-text";
-    nameSpan.innerHTML = `${p.full}${p.ref.team_seasons?.length ? ` <span class="pos">· ${new Set(p.ref.team_seasons.map(t => t.season)).size}y</span>` : ""}`;
+    const seasons = p.ref.team_seasons?.length ? new Set(p.ref.team_seasons.map(t => t.season)).size : 0;
+    nameSpan.innerHTML = `${p.full}${seasons ? ` <span class="pos">· ${seasons}y</span>` : ""}`;
     left.appendChild(nameSpan);
-
+ 
     const pos = document.createElement("span");
     pos.className = "pos";
     pos.textContent = p.position || "";
-
+ 
     item.appendChild(left);
     item.appendChild(pos);
-
+ 
     item.addEventListener("mousedown", (e) => { e.preventDefault(); pickPlayer(p.ref); });
     item.addEventListener("mouseenter", () => { state.activeIdx = i; paintActive(); });
     els.results.appendChild(item);
@@ -1068,26 +1151,21 @@ function hideResults() {
   state.resultsList = [];
   state.activeIdx = -1;
 }
-
-// ---------- PICK & VALIDATE ----------
-// Just adds a player to the chain without auto-completing.
-// The user clicks CHECK CHAIN when they think they're done.
+ 
+// ---------- PICK ----------
 function pickPlayer(player) {
   if (state.complete) return;
   hideResults();
   els.search.value = "";
-
-  // Clear any previous invalid markers (user is re-trying)
   state.chain.forEach(p => { delete p.invalid; });
-
-  // Rarity: fewer total seasons = rarer.
+ 
   const seasonCount = new Set(player.team_seasons.map(t => t.season)).size;
   const rarity = Math.max(1, Math.round(20 - Math.min(seasonCount, 20)));
-
+ 
   const node = {
     id: player.id,
     name: `${player.first_name} ${player.last_name}`,
-    team: latestTeam(player),  // fallback team; updated on validation
+    team: latestTeam(player),
     seasonCount,
     rarity,
     role: null,
@@ -1095,63 +1173,44 @@ function pickPlayer(player) {
   };
   state.chain.push(node);
   state.used.add(player.id);
-
+ 
   renderChain();
-  setStatus(`✓ ${player.last_name.toUpperCase()} ADDED. ADD MORE OR CLICK "CHECK CHAIN" TO VALIDATE.`, "ok");
+  setStatus(`Added ${player.first_name} ${player.last_name}. Add more players or click Check chain.`, "ok");
   els.search.focus();
 }
-
-// Validate the entire chain end-to-end. Walks each consecutive pair
-// and checks teammate overlap. If all valid AND last bridge connects
-// to END, complete the game. Otherwise, mark the broken links.
+ 
+// ---------- CHECK ----------
 function checkChain() {
   if (state.complete) return;
   if (state.chain.length < 2) {
-    setStatus("ADD AT LEAST ONE PLAYER BEFORE CHECKING.", "warn");
+    setStatus("Add at least one bridge player before checking.", "warn");
     return;
   }
-
-  // Build the full ordered list: [start, ...bridges, end]
+ 
   const sequence = [...state.chain.map(n => n._ref), state.endPlayer];
-
-  // Walk pairs; collect break points
   let firstBreak = -1;
   const overlaps = [];
   for (let i = 0; i < sequence.length - 1; i++) {
-    const a = sequence[i];
-    const b = sequence[i + 1];
-    const overlap = shareTeamSeason(a, b);
+    const overlap = shareTeamSeason(sequence[i], sequence[i + 1]);
     overlaps.push(overlap);
-    if (!overlap.length && firstBreak < 0) {
-      firstBreak = i;
-    }
+    if (!overlap.length && firstBreak < 0) firstBreak = i;
   }
-
+ 
   if (firstBreak >= 0) {
-    // Break in the chain — tell the user which connection failed
     const a = sequence[firstBreak];
     const b = sequence[firstBreak + 1];
-    const aName = `${a.first_name} ${a.last_name}`;
-    const bName = `${b.first_name} ${b.last_name}`;
-    setStatus(`✗ BROKEN LINK: ${aName.toUpperCase()} AND ${bName.toUpperCase()} WERE NEVER TEAMMATES.`, "bad");
-    // Mark the offending bridge player visually
-    if (firstBreak + 1 < state.chain.length) {
-      state.chain[firstBreak + 1].invalid = true;
-    } else if (firstBreak < state.chain.length) {
-      state.chain[firstBreak].invalid = true;
-    }
+    setStatus(`Broken link: ${a.first_name} ${a.last_name} and ${b.first_name} ${b.last_name} were never teammates.`, "bad");
+    if (firstBreak + 1 < state.chain.length) state.chain[firstBreak + 1].invalid = true;
+    else if (firstBreak < state.chain.length) state.chain[firstBreak].invalid = true;
     renderChain();
     return;
   }
-
-  // All connections valid! Update each bridge's team to its overlap team,
-  // append the END player, and finish.
+ 
   for (let i = 1; i < state.chain.length; i++) {
     const ov = overlaps[i - 1];
     const best = ov.reduce((acc, t) => t.season > acc.season ? t : acc, ov[0]);
     state.chain[i].team = state.data.teams[best.team_id];
   }
-  // Append END player using the final overlap's team
   const lastOv = overlaps[overlaps.length - 1];
   const finalBest = lastOv.reduce((acc, t) => t.season > acc.season ? t : acc, lastOv[0]);
   state.chain.push({
@@ -1166,22 +1225,22 @@ function checkChain() {
   renderChain();
   finishGame();
 }
-
-// ---------- FINISH & SCORING ----------
+ 
+// ---------- FINISH ----------
 function finishGame() {
   els.search.disabled = true;
   const steps = state.chain.length - 1;
   const rarity = state.chain.reduce((s, p) => s + (p.rarity || 0), 0);
   const eff = Math.max(0, Math.round(1000 / Math.pow(steps, 1.4)));
   const total = eff + rarity * 25;
-
+ 
   els.rSteps.textContent = steps;
   els.rRarity.textContent = rarity;
   els.rEff.textContent = eff;
   els.rTotal.textContent = total;
   els.complete.classList.add("show");
-  setStatus("CHAIN LOCKED. WELL PLAYED.", "ok");
-
+  setStatus("Chain locked. Well played.", "ok");
+ 
   const key = `lineage:${state.puzzleNum}`;
   const prev = JSON.parse(localStorage.getItem(key) || "null");
   if (!prev || total > prev.total) {
@@ -1190,23 +1249,22 @@ function finishGame() {
     }));
   }
 }
-
+ 
 // ---------- CONTROLS ----------
 els.checkBtn.addEventListener("click", checkChain);
-
+ 
 els.undoBtn.addEventListener("click", () => {
   if (state.complete) return;
   if (state.chain.length <= 1) return;
-  // Clear any "invalid" flags first
   state.chain.forEach(p => { delete p.invalid; });
   const removed = state.chain.pop();
   state.used.delete(removed.id);
   renderChain();
   const last = state.chain[state.chain.length - 1];
-  setStatus(`UNDONE. CHAIN NOW ENDS AT ${last.name.toUpperCase()}.`, "warn");
+  setStatus(`Undone. Chain ends at ${last.name}.`, "warn");
   els.search.focus();
 });
-
+ 
 els.resetBtn.addEventListener("click", () => {
   if (!confirm("Reset the chain?")) return;
   state.chain = state.chain.slice(0, 1);
@@ -1217,33 +1275,40 @@ els.resetBtn.addEventListener("click", () => {
   els.search.disabled = false;
   els.search.value = "";
   renderChain();
-  setStatus("RESET. ADD PLAYERS TO BUILD YOUR CHAIN, THEN CLICK CHECK CHAIN.");
+  setStatus("Reset. Add players to build your chain, then click Check chain.");
   els.search.focus();
 });
-
-// Help popup
+ 
+els.shareBtn.addEventListener("click", () => {
+  const txt = [
+    `NBA Lineage #${state.puzzleNum}`,
+    `${state.chain[0].name} → ${state.chain[state.chain.length - 1].name}`,
+    `Steps: ${state.chain.length - 1} · Score: ${els.rTotal.textContent}`,
+    state.chain.map(p => p.name).join(" → "),
+  ].join("\n");
+  navigator.clipboard.writeText(txt).then(() => {
+    els.shareBtn.textContent = "Copied ✓";
+    setTimeout(() => { els.shareBtn.textContent = "Copy share"; }, 1500);
+  });
+});
+ 
 els.helpBtn.addEventListener("click", () => els.helpPopup.classList.add("show"));
 els.helpClose.addEventListener("click", () => els.helpPopup.classList.remove("show"));
 els.helpPopup.addEventListener("click", (e) => {
   if (e.target === els.helpPopup) els.helpPopup.classList.remove("show");
 });
-
-// Nav button hooks
+ 
 $("nav-howto")?.addEventListener("click", () => {
   alert(
-    "NBA LINEAGE\n\n" +
-    "Connect the START player to the END player by adding teammates between them.\n\n" +
+    "Connect the Start player to the End player by adding teammates between them.\n\n" +
     "• Each link must be: same team, same season.\n" +
-    "• Add players one at a time, then click CHECK CHAIN to validate.\n" +
+    "• Add players one at a time, then click Check chain.\n" +
     "• Shorter chains and rarer players score higher.\n\n" +
     "New puzzle every day."
   );
 });
-$("nav-scoring")?.addEventListener("click", () => {
-  els.helpPopup.classList.add("show");
-});
+$("nav-scoring")?.addEventListener("click", () => els.helpPopup.classList.add("show"));
 $("nav-stats")?.addEventListener("click", () => {
-  // Show personal best across recent puzzles from localStorage
   const records = [];
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
@@ -1255,42 +1320,19 @@ $("nav-stats")?.addEventListener("click", () => {
     }
   }
   if (!records.length) {
-    alert("No completed puzzles yet. Finish today's chain to start your record!");
+    alert("No completed puzzles yet. Finish today's chain to start your record.");
     return;
   }
   records.sort((a, b) => b.puzzle - a.puzzle);
-  const lines = records.slice(0, 10).map(r =>
-    `Puzzle #${r.puzzle}: ${r.steps} steps · score ${r.total}`
-  );
-  alert("YOUR RECENT PUZZLES\n\n" + lines.join("\n"));
+  const lines = records.slice(0, 10).map(r => `Puzzle #${r.puzzle}: ${r.steps} steps · score ${r.total}`);
+  alert("Recent puzzles\n\n" + lines.join("\n"));
 });
-
-els.shareBtn.addEventListener("click", () => {
-  const txt = [
-    `NBA LINEAGE #${state.puzzleNum}`,
-    `${state.chain[0].name} → ${state.chain[state.chain.length - 1].name}`,
-    `Steps: ${state.chain.length - 1} · Score: ${els.rTotal.textContent}`,
-    state.chain.map(p => p.name).join(" → "),
-  ].join("\n");
-  navigator.clipboard.writeText(txt).then(() => {
-    els.shareBtn.textContent = "COPIED ✓";
-    setTimeout(() => { els.shareBtn.textContent = "COPY SHARE"; }, 1500);
-  });
-});
-
+ 
 $("how-link").addEventListener("click", (e) => {
   e.preventDefault();
-  alert(
-    "NBA LINEAGE\n\n" +
-    "Connect the START player to the END player by typing the names of NBA players who played on the same team in the same season as the previous player in your chain.\n\n" +
-    "• Each link = same team, same season (strict).\n" +
-    "• Shorter chains = higher efficiency score.\n" +
-    "• Rarer players (shorter careers) = bonus rarity points.\n" +
-    "• Final score = efficiency + rarity × 25.\n\n" +
-    "New puzzle every day."
-  );
+  $("nav-howto").click();
 });
-
+ 
 boot();
 </script>
 </body>
