@@ -186,8 +186,6 @@
 
   .player-card .badge {
     position: absolute; z-index: 3;
-    width: 28px; height: 28px;
-    border-radius: 50%;
     background: rgba(255, 255, 255, 0.95);
     color: #1a0e05;
     display: flex; align-items: center; justify-content: center;
@@ -195,8 +193,19 @@
     font-weight: 700;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
-  .player-card .badge.tl { top: 10px; left: 10px; }
-  .player-card .badge.tr { top: 10px; right: 10px; }
+  .player-card .badge.tl {
+    top: 10px; left: 10px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+  }
+  .player-card .badge.tr {
+    top: 10px; right: 10px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
 
   .player-card .name-bar {
     position: relative; z-index: 2;
