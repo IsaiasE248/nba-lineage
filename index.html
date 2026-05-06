@@ -80,8 +80,7 @@
     display: flex; align-items: center; gap: 10px;
     text-decoration: none; color: var(--ink);
     font-family: 'Fraunces', Georgia, serif;
-    font-size: 20px; font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: 20px; font-weight: 700; letter-spacing: -0.01em;
   }
   .brand-icon {
     width: 28px; height: 28px;
@@ -103,7 +102,7 @@
   .nav-link.active { color: var(--ink); background: var(--surface-2); }
 
   /* MAIN */
-  .wrap { max-width: 720px; margin: 0 auto; padding: 56px 24px 80px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 56px 24px 80px; }
 
   /* HERO */
   .hero { text-align: center; margin-bottom: 48px; }
@@ -131,30 +130,51 @@
   .hero h1 em { font-style: italic; font-weight: 400; color: var(--accent); }
   .hero p { font-size: 16px; color: var(--ink-2); max-width: 480px; margin: 0 auto; }
 
-  /* PUZZLE PAIR — TRADING-CARD STYLE */
-  .pair {
-    display: grid;
-    grid-template-columns: 1fr 40px 1fr;
-    gap: 14px;
-    align-items: stretch;
+  /* CHAIN ROW: start card + bridges + end card, all in one horizontal flow */
+  .chain-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin-bottom: 32px;
+    overflow-x: auto;
+    padding: 4px 4px 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-2) transparent;
   }
+  .chain-row::-webkit-scrollbar { height: 8px; }
+  .chain-row::-webkit-scrollbar-track { background: transparent; }
+  .chain-row::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
+
+  /* TRADING CARDS */
   .player-card {
     position: relative;
+    flex-shrink: 0;
     border-radius: var(--radius);
     overflow: hidden;
-    aspect-ratio: 3 / 4;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     background: var(--surface);
     border: 1px solid var(--border-strong);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    cursor: default;
+    transition: transform 0.2s, border-color 0.2s;
   }
+  /* Big card sizes (Start, End) */
+  .player-card.big {
+    width: 220px;
+    aspect-ratio: 3 / 4;
+  }
+  /* Mini card sizes (chain bridges) */
+  .player-card.mini {
+    width: 130px;
+    aspect-ratio: 3 / 4;
+    cursor: default;
+  }
+  .player-card.mini:hover { border-color: var(--accent-line); }
+
   .player-card .bg-gradient {
-    position: absolute; inset: 0;
-    z-index: 0;
-    /* Filled in by JS based on team color */
+    position: absolute; inset: 0; z-index: 0;
     background: linear-gradient(160deg, #2a3142 0%, #1a1f2e 70%, #0f1320 100%);
   }
   .player-card .photo {
@@ -162,9 +182,8 @@
     inset: 0;
     z-index: 1;
     background-size: cover;
-    background-position: center 20%;
+    background-position: center 18%;
     background-repeat: no-repeat;
-    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
     opacity: 0;
     transition: opacity 0.3s;
   }
@@ -177,33 +196,33 @@
     align-items: center;
     justify-content: center;
     font-family: 'Fraunces', Georgia, serif;
-    font-size: clamp(48px, 8vw, 72px);
     font-weight: 700;
     color: rgba(255,255,255,0.85);
     letter-spacing: -0.02em;
     text-shadow: 0 4px 16px rgba(0,0,0,0.3);
   }
+  .player-card.big .fallback { font-size: clamp(40px, 6vw, 60px); }
+  .player-card.mini .fallback { font-size: 32px; }
+
   .player-card .badge {
-    position: absolute;
-    z-index: 3;
-    width: 32px; height: 32px;
+    position: absolute; z-index: 3;
+    width: 28px; height: 28px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.95);
     color: #1a0e05;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
     font-weight: 700;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
-  .player-card .badge.tl { top: 12px; left: 12px; }
-  .player-card .badge.tr { top: 12px; right: 12px; }
+  .player-card .badge.tl { top: 10px; left: 10px; }
+  .player-card .badge.tr { top: 10px; right: 10px; }
+  .player-card.mini .badge { display: none; }
+
   .player-card .name-bar {
-    position: relative;
-    z-index: 2;
-    padding: 12px 14px;
-    background: rgba(0, 0, 0, 0.55);
+    position: relative; z-index: 2;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-top: 1px solid rgba(255,255,255,0.1);
@@ -211,71 +230,122 @@
   }
   .player-card .name {
     font-family: 'Fraunces', Georgia, serif;
-    font-size: clamp(15px, 2vw, 18px);
     font-weight: 600;
     line-height: 1.15;
     letter-spacing: -0.01em;
     color: #fff;
   }
+  .player-card.big .name { font-size: 16px; }
+  .player-card.mini .name { font-size: 13px; }
   .player-card .team {
-    font-size: 11px;
-    color: rgba(255,255,255,0.65);
-    margin-top: 2px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 3px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
+  .player-card.mini .team { display: none; }
+
   .player-card .label {
-    position: absolute;
-    z-index: 3;
-    top: -1px; left: 50%;
-    transform: translateX(-50%);
+    position: absolute; z-index: 3;
+    top: -1px; left: 50%; transform: translateX(-50%);
     background: var(--accent);
     color: #fff;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.12em;
     padding: 4px 12px 5px;
     border-radius: 0 0 6px 6px;
     text-transform: uppercase;
+    pointer-events: none;
   }
   .player-card.end .label { background: var(--ink); color: var(--bg); }
+  .player-card.mini .label { display: none; }
 
-  .pair-arrow {
-    align-self: center;
-    display: flex; align-items: center; justify-content: center;
+  .player-card.invalid { border-color: var(--red); animation: shake 0.4s ease-in-out; }
+  .player-card.invalid::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(248, 113, 113, 0.2);
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  /* Pop-in animation for new chain mini-cards */
+  .player-card.mini { animation: pop 0.3s ease-out; }
+  @keyframes pop {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* Arrow between cards */
+  .chain-arrow {
     color: var(--ink-3);
-    font-size: 24px;
+    font-size: 22px;
+    flex-shrink: 0;
+    user-select: none;
+    align-self: center;
+    padding: 0 4px;
   }
 
-  @media (max-width: 600px) {
-    .pair { grid-template-columns: 1fr; gap: 10px; }
-    .pair-arrow { transform: rotate(90deg); padding: 4px 0; }
-    .player-card { aspect-ratio: 4 / 3; }
+  /* Empty-state placeholder card slots */
+  .placeholder-card {
+    flex-shrink: 0;
+    width: 130px;
+    aspect-ratio: 3 / 4;
+    border: 2px dashed var(--border-strong);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-faint);
+    font-size: 11px;
+    text-align: center;
+    padding: 12px;
   }
 
-  /* AVATAR FALLBACK (used in chain/search when no photo) */
+  /* AVATARS (used in search dropdown only) */
   .avatar {
     display: inline-flex;
     align-items: center; justify-content: center;
     flex-shrink: 0;
+    width: 36px; height: 36px;
     border-radius: 50%;
     font-family: 'Inter', sans-serif;
     font-weight: 700;
+    font-size: 13px;
     color: #fff;
-    letter-spacing: -0.01em;
     border: 1px solid rgba(255,255,255,0.1);
     overflow: hidden;
     position: relative;
-    background-size: cover;
-    background-position: center 18%;
   }
-  .avatar.sm { width: 28px; height: 28px; font-size: 11px; }
-  .avatar.md { width: 36px; height: 36px; font-size: 13px; }
-  .avatar.lg { width: 56px; height: 56px; font-size: 18px; }
-  /* When there's a photo, hide the initials text */
-  .avatar.has-photo { color: transparent; }
+  .avatar .av-initials {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1;
+  }
+  .avatar img {
+    position: absolute;
+    /* Crop the NBA headshot to show just the face — they're 1040x760 with
+       a lot of body/background; we zoom in on the head */
+    top: -10%;
+    left: 0;
+    width: 100%;
+    height: 130%;
+    object-fit: cover;
+    object-position: center 8%;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .avatar img.loaded { opacity: 1; }
 
-  /* CHAIN AREA */
+  /* SECTION + STATS */
   .section-head {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 12px;
@@ -304,70 +374,8 @@
   }
   .help-btn:hover { background: var(--accent); color: #fff; }
 
-  .chain {
-    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-    min-height: 64px;
-    padding: 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-  .chain-empty {
-    color: var(--ink-faint);
-    font-size: 13px;
-    font-style: italic;
-    padding: 8px;
-  }
-  .link {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 6px 14px 6px 6px;
-    background: var(--surface-2);
-    border: 1px solid var(--border-strong);
-    border-radius: 999px;
-    font-size: 13px; font-weight: 500;
-    color: var(--ink);
-    animation: pop 0.25s ease-out;
-    transition: all 0.15s;
-  }
-  .link:hover { border-color: var(--accent-line); }
-  .link .link-text { display: flex; flex-direction: column; line-height: 1.15; }
-  .link .small {
-    font-size: 10px; color: var(--ink-3);
-    margin-top: 1px; letter-spacing: 0.04em;
-  }
-  .link.start {
-    background: rgba(255, 107, 53, 0.12);
-    border-color: var(--accent-line);
-    color: var(--accent-soft);
-  }
-  .link.start .small { color: rgba(255, 138, 94, 0.7); }
-  .link.end {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: var(--border-strong);
-  }
-  .link.invalid {
-    background: var(--red-bg);
-    border-color: var(--red);
-    color: var(--red);
-    animation: shake 0.4s ease-in-out;
-  }
-  @keyframes pop {
-    from { transform: scale(0.92); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-3px); }
-    75% { transform: translateX(3px); }
-  }
-  .arrow {
-    color: var(--ink-faint);
-    font-size: 14px;
-    user-select: none;
-  }
-
   /* SEARCH */
-  .input-wrap { margin-top: 16px; position: relative; }
+  .input-wrap { position: relative; }
   .search-input {
     width: 100%;
     padding: 14px 16px;
@@ -391,7 +399,7 @@
     background: var(--surface);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius);
-    max-height: 320px;
+    max-height: 360px;
     overflow-y: auto;
     z-index: 10;
     display: none;
@@ -411,7 +419,7 @@
   .result-item:last-child { border-bottom: none; }
   .result-item:hover, .result-item.active { background: var(--surface-2); }
   .result-item .left {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: 12px;
     min-width: 0; flex: 1;
   }
   .result-item .name-text {
@@ -420,6 +428,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .result-item .name-text .yrs {
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-left: 6px;
   }
   .result-item .pos {
     font-size: 11px;
@@ -541,17 +554,6 @@
   }
   .score-cell.total .v { color: var(--accent-soft); font-size: 32px; }
 
-  /* SKELETON */
-  .skel {
-    display: inline-block;
-    height: 22px; width: 160px;
-    background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2));
-    background-size: 200% 100%;
-    border-radius: 4px;
-    animation: shimmer 1.4s linear infinite;
-  }
-  @keyframes shimmer { to { background-position: -200% 0; } }
-
   /* HELP MODAL */
   .help-popup {
     position: fixed; inset: 0;
@@ -574,20 +576,11 @@
   }
   .help-popup h3 {
     font-family: 'Fraunces', Georgia, serif;
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 6px;
+    font-size: 24px; font-weight: 700;
+    letter-spacing: -0.02em; margin-bottom: 6px;
   }
-  .help-popup .lead {
-    font-size: 14px;
-    color: var(--ink-3);
-    margin-bottom: 20px;
-  }
-  .help-popup .item {
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-  }
+  .help-popup .lead { font-size: 14px; color: var(--ink-3); margin-bottom: 20px; }
+  .help-popup .item { padding: 14px 0; border-bottom: 1px solid var(--border); }
   .help-popup .item:last-of-type { border-bottom: none; padding-bottom: 8px; }
   .help-popup .item-label {
     font-size: 11px; font-weight: 600;
@@ -595,9 +588,7 @@
     letter-spacing: 0.08em; text-transform: uppercase;
     margin-bottom: 6px;
   }
-  .help-popup .item-body {
-    font-size: 14px; color: var(--ink-2); line-height: 1.5;
-  }
+  .help-popup .item-body { font-size: 14px; color: var(--ink-2); line-height: 1.5; }
   .help-popup code {
     font-family: 'SF Mono', Monaco, Consolas, monospace;
     font-size: 12.5px;
@@ -616,6 +607,17 @@
   }
   footer a { color: var(--ink-3); text-decoration: none; }
   footer a:hover { color: var(--accent); }
+
+  /* SKELETON */
+  .skel {
+    display: inline-block;
+    height: 16px; width: 100px;
+    background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2));
+    background-size: 200% 100%;
+    border-radius: 4px;
+    animation: shimmer 1.4s linear infinite;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
 </style>
 </head>
 <body>
@@ -648,44 +650,17 @@
     <p>Connect them through teammates who shared a team for at least one season.</p>
   </div>
 
-  <div class="pair" id="pair">
-    <div class="player-card start" id="start-card">
-      <div class="bg-gradient" id="start-bg"></div>
-      <div class="fallback" id="start-fallback"></div>
-      <div class="photo" id="start-photo"></div>
-      <div class="badge tl" id="start-badge-tl"></div>
-      <div class="badge tr" id="start-badge-tr"></div>
-      <div class="label">Start</div>
-      <div class="name-bar">
-        <div class="name" id="start-name"><span class="skel"></span></div>
-        <div class="team" id="start-team">—</div>
-      </div>
-    </div>
-    <div class="pair-arrow">→</div>
-    <div class="player-card end" id="end-card">
-      <div class="bg-gradient" id="end-bg"></div>
-      <div class="fallback" id="end-fallback"></div>
-      <div class="photo" id="end-photo"></div>
-      <div class="badge tl" id="end-badge-tl"></div>
-      <div class="badge tr" id="end-badge-tr"></div>
-      <div class="label">End</div>
-      <div class="name-bar">
-        <div class="name" id="end-name"><span class="skel"></span></div>
-        <div class="team" id="end-team">—</div>
-      </div>
-    </div>
-  </div>
+  <!-- The full chain row: start card, then any added bridge cards, then end card -->
+  <div class="chain-row" id="chain-row"></div>
 
   <div class="section-head">
-    <h2>Your chain</h2>
+    <h2>Build your chain</h2>
     <div class="stat-row">
       <span class="stat"><b id="step-count">0</b> steps</span>
       <span class="stat accent"><b id="rarity-score">0</b> rarity</span>
       <button class="help-btn" id="help-btn" title="How scoring works">?</button>
     </div>
   </div>
-
-  <div class="chain" id="chain"></div>
 
   <div class="input-wrap">
     <input
@@ -784,7 +759,6 @@ const state = {
   chain: [],
   used: new Set(),
   complete: false,
-  searchTimer: null,
   resultsList: [],
   activeIdx: -1,
 };
@@ -792,15 +766,7 @@ const state = {
 const $ = (id) => document.getElementById(id);
 const els = {
   date: $("daily-date"), num: $("puzzle-num"),
-  startName: $("start-name"), startTeam: $("start-team"),
-  endName: $("end-name"), endTeam: $("end-team"),
-  startCard: $("start-card"), startBg: $("start-bg"),
-  startPhoto: $("start-photo"), startFallback: $("start-fallback"),
-  startBadgeTl: $("start-badge-tl"), startBadgeTr: $("start-badge-tr"),
-  endCard: $("end-card"), endBg: $("end-bg"),
-  endPhoto: $("end-photo"), endFallback: $("end-fallback"),
-  endBadgeTl: $("end-badge-tl"), endBadgeTr: $("end-badge-tr"),
-  chain: $("chain"),
+  chainRow: $("chain-row"),
   search: $("search"),
   results: $("results"),
   status: $("status"),
@@ -813,47 +779,26 @@ const els = {
   helpBtn: $("help-btn"), helpPopup: $("help-popup"), helpClose: $("help-close"),
 };
 
-// ---------- TEAM COLORS ----------
-// NBA team primary colors, keyed by balldontlie team_id.
-// These are public team identifiers used as factual data.
+// Team primary colors for card gradients (factual public team identifiers)
 const TEAM_COLORS = {
-  1:  ["#E03A3E", "#1d1d1d"], // Hawks
-  2:  ["#007A33", "#1d1d1d"], // Celtics
-  3:  ["#000000", "#a8aab0"], // Nets
-  4:  ["#1D1160", "#00788C"], // Hornets
-  5:  ["#CE1141", "#1d1d1d"], // Bulls
-  6:  ["#860038", "#041E42"], // Cavaliers
-  7:  ["#00538C", "#002B5E"], // Mavericks
-  8:  ["#0E2240", "#FEC524"], // Nuggets
-  9:  ["#C8102E", "#1d428a"], // Pistons
-  10: ["#1D428A", "#FFC72C"], // Warriors
-  11: ["#CE1141", "#000000"], // Rockets
-  12: ["#002D62", "#FDBB30"], // Pacers
-  13: ["#C8102E", "#1d428a"], // Clippers
-  14: ["#552583", "#FDB927"], // Lakers
-  15: ["#5D76A9", "#12173F"], // Grizzlies
-  16: ["#98002E", "#F9A01B"], // Heat
-  17: ["#00471B", "#EEE1C6"], // Bucks
-  18: ["#0C2340", "#236192"], // Timberwolves
-  19: ["#0C2340", "#C8102E"], // Pelicans
-  20: ["#006BB6", "#F58426"], // Knicks
-  21: ["#007AC1", "#EF3B24"], // Thunder
-  22: ["#0077C0", "#C4CED4"], // Magic
-  23: ["#006BB6", "#ED174C"], // 76ers
-  24: ["#1d1160", "#E56020"], // Suns
-  25: ["#E03A3E", "#000000"], // Trail Blazers
-  26: ["#5A2D81", "#63727A"], // Kings
-  27: ["#C4CED4", "#1d1d1d"], // Spurs
-  28: ["#CE1141", "#000000"], // Raptors
-  29: ["#002B5C", "#00471B"], // Jazz
-  30: ["#002B5C", "#E31837"], // Wizards
+  1:  ["#E03A3E", "#1d1d1d"], 2:  ["#007A33", "#1d1d1d"],
+  3:  ["#000000", "#a8aab0"], 4:  ["#1D1160", "#00788C"],
+  5:  ["#CE1141", "#1d1d1d"], 6:  ["#860038", "#041E42"],
+  7:  ["#00538C", "#002B5E"], 8:  ["#0E2240", "#FEC524"],
+  9:  ["#C8102E", "#1d428a"], 10: ["#1D428A", "#FFC72C"],
+  11: ["#CE1141", "#000000"], 12: ["#002D62", "#FDBB30"],
+  13: ["#C8102E", "#1d428a"], 14: ["#552583", "#FDB927"],
+  15: ["#5D76A9", "#12173F"], 16: ["#98002E", "#F9A01B"],
+  17: ["#00471B", "#EEE1C6"], 18: ["#0C2340", "#236192"],
+  19: ["#0C2340", "#C8102E"], 20: ["#006BB6", "#F58426"],
+  21: ["#007AC1", "#EF3B24"], 22: ["#0077C0", "#C4CED4"],
+  23: ["#006BB6", "#ED174C"], 24: ["#1d1160", "#E56020"],
+  25: ["#E03A3E", "#000000"], 26: ["#5A2D81", "#63727A"],
+  27: ["#C4CED4", "#1d1d1d"], 28: ["#CE1141", "#000000"],
+  29: ["#002B5C", "#00471B"], 30: ["#002B5C", "#E31837"],
 };
+function teamColors(teamId) { return TEAM_COLORS[teamId] || ["#2a3142", "#1a1f2e"]; }
 
-function teamColors(teamId) {
-  return TEAM_COLORS[teamId] || ["#2a3142", "#1a1f2e"];
-}
-
-// ---------- AVATARS / FALLBACK COLORS ----------
 function fallbackColors(id) {
   const palettes = [
     ['#4f46e5', '#7c3aed'], ['#0891b2', '#0e7490'],
@@ -862,77 +807,115 @@ function fallbackColors(id) {
     ['#1e40af', '#1e3a8a'], ['#be185d', '#9d174d'],
     ['#0f766e', '#115e59'], ['#a16207', '#854d0e'],
   ];
-  const idx = Math.abs(id * 2654435761) % palettes.length;
-  return palettes[idx];
+  return palettes[Math.abs(id * 2654435761) % palettes.length];
 }
 function initials(first, last) {
   return ((first || "").trim().charAt(0) + (last || "").trim().charAt(0)).toUpperCase();
 }
 function photoUrl(player, size) {
-  // size: '260x190' (small) or '1040x760' (large)
   if (!player.nba_id) return null;
   return `https://cdn.nba.com/headshots/nba/latest/${size}/${player.nba_id}.png`;
 }
 
-// Build a small avatar element. Tries photo first, falls back to gradient initials.
-function makeAvatar(player, size) {
+// SEARCH AVATAR: dedicated <img> element with face-cropped positioning.
+// Falls back to gradient initials if photo missing or fails to load.
+function makeSearchAvatar(player) {
   const el = document.createElement("div");
-  el.className = "avatar " + (size || "md");
+  el.className = "avatar";
   const [c1, c2] = fallbackColors(player.id);
   el.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
-  el.textContent = initials(player.first_name, player.last_name);
+
+  const initialsEl = document.createElement("span");
+  initialsEl.className = "av-initials";
+  initialsEl.textContent = initials(player.first_name, player.last_name);
+  el.appendChild(initialsEl);
 
   const url = photoUrl(player, "260x190");
   if (url) {
-    const img = new Image();
-    img.onload = () => {
-      el.classList.add("has-photo");
-      el.style.backgroundImage = `url(${url}), linear-gradient(135deg, ${c1}, ${c2})`;
-    };
+    const img = document.createElement("img");
+    img.alt = "";
+    img.onload = () => img.classList.add("loaded");
+    img.onerror = () => img.remove();
     img.src = url;
+    el.appendChild(img);
   }
   return el;
 }
 
-// Render a full-card player display (start/end cards)
-function renderCard(player, refs, role) {
+// Build a trading-card element. `kind` = 'big' | 'mini'. `role` = 'start' | 'end' | null
+function makeCard(player, kind, role) {
+  const card = document.createElement("div");
+  card.className = `player-card ${kind}` + (role ? " " + role : "");
+
   const team = latestTeam(player);
   const [c1, c2] = team ? teamColors(team.id) : fallbackColors(player.id);
 
-  // Background gradient using team colors
-  refs.bg.style.background = `radial-gradient(ellipse at top, ${c1} 0%, ${c2} 70%, #0f1320 100%)`;
+  // Background gradient
+  const bg = document.createElement("div");
+  bg.className = "bg-gradient";
+  bg.style.background = `radial-gradient(ellipse at top, ${c1} 0%, ${c2} 70%, #0f1320 100%)`;
+  card.appendChild(bg);
 
-  // Fallback initials (visible until photo loads, or stays if no nba_id)
-  refs.fallback.textContent = initials(player.first_name, player.last_name);
-  refs.fallback.style.color = "rgba(255,255,255,0.85)";
+  // Initials fallback (always present, sits behind photo)
+  const fallback = document.createElement("div");
+  fallback.className = "fallback";
+  fallback.textContent = initials(player.first_name, player.last_name);
+  card.appendChild(fallback);
 
-  // Photo
-  const url = photoUrl(player, "1040x760");
-  refs.photo.classList.remove("loaded");
-  refs.photo.style.backgroundImage = "";
+  // Photo (loads async, fades in over fallback)
+  const photo = document.createElement("div");
+  photo.className = "photo";
+  const url = photoUrl(player, kind === "big" ? "1040x760" : "260x190");
   if (url) {
     const img = new Image();
     img.onload = () => {
-      refs.photo.style.backgroundImage = `url(${url})`;
-      refs.photo.classList.add("loaded");
+      photo.style.backgroundImage = `url(${url})`;
+      photo.classList.add("loaded");
     };
     img.src = url;
   }
+  card.appendChild(photo);
 
-  // Badges: jersey number top-left, draft year (last 2 digits) top-right
-  const draft = player.draft_year ? `'${String(player.draft_year).slice(-2)}` : "—";
-  refs.badgeTl.textContent = "#" + (player.jersey_number || "?");
-  refs.badgeTr.textContent = draft;
+  // Badges (big cards only): jersey number TL, draft year TR
+  if (kind === "big") {
+    if (player.jersey_number) {
+      const badgeTl = document.createElement("div");
+      badgeTl.className = "badge tl";
+      badgeTl.textContent = "#" + player.jersey_number;
+      card.appendChild(badgeTl);
+    }
+    if (player.draft_year) {
+      const badgeTr = document.createElement("div");
+      badgeTr.className = "badge tr";
+      badgeTr.textContent = "'" + String(player.draft_year).slice(-2);
+      card.appendChild(badgeTr);
+    }
 
-  // Hide jersey badge if we don't have it (most data doesn't include it)
-  if (!player.jersey_number) refs.badgeTl.style.display = "none";
-  else refs.badgeTl.style.display = "flex";
+    // Role label (Start / End)
+    if (role) {
+      const label = document.createElement("div");
+      label.className = "label";
+      label.textContent = role === "start" ? "Start" : "End";
+      card.appendChild(label);
+    }
+  }
 
-  // Name + team
-  refs.name = $(role + "-name");
-  refs.team = $(role + "-team");
-  refs.name.textContent = `${player.first_name} ${player.last_name}`;
-  refs.team.textContent = team?.full_name || "—";
+  // Name bar
+  const nameBar = document.createElement("div");
+  nameBar.className = "name-bar";
+  const nameEl = document.createElement("div");
+  nameEl.className = "name";
+  nameEl.textContent = `${player.first_name} ${player.last_name}`;
+  nameBar.appendChild(nameEl);
+  if (kind === "big") {
+    const teamEl = document.createElement("div");
+    teamEl.className = "team";
+    teamEl.textContent = team?.full_name || "—";
+    nameBar.appendChild(teamEl);
+  }
+  card.appendChild(nameBar);
+
+  return card;
 }
 
 // ---------- DATA ----------
@@ -952,7 +935,6 @@ function buildIndex(data) {
     ref: p,
   }));
 }
-
 function shareTeamSeason(p1, p2) {
   const set = new Set(p1.team_seasons.map(t => `${t.season}:${t.team_id}`));
   const overlap = [];
@@ -961,7 +943,6 @@ function shareTeamSeason(p1, p2) {
   }
   return overlap;
 }
-
 function pickDailyPair() {
   const start = state.puzzleNum % DAILY_POOL.length;
   for (let off = 0; off < DAILY_POOL.length; off++) {
@@ -972,13 +953,11 @@ function pickDailyPair() {
     .sort((x, y) => y.team_seasons.length - x.team_seasons.length);
   return { a: sorted[0].id, b: sorted[1].id };
 }
-
 function latestTeam(p) {
-  if (!p.team_seasons.length) return null;
+  if (!p.team_seasons?.length) return null;
   const latest = p.team_seasons.reduce((acc, t) => t.season > acc.season ? t : acc, p.team_seasons[0]);
   return state.data.teams[latest.team_id] || null;
 }
-
 function setStatus(msg, kind) {
   els.status.className = "status" + (kind ? " " + kind : "");
   els.status.innerHTML = (kind === "thinking" ? '<span class="spinner"></span>' : '') + `<span>${msg}</span>`;
@@ -994,77 +973,80 @@ async function boot() {
     buildIndex(state.data);
 
     const pair = pickDailyPair();
-    const a = state.data.players[pair.a];
-    const b = state.data.players[pair.b];
-    state.startPlayer = a;
-    state.endPlayer = b;
+    state.startPlayer = state.data.players[pair.a];
+    state.endPlayer = state.data.players[pair.b];
 
-    renderPair();
-    state.chain.push({
-      id: a.id,
-      name: `${a.first_name} ${a.last_name}`,
-      team: latestTeam(a),
-      role: "start",
-      _ref: a,
-    });
-    state.used.add(a.id);
-    renderChain();
+    state.used.add(state.startPlayer.id);
+    state.used.add(state.endPlayer.id);
+
+    renderChainRow();
 
     els.search.disabled = false;
-    setStatus(`Add players who connect ${a.last_name} to ${b.last_name}, then click Check chain.`);
+    setStatus(`Add players who connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
     els.search.focus();
   } catch (e) {
     setStatus("Failed to load: " + e.message, "bad");
   }
 }
 
-function renderPair() {
-  renderCard(state.startPlayer, {
-    bg: els.startBg, photo: els.startPhoto, fallback: els.startFallback,
-    badgeTl: els.startBadgeTl, badgeTr: els.startBadgeTr,
-  }, "start");
-  renderCard(state.endPlayer, {
-    bg: els.endBg, photo: els.endPhoto, fallback: els.endFallback,
-    badgeTl: els.endBadgeTl, badgeTr: els.endBadgeTr,
-  }, "end");
-}
+// Builds the entire horizontal chain: [Start big] → [bridge mini]... → [End big]
+function renderChainRow() {
+  els.chainRow.innerHTML = "";
 
-function renderChain() {
-  els.chain.innerHTML = "";
-  if (state.chain.length === 0) {
-    const empty = document.createElement("span");
-    empty.className = "chain-empty";
-    empty.textContent = "Empty chain";
-    els.chain.appendChild(empty);
-    return;
-  }
-  state.chain.forEach((p, i) => {
-    if (i > 0) {
+  // Start card
+  els.chainRow.appendChild(makeCard(state.startPlayer, "big", "start"));
+
+  // Arrow + bridges + arrows + (placeholder if empty + not complete)
+  const bridges = state.chain.filter(p => p.role !== "start" && p.role !== "end");
+
+  if (bridges.length === 0 && !state.complete) {
+    // Show one placeholder slot to hint at the next pick
+    const arrow1 = document.createElement("span");
+    arrow1.className = "chain-arrow";
+    arrow1.textContent = "→";
+    els.chainRow.appendChild(arrow1);
+
+    const ph = document.createElement("div");
+    ph.className = "placeholder-card";
+    ph.textContent = "Add a player";
+    els.chainRow.appendChild(ph);
+  } else {
+    for (const node of bridges) {
       const arrow = document.createElement("span");
-      arrow.className = "arrow";
+      arrow.className = "chain-arrow";
       arrow.textContent = "→";
-      els.chain.appendChild(arrow);
+      els.chainRow.appendChild(arrow);
+
+      const card = makeCard(node._ref, "mini");
+      if (node.invalid) card.classList.add("invalid");
+      els.chainRow.appendChild(card);
     }
-    const node = document.createElement("div");
-    node.className = "link" + (p.role ? " " + p.role : "") + (p.invalid ? " invalid" : "");
-    const ref = p._ref || { id: p.id, first_name: p.name.split(" ")[0], last_name: p.name.split(" ").slice(-1)[0] };
-    node.appendChild(makeAvatar(ref, "sm"));
-    const text = document.createElement("div");
-    text.className = "link-text";
-    const teamAbbr = p.team?.abbreviation || "";
-    text.innerHTML = `<span>${p.name}</span>${teamAbbr ? `<span class="small">${teamAbbr}</span>` : ""}`;
-    node.appendChild(text);
-    els.chain.appendChild(node);
-  });
-  els.stepCount.textContent = Math.max(0, state.chain.length - 1);
-  els.rarityScore.textContent = state.chain.reduce((s, p) => s + (p.rarity || 0), 0);
-  els.checkBtn.disabled = state.chain.length < 2 || state.complete;
+  }
+
+  // Trailing arrow + End card
+  const arrowLast = document.createElement("span");
+  arrowLast.className = "chain-arrow";
+  arrowLast.textContent = "→";
+  els.chainRow.appendChild(arrowLast);
+
+  els.chainRow.appendChild(makeCard(state.endPlayer, "big", "end"));
+
+  // Update stats
+  // Steps = bridges + 2 (the start→first hop + last→end hop), but only meaningful once chain is checked
+  // For display, show bridges count + 1 (== number of hops if chain were complete)
+  els.stepCount.textContent = bridges.length + 1;
+  els.rarityScore.textContent = bridges.reduce((s, p) => s + (p.rarity || 0), 0);
+  els.checkBtn.disabled = bridges.length < 1 || state.complete;
+
+  // Auto-scroll the row to show the latest pick
+  if (bridges.length > 0) {
+    setTimeout(() => { els.chainRow.scrollLeft = els.chainRow.scrollWidth; }, 50);
+  }
 }
 
 // ---------- SEARCH ----------
 els.search.addEventListener("input", () => {
   const q = els.search.value.trim();
-  clearTimeout(state.searchTimer);
   if (q.length < 2) { hideResults(); return; }
   doSearch(q);
 });
@@ -1112,15 +1094,15 @@ function renderResults() {
   state.resultsList.forEach((p, i) => {
     const item = document.createElement("div");
     item.className = "result-item";
-    item.dataset.idx = i;
 
     const left = document.createElement("div");
     left.className = "left";
-    left.appendChild(makeAvatar(p.ref, "sm"));
+    left.appendChild(makeSearchAvatar(p.ref));
+
     const nameSpan = document.createElement("span");
     nameSpan.className = "name-text";
     const seasons = p.ref.team_seasons?.length ? new Set(p.ref.team_seasons.map(t => t.season)).size : 0;
-    nameSpan.innerHTML = `${p.full}${seasons ? ` <span class="pos">· ${seasons}y</span>` : ""}`;
+    nameSpan.innerHTML = `${p.full}${seasons ? `<span class="yrs">· ${seasons}y</span>` : ""}`;
     left.appendChild(nameSpan);
 
     const pos = document.createElement("span");
@@ -1157,19 +1139,16 @@ function pickPlayer(player) {
   const seasonCount = new Set(player.team_seasons.map(t => t.season)).size;
   const rarity = Math.max(1, Math.round(20 - Math.min(seasonCount, 20)));
 
-  const node = {
+  state.chain.push({
     id: player.id,
     name: `${player.first_name} ${player.last_name}`,
-    team: latestTeam(player),
-    seasonCount,
     rarity,
     role: null,
     _ref: player,
-  };
-  state.chain.push(node);
+  });
   state.used.add(player.id);
 
-  renderChain();
+  renderChainRow();
   setStatus(`Added ${player.first_name} ${player.last_name}. Add more players or click Check chain.`, "ok");
   els.search.focus();
 }
@@ -1177,17 +1156,17 @@ function pickPlayer(player) {
 // ---------- CHECK ----------
 function checkChain() {
   if (state.complete) return;
-  if (state.chain.length < 2) {
+  const bridges = state.chain.filter(p => p.role !== "start" && p.role !== "end");
+  if (bridges.length < 1) {
     setStatus("Add at least one bridge player before checking.", "warn");
     return;
   }
 
-  const sequence = [...state.chain.map(n => n._ref), state.endPlayer];
+  // Sequence: [start, ...bridges, end]
+  const sequence = [state.startPlayer, ...bridges.map(n => n._ref), state.endPlayer];
   let firstBreak = -1;
-  const overlaps = [];
   for (let i = 0; i < sequence.length - 1; i++) {
     const overlap = shareTeamSeason(sequence[i], sequence[i + 1]);
-    overlaps.push(overlap);
     if (!overlap.length && firstBreak < 0) firstBreak = i;
   }
 
@@ -1195,36 +1174,23 @@ function checkChain() {
     const a = sequence[firstBreak];
     const b = sequence[firstBreak + 1];
     setStatus(`Broken link: ${a.first_name} ${a.last_name} and ${b.first_name} ${b.last_name} were never teammates.`, "bad");
-    if (firstBreak + 1 < state.chain.length) state.chain[firstBreak + 1].invalid = true;
-    else if (firstBreak < state.chain.length) state.chain[firstBreak].invalid = true;
-    renderChain();
+    // Mark the offending bridge (the one to the right of the break, except if break is at last position)
+    if (firstBreak < bridges.length) bridges[firstBreak].invalid = true;
+    else if (bridges.length > 0) bridges[bridges.length - 1].invalid = true;
+    renderChainRow();
     return;
   }
 
-  for (let i = 1; i < state.chain.length; i++) {
-    const ov = overlaps[i - 1];
-    const best = ov.reduce((acc, t) => t.season > acc.season ? t : acc, ov[0]);
-    state.chain[i].team = state.data.teams[best.team_id];
-  }
-  const lastOv = overlaps[overlaps.length - 1];
-  const finalBest = lastOv.reduce((acc, t) => t.season > acc.season ? t : acc, lastOv[0]);
-  state.chain.push({
-    id: state.endPlayer.id,
-    name: `${state.endPlayer.first_name} ${state.endPlayer.last_name}`,
-    team: state.data.teams[finalBest.team_id] || latestTeam(state.endPlayer),
-    role: "end",
-    _ref: state.endPlayer,
-  });
-  state.used.add(state.endPlayer.id);
   state.complete = true;
-  renderChain();
+  renderChainRow();
   finishGame();
 }
 
 function finishGame() {
   els.search.disabled = true;
-  const steps = state.chain.length - 1;
-  const rarity = state.chain.reduce((s, p) => s + (p.rarity || 0), 0);
+  const bridges = state.chain.filter(p => p.role !== "start" && p.role !== "end");
+  const steps = bridges.length + 1;  // hops between players
+  const rarity = bridges.reduce((s, p) => s + (p.rarity || 0), 0);
   const eff = Math.max(0, Math.round(1000 / Math.pow(steps, 1.4)));
   const total = eff + rarity * 25;
 
@@ -1239,7 +1205,10 @@ function finishGame() {
   const prev = JSON.parse(localStorage.getItem(key) || "null");
   if (!prev || total > prev.total) {
     localStorage.setItem(key, JSON.stringify({
-      total, steps, rarity, chain: state.chain.map(p => p.name),
+      total, steps, rarity,
+      chain: [state.startPlayer.first_name + " " + state.startPlayer.last_name,
+              ...bridges.map(p => p.name),
+              state.endPlayer.first_name + " " + state.endPlayer.last_name],
     }));
   }
 }
@@ -1249,36 +1218,39 @@ els.checkBtn.addEventListener("click", checkChain);
 
 els.undoBtn.addEventListener("click", () => {
   if (state.complete) return;
-  if (state.chain.length <= 1) return;
+  const bridges = state.chain.filter(p => p.role !== "start" && p.role !== "end");
+  if (bridges.length === 0) return;
   state.chain.forEach(p => { delete p.invalid; });
   const removed = state.chain.pop();
   state.used.delete(removed.id);
-  renderChain();
-  const last = state.chain[state.chain.length - 1];
-  setStatus(`Undone. Chain ends at ${last.name}.`, "warn");
+  renderChainRow();
+  setStatus(`Undone. Removed ${removed.name}.`, "warn");
   els.search.focus();
 });
 
 els.resetBtn.addEventListener("click", () => {
   if (!confirm("Reset the chain?")) return;
-  state.chain = state.chain.slice(0, 1);
-  state.chain.forEach(p => { delete p.invalid; });
-  state.used = new Set([state.chain[0].id]);
+  state.chain = [];
+  state.used = new Set([state.startPlayer.id, state.endPlayer.id]);
   state.complete = false;
   els.complete.classList.remove("show");
   els.search.disabled = false;
   els.search.value = "";
-  renderChain();
+  renderChainRow();
   setStatus("Reset. Add players to build your chain, then click Check chain.");
   els.search.focus();
 });
 
 els.shareBtn.addEventListener("click", () => {
+  const bridges = state.chain.filter(p => p.role !== "start" && p.role !== "end");
+  const start = `${state.startPlayer.first_name} ${state.startPlayer.last_name}`;
+  const end = `${state.endPlayer.first_name} ${state.endPlayer.last_name}`;
+  const path = [start, ...bridges.map(p => p.name), end].join(" → ");
   const txt = [
     `NBA Lineage #${state.puzzleNum}`,
-    `${state.chain[0].name} → ${state.chain[state.chain.length - 1].name}`,
-    `Steps: ${state.chain.length - 1} · Score: ${els.rTotal.textContent}`,
-    state.chain.map(p => p.name).join(" → "),
+    `${start} → ${end}`,
+    `Steps: ${bridges.length + 1} · Score: ${els.rTotal.textContent}`,
+    path,
   ].join("\n");
   navigator.clipboard.writeText(txt).then(() => {
     els.shareBtn.textContent = "Copied ✓";
