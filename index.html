@@ -134,6 +134,7 @@
   .chain-row {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     margin-bottom: 32px;
     overflow-x: auto;
@@ -141,6 +142,7 @@
     scrollbar-width: thin;
     scrollbar-color: var(--surface-2) transparent;
   }
+  .chain-row.overflow { justify-content: flex-start; }
   .chain-row::-webkit-scrollbar { height: 8px; }
   .chain-row::-webkit-scrollbar-track { background: transparent; }
   .chain-row::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
@@ -160,18 +162,11 @@
     cursor: default;
     transition: transform 0.2s, border-color 0.2s;
   }
-  /* Big card sizes (Start, End) */
-  .player-card.big {
+  /* All cards: uniform 220px width */
+  .player-card {
     width: 220px;
     aspect-ratio: 3 / 4;
   }
-  /* Mini card sizes (chain bridges) */
-  .player-card.mini {
-    width: 130px;
-    aspect-ratio: 3 / 4;
-    cursor: default;
-  }
-  .player-card.mini:hover { border-color: var(--accent-line); }
 
   .player-card .bg-gradient {
     position: absolute; inset: 0; z-index: 0;
@@ -201,8 +196,7 @@
     letter-spacing: -0.02em;
     text-shadow: 0 4px 16px rgba(0,0,0,0.3);
   }
-  .player-card.big .fallback { font-size: clamp(40px, 6vw, 60px); }
-  .player-card.mini .fallback { font-size: 32px; }
+  .player-card .fallback { font-size: clamp(40px, 6vw, 60px); }
 
   .player-card .badge {
     position: absolute; z-index: 3;
@@ -217,7 +211,6 @@
   }
   .player-card .badge.tl { top: 10px; left: 10px; }
   .player-card .badge.tr { top: 10px; right: 10px; }
-  .player-card.mini .badge { display: none; }
 
   .player-card .name-bar {
     position: relative; z-index: 2;
@@ -235,8 +228,7 @@
     letter-spacing: -0.01em;
     color: #fff;
   }
-  .player-card.big .name { font-size: 16px; }
-  .player-card.mini .name { font-size: 13px; }
+  .player-card .name { font-size: 16px; }
   .player-card .team {
     font-size: 10px;
     color: rgba(255,255,255,0.55);
@@ -244,7 +236,6 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
-  .player-card.mini .team { display: none; }
 
   .player-card .label {
     position: absolute; z-index: 3;
@@ -260,7 +251,6 @@
     pointer-events: none;
   }
   .player-card.end .label { background: var(--ink); color: var(--bg); }
-  .player-card.mini .label { display: none; }
 
   .player-card.invalid { border-color: var(--red); animation: shake 0.4s ease-in-out; }
   .player-card.invalid::after {
@@ -271,8 +261,8 @@
     pointer-events: none;
   }
 
-  /* Pop-in animation for new chain mini-cards */
-  .player-card.mini { animation: pop 0.3s ease-out; }
+  /* Pop-in animation for bridge cards */
+  .player-card.bridge { animation: pop 0.3s ease-out; }
   @keyframes pop {
     from { transform: scale(0.85); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -296,7 +286,7 @@
   /* Empty-state placeholder card slots */
   .placeholder-card {
     flex-shrink: 0;
-    width: 130px;
+    width: 220px;
     aspect-ratio: 3 / 4;
     border: 2px dashed var(--border-strong);
     border-radius: var(--radius);
@@ -842,10 +832,10 @@ function makeSearchAvatar(player) {
   return el;
 }
 
-// Build a trading-card element. `kind` = 'big' | 'mini'. `role` = 'start' | 'end' | null
-function makeCard(player, kind, role) {
+// Build a trading-card element. `role` = 'start' | 'end' | 'bridge' | null
+function makeCard(player, role) {
   const card = document.createElement("div");
-  card.className = `player-card ${kind}` + (role ? " " + role : "");
+  card.className = "player-card" + (role ? " " + role : "");
 
   const team = latestTeam(player);
   const [c1, c2] = team ? teamColors(team.id) : fallbackColors(player.id);
@@ -865,7 +855,7 @@ function makeCard(player, kind, role) {
   // Photo (loads async, fades in over fallback)
   const photo = document.createElement("div");
   photo.className = "photo";
-  const url = photoUrl(player, kind === "big" ? "1040x760" : "260x190");
+  const url = photoUrl(player, "1040x760");
   if (url) {
     const img = new Image();
     img.onload = () => {
@@ -876,43 +866,39 @@ function makeCard(player, kind, role) {
   }
   card.appendChild(photo);
 
-  // Badges (big cards only): jersey number TL, draft year TR
-  if (kind === "big") {
-    if (player.jersey_number) {
-      const badgeTl = document.createElement("div");
-      badgeTl.className = "badge tl";
-      badgeTl.textContent = "#" + player.jersey_number;
-      card.appendChild(badgeTl);
-    }
-    if (player.draft_year) {
-      const badgeTr = document.createElement("div");
-      badgeTr.className = "badge tr";
-      badgeTr.textContent = "'" + String(player.draft_year).slice(-2);
-      card.appendChild(badgeTr);
-    }
-
-    // Role label (Start / End)
-    if (role) {
-      const label = document.createElement("div");
-      label.className = "label";
-      label.textContent = role === "start" ? "Start" : "End";
-      card.appendChild(label);
-    }
+  // Badges: jersey number TL, draft year TR
+  if (player.jersey_number) {
+    const badgeTl = document.createElement("div");
+    badgeTl.className = "badge tl";
+    badgeTl.textContent = "#" + player.jersey_number;
+    card.appendChild(badgeTl);
+  }
+  if (player.draft_year) {
+    const badgeTr = document.createElement("div");
+    badgeTr.className = "badge tr";
+    badgeTr.textContent = "'" + String(player.draft_year).slice(-2);
+    card.appendChild(badgeTr);
   }
 
-  // Name bar
+  // Role label (Start / End only)
+  if (role === "start" || role === "end") {
+    const label = document.createElement("div");
+    label.className = "label";
+    label.textContent = role === "start" ? "Start" : "End";
+    card.appendChild(label);
+  }
+
+  // Name bar (always includes team line)
   const nameBar = document.createElement("div");
   nameBar.className = "name-bar";
   const nameEl = document.createElement("div");
   nameEl.className = "name";
   nameEl.textContent = `${player.first_name} ${player.last_name}`;
   nameBar.appendChild(nameEl);
-  if (kind === "big") {
-    const teamEl = document.createElement("div");
-    teamEl.className = "team";
-    teamEl.textContent = team?.full_name || "—";
-    nameBar.appendChild(teamEl);
-  }
+  const teamEl = document.createElement("div");
+  teamEl.className = "team";
+  teamEl.textContent = team?.full_name || "—";
+  nameBar.appendChild(teamEl);
   card.appendChild(nameBar);
 
   return card;
@@ -989,12 +975,12 @@ async function boot() {
   }
 }
 
-// Builds the entire horizontal chain: [Start big] → [bridge mini]... → [End big]
+// Builds the entire horizontal chain: [Start] → [bridge]... → [End]
 function renderChainRow() {
   els.chainRow.innerHTML = "";
 
   // Start card
-  els.chainRow.appendChild(makeCard(state.startPlayer, "big", "start"));
+  els.chainRow.appendChild(makeCard(state.startPlayer, "start"));
 
   // Arrow + bridges + arrows + (placeholder if empty + not complete)
   const bridges = state.chain.filter(p => p.role !== "start" && p.role !== "end");
@@ -1017,7 +1003,7 @@ function renderChainRow() {
       arrow.textContent = "→";
       els.chainRow.appendChild(arrow);
 
-      const card = makeCard(node._ref, "mini");
+      const card = makeCard(node._ref, "bridge");
       if (node.invalid) card.classList.add("invalid");
       els.chainRow.appendChild(card);
     }
@@ -1029,19 +1015,20 @@ function renderChainRow() {
   arrowLast.textContent = "→";
   els.chainRow.appendChild(arrowLast);
 
-  els.chainRow.appendChild(makeCard(state.endPlayer, "big", "end"));
+  els.chainRow.appendChild(makeCard(state.endPlayer, "end"));
 
   // Update stats
-  // Steps = bridges + 2 (the start→first hop + last→end hop), but only meaningful once chain is checked
-  // For display, show bridges count + 1 (== number of hops if chain were complete)
   els.stepCount.textContent = bridges.length + 1;
   els.rarityScore.textContent = bridges.reduce((s, p) => s + (p.rarity || 0), 0);
   els.checkBtn.disabled = bridges.length < 1 || state.complete;
 
-  // Auto-scroll the row to show the latest pick
-  if (bridges.length > 0) {
-    setTimeout(() => { els.chainRow.scrollLeft = els.chainRow.scrollWidth; }, 50);
-  }
+  // Toggle overflow class so flex justification switches between center and flex-start
+  requestAnimationFrame(() => {
+    els.chainRow.classList.toggle("overflow", els.chainRow.scrollWidth > els.chainRow.clientWidth);
+    if (bridges.length > 0) {
+      els.chainRow.scrollLeft = els.chainRow.scrollWidth;
+    }
+  });
 }
 
 // ---------- SEARCH ----------
