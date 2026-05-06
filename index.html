@@ -904,7 +904,9 @@ function makeCard(player, role) {
   nameBar.appendChild(nameEl);
   const teamEl = document.createElement("div");
   teamEl.className = "team";
-  teamEl.textContent = team?.full_name || "—";
+  const lastSeason = player.team_seasons?.length
+    ? Math.max(...player.team_seasons.map(t => t.season)) : 0;
+  teamEl.textContent = lastSeason < 2024 ? "Retired" : (team?.full_name || "—");
   nameBar.appendChild(teamEl);
   card.appendChild(nameBar);
 
