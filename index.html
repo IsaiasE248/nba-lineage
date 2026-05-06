@@ -6,7 +6,7 @@
 <title>NBA Lineage</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0b0d12;
@@ -35,24 +35,25 @@
     --radius-lg: 16px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
   html, body {
     background: var(--bg);
     color: var(--ink);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
     font-size: 15px;
     line-height: 1.5;
-    min-height: 100vh;
+    min-height: 100dvh;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
+  /* Grain overlay */
   body::before {
     content: '';
-    position: fixed; top: 50%; left: -200px;
-    width: 400px; height: 400px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    transform: translateY(-50%);
-    pointer-events: none; z-index: -1; opacity: 0.5;
+    position: fixed; inset: 0; z-index: 999;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
   }
   body::after {
     content: '';
@@ -65,15 +66,19 @@
 
   /* NAVBAR */
   .navbar {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(11, 13, 18, 0.8);
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 50;
+    width: calc(100% - 48px);
+    max-width: 1100px;
+    background: rgba(11, 13, 18, 0.75);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border-bottom: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
   }
   .nav-inner {
-    max-width: 1140px; margin: 0 auto;
-    padding: 14px 24px;
+    padding: 10px 16px;
     display: flex; align-items: center; justify-content: space-between; gap: 24px;
   }
   .brand {
@@ -102,10 +107,10 @@
   .nav-link.active { color: var(--ink); background: var(--surface-2); }
 
   /* MAIN */
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 56px 24px 80px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 108px 24px 80px; }
 
   /* HERO */
-  .hero { text-align: center; margin-bottom: 48px; }
+  .hero { text-align: left; margin-bottom: 48px; }
   .hero .eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 6px 14px;
@@ -114,6 +119,7 @@
     border-radius: 999px;
     font-size: 12px; color: var(--ink-2); font-weight: 500;
     margin-bottom: 20px;
+    letter-spacing: 0.01em;
   }
   .hero .eyebrow .dot {
     width: 6px; height: 6px; border-radius: 50%;
@@ -122,13 +128,14 @@
   }
   .hero h1 {
     font-family: 'Fraunces', Georgia, serif;
-    font-size: clamp(40px, 7vw, 64px);
-    font-weight: 700; line-height: 1.05;
-    letter-spacing: -0.025em;
-    margin-bottom: 12px;
+    font-size: clamp(44px, 7vw, 72px);
+    font-weight: 700; line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 14px;
+    text-wrap: balance;
   }
   .hero h1 em { font-style: italic; font-weight: 400; color: var(--accent); }
-  .hero p { font-size: 16px; color: var(--ink-2); max-width: 480px; margin: 0 auto; }
+  .hero p { font-size: 16px; color: var(--ink-2); max-width: 440px; line-height: 1.6; }
 
   /* CHAIN ROW: start card + bridges + end card, all in one horizontal flow */
   .chain-row {
@@ -147,26 +154,32 @@
   .chain-row::-webkit-scrollbar-track { background: transparent; }
   .chain-row::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
 
-  /* TRADING CARDS */
+  /* TRADING CARDS — double-bezel */
+  .player-card-shell {
+    flex-shrink: 0;
+    padding: 3px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-strong);
+    border-radius: calc(var(--radius) + 3px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07);
+  }
   .player-card {
     position: relative;
     flex-shrink: 0;
+    width: 220px;
+    aspect-ratio: 3 / 4;
     border-radius: var(--radius);
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     background: var(--surface);
-    border: 1px solid var(--border-strong);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255,255,255,0.08);
     cursor: default;
-    transition: transform 0.2s, border-color 0.2s;
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
-  /* All cards: uniform 220px width */
-  .player-card {
-    width: 220px;
-    aspect-ratio: 3 / 4;
-  }
+  .player-card-shell:hover .player-card { transform: translateY(-2px); }
 
   .player-card .bg-gradient {
     position: absolute; inset: 0; z-index: 0;
@@ -368,7 +381,7 @@
     flex-shrink: 0;
     width: 36px; height: 36px;
     border-radius: 50%;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 13px;
     color: #fff;
@@ -430,17 +443,18 @@
   .input-wrap { position: relative; }
   .search-input {
     width: 100%;
-    padding: 14px 16px;
+    padding: 15px 20px;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
     color: var(--ink);
     font-family: inherit;
     font-size: 15px;
     outline: none;
-    border-radius: var(--radius);
-    transition: border-color 0.15s, box-shadow 0.15s;
+    border-radius: var(--radius-lg);
+    transition: border-color 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s cubic-bezier(0.16,1,0.3,1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
   }
-  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.04); }
   .search-input::placeholder { color: var(--ink-faint); }
   .search-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -525,7 +539,7 @@
   /* CONTROLS */
   .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
   .btn {
-    padding: 10px 18px;
+    padding: 10px 20px;
     background: transparent;
     border: 1px solid var(--border-strong);
     color: var(--ink);
@@ -533,20 +547,23 @@
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    border-radius: var(--radius-sm);
-    transition: all 0.15s;
+    border-radius: 999px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 0.01em;
   }
-  .btn:hover { border-color: rgba(255,255,255,0.25); background: var(--surface-2); }
+  .btn:hover { border-color: rgba(255,255,255,0.28); background: var(--surface-2); transform: translateY(-1px); }
+  .btn:active { transform: scale(0.97) translateY(0); }
   .btn.primary {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
     font-weight: 600;
-    box-shadow: 0 4px 16px rgba(255,107,53,0.25);
+    box-shadow: 0 4px 20px rgba(255,107,53,0.3);
   }
-  .btn.primary:hover { background: var(--accent-soft); border-color: var(--accent-soft); }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn:disabled:hover { background: transparent; border-color: var(--border-strong); }
+  .btn.primary:hover { background: var(--accent-soft); border-color: var(--accent-soft); box-shadow: 0 6px 24px rgba(255,107,53,0.4); }
+  .btn.primary:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+  .btn:disabled:hover { background: transparent; border-color: var(--border-strong); box-shadow: none; }
 
   /* COMPLETE */
   .complete {
@@ -652,13 +669,26 @@
   .help-popup .close { margin-top: 20px; width: 100%; }
 
   footer {
-    margin-top: 56px;
-    text-align: center;
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-align: left;
     font-size: 12px;
     color: var(--ink-faint);
+    letter-spacing: 0.02em;
   }
-  footer a { color: var(--ink-3); text-decoration: none; }
+  footer a { color: var(--ink-3); text-decoration: none; transition: color 0.15s; }
   footer a:hover { color: var(--accent); }
+
+  /* Scroll-reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
 
   /* SKELETON */
   .skel {
@@ -697,7 +727,7 @@
 
 <div class="wrap">
 
-  <div class="hero">
+  <div class="hero reveal">
     <div class="eyebrow">
       <span class="dot"></span>
       <span>Daily <span id="daily-date">—</span> · Puzzle <span id="puzzle-num">—</span></span>
@@ -707,9 +737,9 @@
   </div>
 
   <!-- The full chain row: start card, then any added bridge cards, then end card -->
-  <div class="chain-row" id="chain-row"></div>
+  <div class="chain-row reveal reveal-delay-1" id="chain-row"></div>
 
-  <div class="section-head">
+  <div class="section-head reveal reveal-delay-2">
     <h2>Build your chain</h2>
     <div class="stat-row">
       <span class="stat"><b id="step-count">0</b> steps</span>
@@ -718,7 +748,7 @@
     </div>
   </div>
 
-  <div class="input-wrap">
+  <div class="input-wrap reveal reveal-delay-2">
     <input
       id="search"
       class="search-input"
@@ -731,12 +761,12 @@
     <div class="results" id="results"></div>
   </div>
 
-  <div class="status" id="status">
+  <div class="status reveal reveal-delay-2" id="status">
     <span class="spinner"></span>
     <span>Loading database…</span>
   </div>
 
-  <div class="controls">
+  <div class="controls reveal reveal-delay-2">
     <button class="btn primary" id="check-btn" disabled>Check chain</button>
     <button class="btn" id="undo-btn">Undo</button>
     <button class="btn" id="reset-btn">Reset</button>
@@ -1060,7 +1090,10 @@ function makeCard(player, role) {
   nameBar.appendChild(teamEl);
   card.appendChild(nameBar);
 
-  return card;
+  const shell = document.createElement("div");
+  shell.className = "player-card-shell";
+  shell.appendChild(card);
+  return shell;
 }
 
 // ---------- DATA ----------
@@ -1150,9 +1183,9 @@ function renderChainRow() {
   } else {
     bridges.forEach((node, i) => {
       els.chainRow.appendChild(makeArrow(i));
-      const card = makeCard(node._ref, "bridge");
-      if (node.invalid) card.classList.add("invalid");
-      els.chainRow.appendChild(card);
+      const shell = makeCard(node._ref, "bridge");
+      if (node.invalid) shell.querySelector('.player-card').classList.add("invalid");
+      els.chainRow.appendChild(shell);
     });
   }
 
@@ -1559,6 +1592,12 @@ async function boot() {
 }
 
 boot();
+
+// Scroll-reveal
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 </script>
 </body>
 </html>
