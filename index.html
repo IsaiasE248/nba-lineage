@@ -769,23 +769,38 @@ const els = {
   helpBtn: $("help-btn"), helpPopup: $("help-popup"), helpClose: $("help-close"),
 };
 
-// Team primary colors for card gradients (factual public team identifiers)
+// Team primary + secondary colors for card gradients
 const TEAM_COLORS = {
-  1:  ["#E03A3E", "#1d1d1d"], 2:  ["#007A33", "#1d1d1d"],
-  3:  ["#000000", "#a8aab0"], 4:  ["#1D1160", "#00788C"],
-  5:  ["#CE1141", "#1d1d1d"], 6:  ["#860038", "#041E42"],
-  7:  ["#00538C", "#002B5E"], 8:  ["#0E2240", "#FEC524"],
-  9:  ["#C8102E", "#1d428a"], 10: ["#1D428A", "#FFC72C"],
-  11: ["#CE1141", "#000000"], 12: ["#002D62", "#FDBB30"],
-  13: ["#C8102E", "#1d428a"], 14: ["#552583", "#FDB927"],
-  15: ["#5D76A9", "#12173F"], 16: ["#98002E", "#F9A01B"],
-  17: ["#00471B", "#EEE1C6"], 18: ["#0C2340", "#236192"],
-  19: ["#0C2340", "#C8102E"], 20: ["#006BB6", "#F58426"],
-  21: ["#007AC1", "#EF3B24"], 22: ["#0077C0", "#C4CED4"],
-  23: ["#006BB6", "#ED174C"], 24: ["#1d1160", "#E56020"],
-  25: ["#E03A3E", "#000000"], 26: ["#5A2D81", "#63727A"],
-  27: ["#C4CED4", "#1d1d1d"], 28: ["#CE1141", "#000000"],
-  29: ["#002B5C", "#00471B"], 30: ["#002B5C", "#E31837"],
+  1:  ["#E03A3E", "#C1D32F"],  // Hawks: red + lime
+  2:  ["#007A33", "#BA9653"],  // Celtics: green + gold
+  3:  ["#1d1d1d", "#7b8b8f"],  // Nets: black + silver
+  4:  ["#1D1160", "#00788C"],  // Hornets: purple + teal
+  5:  ["#CE1141", "#1d1d1d"],  // Bulls: red + black
+  6:  ["#860038", "#041E42"],  // Cavaliers: wine + navy
+  7:  ["#00538C", "#B8C4CA"],  // Mavericks: blue + silver
+  8:  ["#0E2240", "#FEC524"],  // Nuggets: navy + gold
+  9:  ["#C8102E", "#1D428A"],  // Pistons: red + blue
+  10: ["#1D428A", "#FFC72C"],  // Warriors: blue + gold
+  11: ["#CE1141", "#9ea2a2"],  // Rockets: red + silver
+  12: ["#002D62", "#FDBB30"],  // Pacers: navy + gold
+  13: ["#C8102E", "#1D428A"],  // Clippers: red + blue
+  14: ["#552583", "#FDB927"],  // Lakers: purple + gold
+  15: ["#5D76A9", "#12173F"],  // Grizzlies: slate + navy
+  16: ["#98002E", "#F9A01B"],  // Heat: red + gold
+  17: ["#00471B", "#EEE1C6"],  // Bucks: green + cream
+  18: ["#0C2340", "#78BE20"],  // Timberwolves: navy + lime
+  19: ["#0C2340", "#C8102E"],  // Pelicans: navy + red
+  20: ["#006BB6", "#F58426"],  // Knicks: blue + orange
+  21: ["#007AC1", "#EF3B24"],  // Thunder: blue + orange
+  22: ["#0077C0", "#C4CED4"],  // Magic: blue + silver
+  23: ["#006BB6", "#ED174C"],  // 76ers: blue + red
+  24: ["#1D1160", "#E56020"],  // Suns: purple + orange
+  25: ["#E03A3E", "#1d1d1d"],  // Trail Blazers: red + black
+  26: ["#5A2D81", "#63727A"],  // Kings: purple + pewter
+  27: ["#8a8d8f", "#1d1d1d"],  // Spurs: silver + black
+  28: ["#CE1141", "#1d1d1d"],  // Raptors: red + black
+  29: ["#002B5C", "#00471B"],  // Jazz: navy + green
+  30: ["#002B5C", "#E31837"],  // Wizards: navy + red
 };
 function teamColors(teamId) { return TEAM_COLORS[teamId] || ["#2a3142", "#1a1f2e"]; }
 
@@ -843,7 +858,7 @@ function makeCard(player, role) {
   // Background gradient
   const bg = document.createElement("div");
   bg.className = "bg-gradient";
-  bg.style.background = `radial-gradient(ellipse at top, ${c1} 0%, ${c2} 70%, #0f1320 100%)`;
+  bg.style.background = `linear-gradient(150deg, ${c1} 0%, ${c2} 55%, #080a10 100%)`;
   card.appendChild(bg);
 
   // Initials fallback (always present, sits behind photo)
@@ -941,7 +956,7 @@ function pickDailyPair() {
 }
 function latestTeam(p) {
   if (!p.team_seasons?.length) return null;
-  const latest = p.team_seasons.reduce((acc, t) => t.season > acc.season ? t : acc, p.team_seasons[0]);
+  const latest = p.team_seasons.reduce((acc, t) => t.season >= acc.season ? t : acc, p.team_seasons[0]);
   return state.data.teams[latest.team_id] || null;
 }
 function setStatus(msg, kind) {
