@@ -1500,17 +1500,35 @@ $("nav-daily")?.addEventListener("click", () => {
   }
 });
 
-$("nav-practice")?.addEventListener("click", () => {
+function photoExists(nbaId) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = `https://cdn.nba.com/headshots/nba/latest/260x190/${nbaId}.png`;
+  });
+}
+
+$("nav-practice")?.addEventListener("click", async () => {
   if (!state.data) return;
   const eligible = Object.values(state.data.players).filter(p => {
     if (!p.nba_id || !p.team_seasons?.length) return false;
     const seasons = new Set(p.team_seasons.map(t => t.season));
-    const maxSeason = Math.max(...seasons);
-    return seasons.size >= 10 && maxSeason >= 2010;
+    return seasons.size >= 10 && Math.max(...seasons) >= 2010;
   });
-  const a = eligible[Math.floor(Math.random() * eligible.length)];
-  let b = eligible[Math.floor(Math.random() * eligible.length)];
-  while (b.id === a.id) b = eligible[Math.floor(Math.random() * eligible.length)];
+
+  setStatus("Finding players…", "thinking");
+
+  let a, b;
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const pick = eligible[Math.floor(Math.random() * eligible.length)];
+    if (await photoExists(pick.nba_id)) { a = pick; break; }
+  }
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const pick = eligible[Math.floor(Math.random() * eligible.length)];
+    if (pick.id !== a?.id && await photoExists(pick.nba_id)) { b = pick; break; }
+  }
+  if (!a || !b) { setStatus("Couldn't find players, try again.", "bad"); return; }
 
   state.practice = true;
   state.startPlayer = a;
