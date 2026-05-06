@@ -183,20 +183,6 @@
     transition: opacity 0.3s;
   }
   .player-card .photo.loaded { opacity: 1; }
-  .player-card .fallback {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Fraunces', Georgia, serif;
-    font-weight: 700;
-    color: rgba(255,255,255,0.85);
-    letter-spacing: -0.02em;
-    text-shadow: 0 4px 16px rgba(0,0,0,0.3);
-  }
-  .player-card .fallback { font-size: clamp(40px, 6vw, 60px); }
 
   .player-card .badge {
     position: absolute; z-index: 3;
@@ -861,13 +847,7 @@ function makeCard(player, role) {
   bg.style.background = `linear-gradient(150deg, ${c1} 0%, ${c2} 55%, #080a10 100%)`;
   card.appendChild(bg);
 
-  // Initials fallback (always present, sits behind photo)
-  const fallback = document.createElement("div");
-  fallback.className = "fallback";
-  fallback.textContent = initials(player.first_name, player.last_name);
-  card.appendChild(fallback);
-
-  // Photo (loads async, fades in over fallback)
+  // Photo (loads async, fades in over gradient)
   const photo = document.createElement("div");
   photo.className = "photo";
   const url = photoUrl(player, "1040x760");
@@ -888,10 +868,13 @@ function makeCard(player, role) {
     badgeTl.textContent = "#" + player.jersey_number;
     card.appendChild(badgeTl);
   }
-  if (player.draft_year) {
+  if (player.team_seasons?.length) {
+    const seasons = player.team_seasons.map(t => t.season);
+    const first = Math.min(...seasons);
+    const last = Math.max(...seasons);
     const badgeTr = document.createElement("div");
     badgeTr.className = "badge tr";
-    badgeTr.textContent = "'" + String(player.draft_year).slice(-2);
+    badgeTr.textContent = String(first).slice(-2) + "–" + String(last).slice(-2);
     card.appendChild(badgeTr);
   }
 
