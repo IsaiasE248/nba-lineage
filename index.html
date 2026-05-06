@@ -1502,7 +1502,9 @@ $("nav-daily")?.addEventListener("click", () => {
 
 $("nav-practice")?.addEventListener("click", () => {
   if (!state.data) return;
-  const eligible = Object.values(state.data.players).filter(p => p.team_seasons?.length >= 3);
+  const eligible = Object.values(state.data.players).filter(p =>
+    p.nba_id && new Set(p.team_seasons.map(t => t.season)).size >= 8
+  );
   const a = eligible[Math.floor(Math.random() * eligible.length)];
   let b = eligible[Math.floor(Math.random() * eligible.length)];
   while (b.id === a.id) b = eligible[Math.floor(Math.random() * eligible.length)];
