@@ -1159,23 +1159,26 @@
         <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Bio <span style="color:var(--ink-faint);font-weight:400;">(160 chars)</span></label>
         <textarea id="settings-bio" class="settings-input" rows="3" maxlength="160" placeholder="Tell people about yourself…" style="resize:vertical;min-height:72px;"></textarea>
       </div>
-      <!-- Instagram -->
+      <!-- X (Twitter) -->
       <div>
-        <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Instagram</label>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="color:var(--ink-3);font-size:14px;">@</span>
-          <input id="settings-instagram" class="settings-input" type="text" maxlength="50" placeholder="yourhandle" style="flex:1;">
+        <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">X (Twitter)</label>
+        <!-- Connected state -->
+        <div id="settings-x-connected" style="display:none;align-items:center;gap:10px;">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:var(--ink-2);flex-shrink:0;" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          <span id="settings-x-handle" style="font-size:14px;color:var(--ink);font-weight:500;"></span>
+          <span style="font-size:11px;color:#4caf50;font-weight:600;">✓ Verified</span>
+          <button id="settings-x-unlink-btn" style="margin-left:auto;font-size:12px;color:var(--ink-3);background:none;border:1px solid var(--border-strong);border-radius:6px;padding:3px 10px;cursor:pointer;">Unlink</button>
         </div>
-      </div>
-      <!-- TikTok -->
-      <div>
-        <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">TikTok</label>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="color:var(--ink-3);font-size:14px;">@</span>
-          <input id="settings-tiktok" class="settings-input" type="text" maxlength="50" placeholder="yourhandle" style="flex:1;">
+        <!-- Disconnected state -->
+        <div id="settings-x-disconnected" style="display:flex;flex-direction:column;gap:6px;">
+          <button id="settings-x-link-btn" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;color:var(--ink);font-size:14px;font-weight:600;padding:10px 16px;cursor:pointer;width:100%;">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Connect X account
+          </button>
+          <p style="font-size:12px;color:var(--ink-faint);margin:0;">Connecting verifies it's your account via X's sign-in.</p>
         </div>
+        <div class="settings-msg" id="settings-x-msg"></div>
       </div>
-      <p style="font-size:12px;color:var(--ink-faint);margin-top:-4px;">Social handles are self-reported and not verified.</p>
       <button class="settings-save-btn" id="settings-save-profile-btn">Save profile</button>
       <div class="settings-msg" id="settings-profile-msg2"></div>
       </div>
@@ -2466,19 +2469,17 @@ async function openProfileModal(row) {
       }
       if (data.bio) $('pm-bio').textContent = data.bio;
       const socials = $('pm-socials');
-      if (data.instagram) {
-        const tag = document.createElement('span');
-        tag.style.cssText = 'font-size:12px;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--border);border-radius:999px;padding:3px 10px;';
-        tag.textContent = '📷 @' + data.instagram;
-        tag.title = 'Instagram (self-reported)';
-        socials.appendChild(tag);
-      }
-      if (data.tiktok) {
-        const tag = document.createElement('span');
-        tag.style.cssText = 'font-size:12px;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--border);border-radius:999px;padding:3px 10px;';
-        tag.textContent = '🎵 @' + data.tiktok;
-        tag.title = 'TikTok (self-reported)';
-        socials.appendChild(tag);
+      if (data.twitterHandle) {
+        const link = document.createElement('a');
+        link.href = 'https://x.com/' + data.twitterHandle;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.title = '@' + data.twitterHandle + ' on X';
+        link.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);font-weight:500;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:999px;padding:5px 12px;text-decoration:none;transition:background 0.15s;';
+        link.onmouseover = () => link.style.background = 'var(--surface-3)';
+        link.onmouseout = () => link.style.background = 'var(--surface-2)';
+        link.innerHTML = `<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:currentColor;flex-shrink:0;" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>@${data.twitterHandle}`;
+        socials.appendChild(link);
       }
     }
   } catch(e) {}
@@ -2716,8 +2717,7 @@ async function loadSettingsView() {
   const doc = await loadUserDoc(user.uid);
   $('settings-name-input').value = user.displayName || doc.displayName || '';
   $('settings-bio').value = doc.bio || '';
-  $('settings-instagram').value = doc.instagram || '';
-  $('settings-tiktok').value = doc.tiktok || '';
+  renderXStatus(doc.twitterHandle || '');
   renderSettingsAvatar(doc.photoDataURL || user.photoURL || null, user);
   $('settings-profile-msg').textContent = '';
   $('settings-profile-msg').className = 'settings-msg';
@@ -2787,15 +2787,72 @@ $('settings-save-profile-btn')?.addEventListener('click', async () => {
   const msg = $('settings-profile-msg2');
   if (!user) return;
   const bio = $('settings-bio').value.trim();
-  const instagram = $('settings-instagram').value.trim().replace(/^@/, '');
-  const tiktok = $('settings-tiktok').value.trim().replace(/^@/, '');
   try {
     msg.textContent = 'Saving…'; msg.className = 'settings-msg';
-    await fbDb.collection('users').doc(user.uid).set({ bio, instagram, tiktok }, { merge: true });
+    await fbDb.collection('users').doc(user.uid).set({ bio }, { merge: true });
     msg.textContent = 'Saved!'; msg.className = 'settings-msg ok';
     setTimeout(() => { msg.textContent = ''; }, 3000);
   } catch(e) {
     msg.textContent = 'Failed to save.'; msg.className = 'settings-msg error';
+  }
+});
+
+// ── X (Twitter) link / unlink ─────────────────────────────────────────────────
+function renderXStatus(handle) {
+  const connected = $('settings-x-connected');
+  const disconnected = $('settings-x-disconnected');
+  if (!connected || !disconnected) return;
+  if (handle) {
+    $('settings-x-handle').textContent = '@' + handle;
+    connected.style.display = 'flex';
+    disconnected.style.display = 'none';
+  } else {
+    connected.style.display = 'none';
+    disconnected.style.display = 'flex';
+  }
+}
+
+const twitterProvider = new firebase.auth.TwitterAuthProvider();
+
+$('settings-x-link-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  const msg = $('settings-x-msg');
+  if (!user) return;
+  try {
+    msg.textContent = 'Opening X sign-in…'; msg.className = 'settings-msg';
+    const result = await user.linkWithPopup(twitterProvider);
+    const handle = result.additionalUserInfo?.username || '';
+    await fbDb.collection('users').doc(user.uid).set({ twitterHandle: handle }, { merge: true });
+    renderXStatus(handle);
+    msg.textContent = 'X account connected!'; msg.className = 'settings-msg ok';
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+  } catch(e) {
+    if (e.code === 'auth/credential-already-in-use') {
+      msg.textContent = 'That X account is linked to a different profile.';
+    } else if (e.code === 'auth/provider-already-linked') {
+      msg.textContent = 'X already linked. Unlink first to switch accounts.';
+    } else if (e.code === 'auth/popup-closed-by-user') {
+      msg.textContent = '';
+    } else {
+      msg.textContent = 'Could not connect. Make sure X is enabled in Firebase Console.';
+    }
+    msg.className = 'settings-msg error';
+  }
+});
+
+$('settings-x-unlink-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  const msg = $('settings-x-msg');
+  if (!user) return;
+  if (!confirm('Unlink your X account?')) return;
+  try {
+    await user.unlink('twitter.com');
+    await fbDb.collection('users').doc(user.uid).set({ twitterHandle: '' }, { merge: true });
+    renderXStatus('');
+    msg.textContent = 'X account unlinked.'; msg.className = 'settings-msg ok';
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+  } catch(e) {
+    msg.textContent = 'Failed to unlink.'; msg.className = 'settings-msg error';
   }
 });
 
