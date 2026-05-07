@@ -137,6 +137,29 @@
   .hero h1 em { font-style: italic; font-weight: 400; color: var(--accent); }
   .hero p { font-size: 16px; color: var(--ink-2); max-width: 440px; line-height: 1.6; }
 
+  /* DIFFICULTY TABS */
+  .diff-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 36px;
+  }
+  .diff-tab {
+    flex: 1;
+    padding: 12px 0;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+  }
+  .diff-tab:hover { color: var(--ink); border-color: var(--surface-2); background: var(--surface); }
+  .diff-tab.active { color: var(--accent); border-color: var(--accent); background: rgba(245,158,11,0.08); }
+
   /* CHAIN ROW: start card + bridges + end card, all in one horizontal flow */
   .chain-row {
     display: flex;
@@ -715,9 +738,6 @@
     <div style="display:flex;align-items:center;gap:10px;">
       <span class="streak-badge" id="streak-badge" title="Current streak">🔥 0</span>
       <div class="nav-links">
-        <button class="nav-link active" id="nav-easy">Easy</button>
-        <button class="nav-link" id="nav-medium">Medium</button>
-        <button class="nav-link" id="nav-hard">Hard</button>
         <button class="nav-link" id="nav-howto">How to play</button>
         <button class="nav-link" id="nav-scoring">Scoring</button>
         <button class="nav-link" id="nav-stats">Stats</button>
@@ -735,6 +755,13 @@
     </div>
     <h1>Two players, <em>one chain</em>.</h1>
     <p>Connect them through teammates who shared a team for at least one season.</p>
+  </div>
+
+  <!-- Difficulty selector -->
+  <div class="diff-tabs reveal">
+    <button class="diff-tab" id="tab-easy" onclick="switchDifficulty('easy')">Easy</button>
+    <button class="diff-tab active" id="tab-medium" onclick="switchDifficulty('medium')">Medium</button>
+    <button class="diff-tab" id="tab-hard" onclick="switchDifficulty('hard')">Hard</button>
   </div>
 
   <!-- The full chain row: start card, then any added bridge cards, then end card -->
@@ -1580,9 +1607,10 @@ function switchDifficulty(diff) {
   state.endPlayer = state.data.players[pair.b];
   state.used = new Set([state.startPlayer.id, state.endPlayer.id]);
 
-  // Update active nav button
+  // Update active nav + tab buttons
   ["easy","medium","hard"].forEach(d => {
     $(`nav-${d}`)?.classList.toggle("active", d === diff);
+    $(`tab-${d}`)?.classList.toggle("active", d === diff);
   });
 
   updateStreakBadge();
