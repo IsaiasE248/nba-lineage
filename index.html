@@ -1039,11 +1039,15 @@
           <button class="settings-save-btn" id="settings-email-btn" style="margin-top:10px;">Update email</button>
         </div>
 
-        <div>
-          <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Password reset</label>
-          <p style="font-size:13px;color:var(--ink-3);margin-bottom:10px;">We'll send a reset link to your email address.</p>
-          <div class="settings-msg" id="settings-pw-msg" style="margin-bottom:8px;"></div>
-          <button class="settings-save-btn" id="settings-reset-pw-btn" style="background:var(--surface-2);color:var(--ink);border:1px solid var(--border-strong);">Send password reset email</button>
+        <div id="settings-pw-wrap">
+          <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Change password</label>
+          <input class="settings-input" id="settings-new-pw" type="password" placeholder="New password" autocomplete="new-password" style="margin-bottom:8px;">
+          <input class="settings-input" id="settings-confirm-pw" type="password" placeholder="Confirm new password" autocomplete="new-password">
+          <div class="settings-msg" id="settings-pw-msg" style="margin-top:8px;"></div>
+          <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+            <button class="settings-save-btn" id="settings-change-pw-btn">Change password</button>
+            <button class="settings-save-btn" id="settings-reset-pw-btn" style="background:var(--surface-2);color:var(--ink);border:1px solid var(--border-strong);">Send reset email instead</button>
+          </div>
         </div>
 
         <button class="settings-signout-btn" id="settings-signout-btn">Sign out</button>
@@ -1070,10 +1074,7 @@
 
     <div id="lb-signin-prompt" style="display:none;text-align:center;padding:60px 0;">
       <p style="color:var(--ink-2);margin-bottom:20px;font-size:16px;">Sign in to save your scores and appear on the leaderboard.</p>
-      <button class="google-btn" id="lb-google-btn" style="max-width:280px;margin:0 auto;">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-        Sign in with Google
-      </button>
+      <button class="settings-save-btn" id="lb-signin-btn" style="margin:0 auto;">Sign in / Create account</button>
     </div>
 
     <div id="lb-table-wrap">
@@ -2270,6 +2271,9 @@ fbAuth.onAuthStateChanged(async user => {
   if (user) {
     const doc = await loadUserDoc(user.uid);
     updateNavAvatar(user, doc.photoDataURL || null);
+    // If leaderboard or settings is open, refresh it
+    if ($('leaderboard-view').classList.contains('active')) loadLeaderboardView();
+    if ($('settings-view').classList.contains('active')) loadSettingsView();
   } else {
     updateNavAvatar(null);
   }
@@ -2329,8 +2333,22 @@ $('nav-leaderboard')?.addEventListener('click', showLeaderboardView);
 $('nav-settings')?.addEventListener('click', showSettingsView);
 $('nav-avatar')?.addEventListener('click', showSettingsView);
 $('lb-back')?.addEventListener('click', () => showView('game'));
-$('lb-google-btn')?.addEventListener('click', async () => { const ok = await signInWithGoogle(); if (ok) loadLeaderboardView(); });
-$('settings-signin-btn')?.addEventListener('click', async () => { const ok = await signInWithGoogle(); if (ok) loadSettingsView(); });
+$('lb-signin-btn')?.addEventListener('click', () => {
+  // Open auth modal in sign-in mode; onAuthStateChanged will reload leaderboard
+  emailAuthMode = 'signin';
+  $('auth-google-panel').style.display = 'block';
+  $('auth-email-panel').style.display = 'none';
+  $('tab-google-auth').classList.add('active');
+  $('tab-email-auth').classList.remove('active');
+  $('auth-name').style.display = 'none';
+  $('auth-email-submit').textContent = 'Sign in';
+  $('auth-mode-toggle').textContent = 'No account? Create one';
+  $('auth-error').textContent = '';
+  $('auth-overlay').classList.add('show');
+});
+$('settings-signin-btn')?.addEventListener('click', () => {
+  $('auth-overlay').classList.add('show');
+});
 
 // Auth tab switching
 $('tab-google-auth')?.addEventListener('click', () => {
@@ -2403,7 +2421,7 @@ async function loadSettingsView() {
   const verified = user.emailVerified || isGoogle;
   // Hide email/password change for Google users (managed by Google)
   if ($('settings-email-change-wrap')) $('settings-email-change-wrap').style.display = isGoogle ? 'none' : 'block';
-  if ($('settings-reset-pw-btn')) $('settings-reset-pw-btn').style.display = isGoogle ? 'none' : 'block';
+  if ($('settings-pw-wrap')) $('settings-pw-wrap').style.display = isGoogle ? 'none' : 'block';
   $('settings-verify-status').textContent = verified ? '✓ Verified' : '✗ Not verified';
   $('settings-verify-status').style.color = verified ? 'var(--green)' : 'var(--red)';
   $('settings-verify-banner').style.display = verified ? 'none' : 'flex';
@@ -2464,6 +2482,26 @@ $('settings-save-btn')?.addEventListener('click', async () => {
 });
 
 $('settings-signout-btn')?.addEventListener('click', () => { fbAuth.signOut(); showView('game'); });
+
+$('settings-change-pw-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  const newPw = $('settings-new-pw').value;
+  const confirmPw = $('settings-confirm-pw').value;
+  const msg = $('settings-pw-msg');
+  if (!newPw) { msg.textContent = 'Enter a new password.'; msg.className = 'settings-msg error'; return; }
+  if (newPw !== confirmPw) { msg.textContent = 'Passwords do not match.'; msg.className = 'settings-msg error'; return; }
+  try {
+    await user.updatePassword(newPw);
+    $('settings-new-pw').value = ''; $('settings-confirm-pw').value = '';
+    msg.textContent = '✓ Password changed.'; msg.className = 'settings-msg ok';
+  } catch(e) {
+    const errs = {
+      'auth/weak-password': 'Password must be at least 6 characters.',
+      'auth/requires-recent-login': 'Sign out and sign back in before changing your password.',
+    };
+    msg.textContent = errs[e.code] || e.message; msg.className = 'settings-msg error';
+  }
+});
 
 $('settings-reset-pw-btn')?.addEventListener('click', async () => {
   const user = fbAuth.currentUser;
