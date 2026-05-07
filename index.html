@@ -2109,7 +2109,7 @@ $('auth-skip')?.addEventListener('click', () => {
   pendingScore = null;
 });
 $('nav-play')?.addEventListener('click', hideLeaderboardView);
-$('nav-signin')?.addEventListener('click', signInWithGoogle);
+$('nav-signin')?.addEventListener('click', () => $('auth-overlay').classList.add('show'));
 $('nav-signout')?.addEventListener('click', () => fbAuth.signOut());
 $('nav-leaderboard')?.addEventListener('click', showLeaderboardView);
 $('lb-back')?.addEventListener('click', hideLeaderboardView);
