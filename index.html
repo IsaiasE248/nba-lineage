@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
   :root {
     --bg: #0b0d12;
@@ -136,6 +139,56 @@
   }
   .hero h1 em { font-style: italic; font-weight: 400; color: var(--accent); }
   .hero p { font-size: 16px; color: var(--ink-2); max-width: 440px; line-height: 1.6; }
+
+  /* AUTH MODAL */
+  .auth-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+  }
+  .auth-overlay.show { display: flex; }
+  .auth-modal {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px 36px;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    animation: pop 0.3s ease-out;
+  }
+  .auth-ball { font-size: 48px; margin-bottom: 16px; }
+  .auth-modal h2 { font-family: 'Fraunces',Georgia,serif; font-size: 26px; margin-bottom: 10px; }
+  .auth-modal p { color: var(--ink-2); font-size: 15px; line-height: 1.6; margin-bottom: 28px; }
+  .google-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 13px 20px;
+    background: #fff; color: #111;
+    border: none; border-radius: 12px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .google-btn:hover { opacity: 0.9; }
+  .auth-skip {
+    margin-top: 14px; background: none; border: none;
+    color: var(--ink-3); font-size: 13px; cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .auth-skip:hover { color: var(--ink-2); }
+
+  /* LEADERBOARD */
+  .lb-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .lb-table th { text-align: left; padding: 8px 10px; color: var(--ink-3); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+  .lb-table td { padding: 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .lb-table tr:last-child td { border-bottom: none; }
+  .lb-table tr.me td { background: rgba(245,158,11,0.08); }
+  .lb-rank { color: var(--ink-3); font-weight: 700; width: 28px; }
+  .lb-player { display: flex; align-items: center; gap: 8px; }
+  .lb-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+  .lb-name { font-weight: 600; }
+  .lb-pts { color: var(--accent); font-weight: 700; }
 
   /* DIFFICULTY TABS */
   .diff-tabs {
@@ -743,10 +796,54 @@
         <button class="nav-link" id="nav-howto">How to play</button>
         <button class="nav-link" id="nav-scoring">Scoring</button>
         <button class="nav-link" id="nav-stats">Stats</button>
+        <button class="nav-link" id="nav-leaderboard">🏆 Leaderboard</button>
       </div>
+      <div id="nav-user" style="display:none;align-items:center;gap:8px;margin-left:6px;">
+        <img id="nav-avatar" src="" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">
+        <button class="nav-link" id="nav-signout" style="font-size:12px;padding:4px 10px;">Sign out</button>
+      </div>
+      <button class="nav-link" id="nav-signin" style="display:none;background:var(--accent);color:#000;font-weight:700;">Sign in</button>
     </div>
   </div>
 </nav>
+
+<!-- Auth prompt modal -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-modal">
+    <div class="auth-ball">🏀</div>
+    <h2>Join the leaderboard</h2>
+    <p>Save your score and compete with other players this week. Resets every Monday.</p>
+    <button class="google-btn" id="google-signin-btn">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+      Continue with Google
+    </button>
+    <button class="auth-skip" id="auth-skip">Maybe later</button>
+  </div>
+</div>
+
+<!-- Leaderboard popup -->
+<div class="popup" id="leaderboard-popup">
+  <div class="popup-inner" style="max-width:560px;">
+    <button class="popup-close" id="lb-close">×</button>
+    <h2 style="font-family:'Fraunces',Georgia,serif;font-size:24px;margin-bottom:4px;">🏆 Weekly Leaderboard</h2>
+    <div id="lb-week-label" style="font-size:13px;color:var(--ink-3);margin-bottom:20px;"></div>
+    <div id="lb-signin-prompt" style="display:none;text-align:center;padding:24px 0;">
+      <p style="color:var(--ink-2);margin-bottom:16px;">Sign in to save your scores and appear on the leaderboard.</p>
+      <button class="google-btn" id="lb-google-btn">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        Sign in with Google
+      </button>
+    </div>
+    <div id="lb-table-wrap">
+      <table class="lb-table">
+        <thead><tr><th>#</th><th>Player</th><th>Easy</th><th>Med</th><th>Hard</th><th>Total</th></tr></thead>
+        <tbody id="lb-body"></tbody>
+      </table>
+      <div id="lb-loading" style="text-align:center;padding:32px;color:var(--ink-3);">Loading…</div>
+    </div>
+    <div id="lb-my-row" style="display:none;border-top:1px solid var(--border);margin-top:12px;padding-top:12px;font-size:13px;color:var(--ink-2);"></div>
+  </div>
+</div>
 
 <div class="wrap">
 
@@ -1480,6 +1577,7 @@ function finishGame() {
     }
     updateStreakBadge();
     markCompletedTabs();
+    handlePuzzleComplete(state.difficulty, total);
   }
 
   // Lock input so completed puzzle can't be edited
@@ -1706,6 +1804,175 @@ async function boot() {
 }
 
 boot();
+
+// ─── FIREBASE ────────────────────────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey: "AIzaSyCWnZgwaoRuGPafRyo-b41dYN5Bmwwcl50",
+  authDomain: "lineage-4e94d.firebaseapp.com",
+  projectId: "lineage-4e94d",
+  storageBucket: "lineage-4e94d.firebasestorage.app",
+  messagingSenderId: "251068016271",
+  appId: "1:251068016271:web:7913e3fe66a01e8311f2fa"
+});
+const fbAuth = firebase.auth();
+const fbDb   = firebase.firestore();
+const gProvider = new firebase.auth.GoogleAuthProvider();
+
+// Week ID — resets every Monday (e.g. "2026-05-04")
+function getWeekId() {
+  const d = new Date();
+  d.setUTCHours(0,0,0,0);
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() - (day - 1));
+  return d.toISOString().slice(0, 10);
+}
+
+function weekLabel() {
+  const start = new Date(getWeekId());
+  const end   = new Date(start); end.setDate(end.getDate() + 6);
+  const fmt = d => d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  return `Week of ${fmt(start)} – ${fmt(end)}`;
+}
+
+const MULTIPLIERS = { easy: 1, medium: 1.5, hard: 2 };
+
+// Save completed puzzle score to Firestore
+async function saveScoreToFirestore(diff, rawScore) {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const weekId    = getWeekId();
+  const puzzleKey = `${diff}_${dayIndex()}`;
+  const docId     = `${weekId}_${user.uid}`;
+  const ref       = fbDb.collection('leaderboard').doc(docId);
+  const snap      = await ref.get();
+  const data      = snap.exists ? snap.data() : {
+    uid: user.uid, displayName: user.displayName,
+    photoURL: user.photoURL || '', weekId,
+    total: 0, easy: 0, medium: 0, hard: 0, puzzles: {}
+  };
+  if (data.puzzles[puzzleKey]) return; // already saved
+  const pts = Math.round(rawScore * MULTIPLIERS[diff]);
+  data.puzzles[puzzleKey] = pts;
+  data[diff]  = (data[diff]  || 0) + pts;
+  data.total  = (data.total  || 0) + pts;
+  data.displayName = user.displayName;
+  data.photoURL    = user.photoURL || '';
+  await ref.set(data);
+}
+
+// Load top 20 for current week
+async function loadLeaderboard() {
+  const weekId = getWeekId();
+  const snap = await fbDb.collection('leaderboard')
+    .where('weekId', '==', weekId).get();
+  return snap.docs.map(d => d.data())
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 20);
+}
+
+// Render leaderboard popup
+async function openLeaderboard() {
+  const popup = $('leaderboard-popup');
+  popup.classList.add('show');
+  $('lb-week-label').textContent = weekLabel();
+  $('lb-loading').style.display = 'block';
+  $('lb-body').innerHTML = '';
+  $('lb-my-row').style.display = 'none';
+
+  const user = fbAuth.currentUser;
+  if (!user) {
+    $('lb-signin-prompt').style.display = 'block';
+    $('lb-table-wrap').style.display = 'none';
+  } else {
+    $('lb-signin-prompt').style.display = 'none';
+    $('lb-table-wrap').style.display = 'block';
+  }
+
+  try {
+    const rows = await loadLeaderboard();
+    $('lb-loading').style.display = 'none';
+    if (!rows.length) {
+      $('lb-body').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--ink-3)">No scores yet this week. Be the first!</td></tr>';
+      return;
+    }
+    rows.forEach((r, i) => {
+      const isMe = user && r.uid === user.uid;
+      const tr = document.createElement('tr');
+      if (isMe) tr.classList.add('me');
+      tr.innerHTML = `
+        <td class="lb-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
+        <td><div class="lb-player">
+          ${r.photoURL ? `<img class="lb-avatar" src="${r.photoURL}" alt="">` : ''}
+          <span class="lb-name">${r.displayName || 'Player'}</span>
+          ${isMe ? '<span style="font-size:11px;color:var(--accent);margin-left:4px;">you</span>' : ''}
+        </div></td>
+        <td>${r.easy || 0}</td>
+        <td>${r.medium || 0}</td>
+        <td>${r.hard || 0}</td>
+        <td class="lb-pts">${r.total}</td>`;
+      $('lb-body').appendChild(tr);
+    });
+
+    if (user && !rows.find(r => r.uid === user.uid)) {
+      $('lb-my-row').style.display = 'block';
+      $('lb-my-row').textContent = "You haven't scored this week yet — complete a puzzle to appear here.";
+    }
+  } catch(e) {
+    $('lb-loading').textContent = 'Failed to load leaderboard.';
+  }
+}
+
+// Auth state
+fbAuth.onAuthStateChanged(user => {
+  if (user) {
+    $('nav-user').style.display = 'flex';
+    $('nav-avatar').src = user.photoURL || '';
+    $('nav-signin').style.display = 'none';
+  } else {
+    $('nav-user').style.display = 'none';
+    $('nav-signin').style.display = 'block';
+  }
+});
+
+async function signInWithGoogle() {
+  try { await fbAuth.signInWithPopup(gProvider); } catch(e) { console.warn('Sign-in cancelled'); }
+}
+
+// After puzzle complete — prompt or save
+let pendingScore = null;
+function handlePuzzleComplete(diff, rawScore) {
+  if (fbAuth.currentUser) {
+    saveScoreToFirestore(diff, rawScore);
+  } else {
+    pendingScore = { diff, rawScore };
+    $('auth-overlay').classList.add('show');
+  }
+}
+
+// Auth modal buttons
+$('google-signin-btn')?.addEventListener('click', async () => {
+  await signInWithGoogle();
+  $('auth-overlay').classList.remove('show');
+  if (pendingScore) {
+    await saveScoreToFirestore(pendingScore.diff, pendingScore.rawScore);
+    pendingScore = null;
+  }
+});
+$('auth-skip')?.addEventListener('click', () => {
+  $('auth-overlay').classList.remove('show');
+  pendingScore = null;
+});
+$('nav-signin')?.addEventListener('click', signInWithGoogle);
+$('nav-signout')?.addEventListener('click', () => fbAuth.signOut());
+$('nav-leaderboard')?.addEventListener('click', openLeaderboard);
+$('lb-close')?.addEventListener('click', () => $('leaderboard-popup').classList.remove('show'));
+$('lb-google-btn')?.addEventListener('click', async () => {
+  await signInWithGoogle();
+  openLeaderboard();
+});
+$('leaderboard-popup')?.addEventListener('click', e => {
+  if (e.target === $('leaderboard-popup')) $('leaderboard-popup').classList.remove('show');
+});
 
 // Scroll-reveal
 const revealObserver = new IntersectionObserver((entries) => {
