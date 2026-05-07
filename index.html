@@ -1059,8 +1059,22 @@
       <div class="settings-card" style="border-color:rgba(248,113,113,0.3);">
         <div class="settings-card-title" style="color:var(--red);">Danger zone</div>
         <p style="font-size:14px;color:var(--ink-2);">Permanently delete your account and all your scores. This cannot be undone.</p>
-        <div class="settings-msg" id="settings-delete-msg" style="margin-top:4px;"></div>
-        <button class="settings-signout-btn" id="settings-delete-btn" style="border-color:var(--red);margin-top:4px;">Delete my account</button>
+
+        <!-- Step 1: initial button -->
+        <div id="settings-delete-step1">
+          <button class="settings-signout-btn" id="settings-delete-btn" style="border-color:var(--red);">Delete my account</button>
+        </div>
+
+        <!-- Step 2: password confirmation (verified email users only) -->
+        <div id="settings-delete-step2" style="display:none;">
+          <p style="font-size:13px;color:var(--ink-2);margin-bottom:10px;">Enter your password to confirm deletion.</p>
+          <input class="settings-input" id="settings-delete-pw" type="password" placeholder="Your password" autocomplete="current-password">
+          <div class="settings-msg" id="settings-delete-msg" style="margin-top:8px;"></div>
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <button class="settings-signout-btn" id="settings-delete-confirm-btn" style="border-color:var(--red);">Confirm deletion</button>
+            <button class="settings-signout-btn" id="settings-delete-cancel-btn">Cancel</button>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -2447,6 +2461,10 @@ async function loadSettingsView() {
   renderSettingsAvatar(doc.photoDataURL || user.photoURL || null, user);
   $('settings-profile-msg').textContent = '';
   $('settings-profile-msg').className = 'settings-msg';
+  // Reset delete flow
+  $('settings-delete-step1').style.display = 'block';
+  $('settings-delete-step2').style.display = 'none';
+  $('settings-delete-msg').textContent = '';
 }
 
 function renderSettingsAvatar(photoSrc, user) {
@@ -2543,17 +2561,59 @@ $('settings-email-btn')?.addEventListener('click', async () => {
   }
 });
 
-$('settings-delete-btn')?.addEventListener('click', async () => {
+$('settings-delete-btn')?.addEventListener('click', () => {
   const user = fbAuth.currentUser;
+  if (!user) return;
+  const isGoogle = user.providerData?.some(p => p.providerId === 'google.com');
+  const verified = user.emailVerified || isGoogle;
+
+  if (!verified) {
+    // Unverified: just confirm and delete
+    if (!confirm('Delete your account permanently? This cannot be undone.')) return;
+    fbDb.collection('users').doc(user.uid).delete().catch(() => {});
+    user.delete().then(() => showView('game')).catch(e => alert(e.message));
+    return;
+  }
+
+  if (isGoogle) {
+    // Google users: confirm and delete (Google manages re-auth)
+    if (!confirm('Delete your account permanently? This cannot be undone.')) return;
+    fbDb.collection('users').doc(user.uid).delete().catch(() => {});
+    user.delete().then(() => showView('game')).catch(e => alert(e.message));
+    return;
+  }
+
+  // Verified email users: show password confirmation step
+  $('settings-delete-step1').style.display = 'none';
+  $('settings-delete-step2').style.display = 'block';
+  $('settings-delete-pw').value = '';
+  $('settings-delete-msg').textContent = '';
+  $('settings-delete-pw').focus();
+});
+
+$('settings-delete-cancel-btn')?.addEventListener('click', () => {
+  $('settings-delete-step1').style.display = 'block';
+  $('settings-delete-step2').style.display = 'none';
+  $('settings-delete-msg').textContent = '';
+});
+
+$('settings-delete-confirm-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  const pw = $('settings-delete-pw').value;
   const msg = $('settings-delete-msg');
-  if (!confirm('Delete your account permanently? This cannot be undone.')) return;
+  if (!pw) { msg.textContent = 'Enter your password.'; msg.className = 'settings-msg error'; return; }
   try {
-    // Delete Firestore user doc and leaderboard entries
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, pw);
+    await user.reauthenticateWithCredential(credential);
     await fbDb.collection('users').doc(user.uid).delete().catch(() => {});
     await user.delete();
     showView('game');
   } catch(e) {
-    const errs = { 'auth/requires-recent-login': 'Sign out and sign back in before deleting your account.' };
+    const errs = {
+      'auth/wrong-password': 'Incorrect password.',
+      'auth/invalid-credential': 'Incorrect password.',
+      'auth/too-many-requests': 'Too many attempts. Try again later.',
+    };
     msg.textContent = errs[e.code] || e.message; msg.className = 'settings-msg error';
   }
 });
