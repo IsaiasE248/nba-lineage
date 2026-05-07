@@ -2576,10 +2576,27 @@ $('settings-delete-btn')?.addEventListener('click', () => {
   if (!user.emailVerified) {
     // Unverified email: no password needed, just delete
     fbDb.collection('users').doc(user.uid).delete().catch(() => {});
-    user.delete().then(() => showView('game')).catch(e => {
-      $('settings-delete-msg').textContent = e.message;
-      $('settings-delete-msg').className = 'settings-msg error';
-    });
+    user.delete()
+      .then(() => showView('game'))
+      .catch(async e => {
+        if (e.code === 'auth/requires-recent-login') {
+          // Session too old — sign out and back in silently by re-sending sign-in link isn't possible,
+          // so ask for password as a one-time re-auth step
+          const pw = prompt('To confirm deletion, enter your password:');
+          if (!pw) return;
+          try {
+            const credential = firebase.auth.EmailAuthProvider.credential(user.email, pw);
+            await user.reauthenticateWithCredential(credential);
+            await fbDb.collection('users').doc(user.uid).delete().catch(() => {});
+            await user.delete();
+            showView('game');
+          } catch(e2) {
+            alert('Could not delete account: ' + (e2.message || e2));
+          }
+        } else {
+          alert('Could not delete account: ' + e.message);
+        }
+      });
     return;
   }
 
