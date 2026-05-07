@@ -2160,7 +2160,16 @@ $('auth-email-submit')?.addEventListener('click', async () => {
       pendingScore = null;
     }
   } catch(e) {
-    $('auth-error').textContent = e.message.replace('Firebase: ', '').replace(/ \(auth\/.*?\)\.?/, '');
+    const msgs = {
+      'auth/email-already-in-use': 'That email is already registered. Try signing in.',
+      'auth/invalid-email': 'Invalid email address.',
+      'auth/weak-password': 'Password must be at least 6 characters.',
+      'auth/user-not-found': 'No account found with that email.',
+      'auth/wrong-password': 'Incorrect password.',
+      'auth/invalid-credential': 'Incorrect email or password.',
+      'auth/too-many-requests': 'Too many attempts. Try again later.',
+    };
+    $('auth-error').textContent = msgs[e.code] || e.message || 'Something went wrong.';
   }
 });
 
