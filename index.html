@@ -999,7 +999,10 @@
         <div class="settings-card-title">Profile</div>
 
         <div class="settings-verify-banner" id="settings-verify-banner" style="display:none;">
-          <p>⚠ Verify your email to customize your profile.</p>
+          <div>
+            <p>⚠ Verify your email to customize your profile.</p>
+            <p style="font-size:12px;color:var(--ink-3);margin-top:4px;">Check your spam/junk folder if you don't see it.</p>
+          </div>
           <button class="settings-resend-btn" id="settings-resend-btn">Resend email</button>
         </div>
 
@@ -2380,6 +2383,10 @@ $('auth-email-submit')?.addEventListener('click', async () => {
       const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
       if (name) await cred.user.updateProfile({ displayName: name });
       await cred.user.sendEmailVerification();
+      $('auth-error').style.color = 'var(--green)';
+      $('auth-error').textContent = '✓ Account created! Check your inbox (and spam folder) for a verification email.';
+      await new Promise(r => setTimeout(r, 2500));
+      $('auth-error').style.color = '';
     } else {
       await fbAuth.signInWithEmailAndPassword(email, password);
     }
