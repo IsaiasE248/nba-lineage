@@ -1057,6 +1057,10 @@
       <thead><tr><th>Puzzle</th><th>Score</th><th>Steps</th><th>Rarity</th></tr></thead>
       <tbody id="st-body"></tbody>
     </table>
+    <style>
+      .chain-line { font-size: 11px; color: var(--ink-3); margin-top: 3px; line-height: 1.4; }
+      .chain-line span { color: var(--accent); margin: 0 3px; }
+    </style>
     <button class="btn primary" id="stats-close" style="margin-top:20px;width:100%">Close</button>
   </div>
 </div>
@@ -1757,8 +1761,15 @@ $("nav-stats")?.addEventListener("click", () => {
     els.stBody.innerHTML = `<tr><td colspan="4" style="color:var(--ink-3);text-align:center;padding:20px">No completed puzzles yet.</td></tr>`;
   } else {
     records.slice(0, 15).forEach(r => {
+      const chainHtml = r.chain
+        ? r.chain.map((n, i) => i === 0 ? n : `<span>→</span>${n}`).join('')
+        : '';
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>#${r.puzzle}</td><td>${r.total}</td><td>${r.steps}</td><td>${r.rarity}</td>`;
+      tr.innerHTML = `
+        <td>#${r.puzzle}</td>
+        <td>${r.total}<div class="chain-line">${chainHtml}</div></td>
+        <td>${r.steps}</td>
+        <td>${r.rarity}</td>`;
       els.stBody.appendChild(tr);
     });
   }
