@@ -913,38 +913,38 @@ const POOL_EASY = [
   { a: 367, b: 192 },  // Chris Paul ↔ Harden (Rockets era)
 ];
 
-// Medium: both players are superstars, cross-era 3-hop chains
+// Medium: same era, never teammates, 2 hops — think about who they both played with
 const POOL_MEDIUM = [
+  { a: 115, b: 278  },  // Curry ↔ Lillard
+  { a: 115, b: 192  },  // Curry ↔ Harden
+  { a: 115, b: 472  },  // Curry ↔ Westbrook
+  { a: 274, b: 278  },  // Kawhi ↔ Lillard
+  { a: 278, b: 192  },  // Lillard ↔ Harden
+  { a: 278, b: 367  },  // Lillard ↔ CP3
+  { a: 246, b: 192  },  // Jokic ↔ Harden
+  { a: 246, b: 278  },  // Jokic ↔ Lillard
+  { a: 145, b: 278  },  // Embiid ↔ Lillard
+  { a: 132, b: 192  },  // Luka ↔ Harden
+  { a: 434, b: 278  },  // Tatum ↔ Lillard
+  { a: 172, b: 278  },  // Paul George ↔ Lillard
+];
+
+// Hard: cross-era 3-4 hops — careers never overlapped
+const POOL_HARD = [
   { a: 237, b: 2994 },  // LeBron ↔ Magic Johnson
   { a: 140, b: 2931 },  // KD ↔ Michael Jordan
   { a: 115, b: 2994 },  // Curry ↔ Magic Johnson
-  { a: 140, b: 2994 },  // KD ↔ Magic Johnson
   { a: 115, b: 2851 },  // Curry ↔ Larry Bird
   { a: 237, b: 2937 },  // LeBron ↔ Charles Barkley
   { a: 140, b: 2937 },  // KD ↔ Charles Barkley
   { a: 278, b: 2871 },  // Lillard ↔ John Stockton
   { a: 192, b: 2931 },  // Harden ↔ Michael Jordan
-  { a: 115, b: 2937 },  // Curry ↔ Charles Barkley
   { a: 278, b: 583  },  // Lillard ↔ Karl Malone
-  { a: 274, b: 2871 },  // Kawhi ↔ John Stockton
-];
-
-// Hard: 4-hop cross-era chains — modern stars vs. 1980s legends
-const POOL_HARD = [
-  { a: 278,  b: 2851 },  // Lillard ↔ Larry Bird
-  { a: 79,   b: 2851 },  // Jimmy Butler ↔ Larry Bird
-  { a: 172,  b: 2851 },  // Paul George ↔ Larry Bird
-  { a: 117,  b: 2851 },  // Anthony Davis ↔ Larry Bird
-  { a: 246,  b: 2851 },  // Jokic ↔ Larry Bird
-  { a: 145,  b: 2851 },  // Joel Embiid ↔ Larry Bird
-  { a: 132,  b: 2851 },  // Luka Doncic ↔ Larry Bird
-  { a: 434,  b: 2994 },  // Jayson Tatum ↔ Magic Johnson
-  { a: 434,  b: 2851 },  // Jayson Tatum ↔ Larry Bird
-  { a: 57,   b: 2994 },  // Devin Booker ↔ Magic Johnson
-  { a: 57,   b: 2851 },  // Devin Booker ↔ Larry Bird
-  { a: 322,  b: 2851 },  // Donovan Mitchell ↔ Larry Bird
-  { a: 2994, b: 1920 },  // Magic Johnson ↔ Patrick Ewing
-  { a: 2851, b: 1920 },  // Larry Bird ↔ Patrick Ewing
+  { a: 278, b: 2851 },  // Lillard ↔ Larry Bird
+  { a: 246, b: 2851 },  // Jokic ↔ Larry Bird
+  { a: 145, b: 2851 },  // Embiid ↔ Larry Bird
+  { a: 434, b: 2994 },  // Tatum ↔ Magic Johnson
+  { a: 57,  b: 2851 },  // Booker ↔ Larry Bird
 ];
 
 const POOLS = { easy: POOL_EASY, medium: POOL_MEDIUM, hard: POOL_HARD };
