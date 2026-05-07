@@ -581,13 +581,6 @@
   .history-tbl td { padding: 9px 8px; color: var(--ink-2); border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
   .history-tbl tr:last-child td { border-bottom: none; }
 
-  /* ACHIEVEMENTS */
-  .ach-wrap { margin-top: 20px; }
-  .ach-wrap h4 { font-size: 11px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
-  .ach-list { display: flex; flex-wrap: wrap; gap: 8px; }
-  .ach-badge { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--ink-3); }
-  .ach-badge.earned { border-color: var(--accent-line); background: var(--accent-glow); color: var(--accent-soft); }
-
   /* CUSTOM TOOLTIPS */
   [data-tooltip] { position: relative; cursor: help; }
   [data-tooltip]::after {
@@ -1130,6 +1123,22 @@
 
         <div class="settings-msg" id="settings-profile-msg"></div>
         <button class="settings-save-btn" id="settings-save-btn">Save changes</button>
+
+      <!-- Bio -->
+      <div>
+        <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Bio</label>
+        <textarea id="settings-bio" class="settings-input" rows="3" maxlength="160" placeholder="Tell people about yourself…" style="resize:vertical;min-height:72px;"></textarea>
+      </div>
+      <!-- Twitter / X -->
+      <div>
+        <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Twitter / X handle</label>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="color:var(--ink-3);font-size:14px;">@</span>
+          <input id="settings-twitter" class="settings-input" type="text" maxlength="50" placeholder="yourhandle" style="flex:1;">
+        </div>
+      </div>
+      <button class="settings-save-btn" id="settings-save-profile-btn">Save profile</button>
+      <div class="settings-msg" id="settings-profile-msg2"></div>
       </div>
 
       <div class="settings-card">
@@ -1288,10 +1297,6 @@
       <div class="score-cell" data-tooltip="Obscure players score more.&#10;Rarity = 20 − career seasons.&#10;Each point = +25 to final score."><div class="k">Rarity</div><div class="v" id="r-rarity">—</div></div>
       <div class="score-cell" data-tooltip="1000 ÷ steps^1.4, rounded down.&#10;Fewer bridge players = much higher efficiency."><div class="k">Efficiency</div><div class="v" id="r-eff">—</div></div>
       <div class="score-cell total" data-tooltip="Efficiency + (Rarity × 25).&#10;Rarity is heavily weighted — one deep bench player can double your score."><div class="k">Final score</div><div class="v" id="r-total">—</div></div>
-    </div>
-    <div class="ach-wrap" id="ach-wrap" style="display:none">
-      <h4>Achievements</h4>
-      <div class="ach-list" id="ach-list"></div>
     </div>
     <div class="controls" style="margin-top: 20px;">
       <button class="btn primary" id="share-btn">Copy share</button>
@@ -1475,18 +1480,7 @@ const els = {
   statsPopup: $("stats-popup"), statsClose: $("stats-close"),
   stPlayed: $("st-played"), stBest: $("st-best"), stAvg: $("st-avg"), stStreak: $("st-streak"),
   stBody: $("st-body"),
-  achWrap: $("ach-wrap"), achList: $("ach-list"),
 };
-
-const ACHIEVEMENTS = [
-  { id: "two_hop",   icon: "⚡", label: "Two-Hop",    desc: "Solve with just 1 bridge player",           check: (b) => b.length === 1 },
-  { id: "efficient", icon: "🎯", label: "Efficient",   desc: "Solve in 2 bridges or fewer",               check: (b) => b.length <= 2 },
-  { id: "rare_find", icon: "💎", label: "Rare Find",   desc: "Use a bridge with rarity ≥ 15",             check: (b) => b.some(p => p.rarity >= 15) },
-  { id: "deep_cut",  icon: "🕵️", label: "Deep Cut",    desc: "Use a bridge with rarity ≥ 18",             check: (b) => b.some(p => p.rarity >= 18) },
-  { id: "journeyman",icon: "🗺️", label: "Journeyman",  desc: "Use a bridge who played for 5+ teams",      check: (b) => b.some(p => new Set(p._ref.team_seasons.map(t => t.team_id)).size >= 5) },
-  { id: "veteran",   icon: "🏆", label: "Veteran",     desc: "Use a bridge with 12+ seasons",             check: (b) => b.some(p => new Set(p._ref.team_seasons.map(t => t.season)).size >= 12) },
-  { id: "centurion", icon: "💯", label: "Centurion",   desc: "Score 500 or higher",                       check: (b, total) => total >= 500 },
-];
 
 function getStreak(diff) {
   const today = dayIndex();
@@ -1973,19 +1967,6 @@ function finishGame() {
   els.checkBtn.disabled = true;
   els.undoBtn.disabled = true;
 
-  // Achievements
-  const earned = ACHIEVEMENTS.filter(a => a.check(bridges, total));
-  if (earned.length) {
-    els.achWrap.style.display = "";
-    els.achList.innerHTML = "";
-    earned.forEach(a => {
-      const badge = document.createElement("span");
-      badge.className = "ach-badge earned";
-      badge.textContent = `${a.icon} ${a.label}`;
-      badge.dataset.tooltip = a.desc;
-      els.achList.appendChild(badge);
-    });
-  }
 }
 
 // ---------- CONTROLS ----------
@@ -2011,8 +1992,6 @@ els.resetBtn.addEventListener("click", () => {
   state.connections = [];
   state.brokenLink = -1;
   els.complete.classList.remove("show");
-  els.achWrap.style.display = "none";
-  els.achList.innerHTML = "";
   els.search.disabled = false;
   els.search.value = "";
   renderChainRow();
@@ -2112,7 +2091,6 @@ function switchDifficulty(diff) {
   state.brokenLink = -1;
   state.complete = false;
   els.complete.classList.remove("show");
-  els.achWrap.style.display = "none";
   els.search.value = "";
 
   const pair = pickDailyPair();
@@ -2191,20 +2169,6 @@ function restoreSolvedChain(savedJson) {
     els.rEff.textContent    = eff;
     els.rTotal.textContent  = saved.total || (eff + rarity * 25);
     els.complete.classList.add("show");
-
-    // Restore achievements
-    const earned = ACHIEVEMENTS.filter(a => a.check(bridges, saved.total));
-    if (earned.length) {
-      els.achWrap.style.display = "";
-      els.achList.innerHTML = "";
-      earned.forEach(a => {
-        const badge = document.createElement("span");
-        badge.className = "ach-badge earned";
-        badge.textContent = `${a.icon} ${a.label}`;
-        badge.title = a.desc;
-        els.achList.appendChild(badge);
-      });
-    }
 
     setStatus("Already solved today. Come back tomorrow for a new puzzle.", "ok");
   } catch(e) {
@@ -2387,6 +2351,7 @@ async function loadLeaderboardView() {
       const isMe = r.uid === user.uid;
       const tr = document.createElement('tr');
       if (isMe) tr.classList.add('me');
+      tr.style.cursor = 'pointer';
       tr.innerHTML = `
         <td class="lb-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
         <td><div class="lb-player">
@@ -2399,6 +2364,7 @@ async function loadLeaderboardView() {
         <td>${r.hard || 0}</td>
         <td class="lb-pts">${r.total}</td>`;
       $('lb-body').appendChild(tr);
+      tr.addEventListener('click', () => openProfileModal(r));
     });
 
     if (!rows.find(r => r.uid === user.uid)) {
@@ -2411,6 +2377,56 @@ async function loadLeaderboardView() {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+async function openProfileModal(row) {
+  // populate scores from leaderboard row
+  $('pm-name').textContent = row.displayName || 'Player';
+  $('pm-easy').textContent = row.easy || 0;
+  $('pm-medium').textContent = row.medium || 0;
+  $('pm-hard').textContent = row.hard || 0;
+  $('pm-total').textContent = row.total || 0;
+  $('pm-bio').textContent = '';
+  $('pm-twitter').style.display = 'none';
+
+  // avatar
+  const av = $('pm-avatar');
+  av.innerHTML = '';
+  if (row.photoURL) {
+    av.innerHTML = `<img src="${row.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  } else {
+    const name = row.displayName || 'P';
+    av.textContent = name.charAt(0).toUpperCase();
+  }
+
+  // show modal immediately, then load extra profile data
+  const overlay = $('profile-overlay');
+  overlay.style.display = 'flex';
+
+  try {
+    const snap = await fbDb.collection('users').doc(row.uid).get();
+    if (snap.exists) {
+      const data = snap.data();
+      if (data.bio) $('pm-bio').textContent = data.bio;
+      if (data.twitter) {
+        $('pm-twitter').textContent = '@' + data.twitter;
+        $('pm-twitter').style.display = 'block';
+        $('pm-twitter').onclick = () => window.open(`https://twitter.com/${data.twitter}`, '_blank');
+        $('pm-twitter').style.cursor = 'pointer';
+      }
+      // update avatar with custom photo if available
+      if (data.photoDataURL) {
+        av.innerHTML = `<img src="${data.photoDataURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      }
+    }
+  } catch(e) {}
+}
+
+$('profile-modal-close')?.addEventListener('click', () => {
+  $('profile-overlay').style.display = 'none';
+});
+$('profile-overlay')?.addEventListener('click', (e) => {
+  if (e.target === $('profile-overlay')) $('profile-overlay').style.display = 'none';
+});
 
 function updateNavAvatar(user, photoDataURL) {
   if (!user) { $('nav-user').style.display = 'none'; $('nav-signin').style.display = 'block'; $('nav-settings').style.display = 'none'; return; }
@@ -2623,6 +2639,8 @@ async function loadSettingsView() {
   // Load current profile data
   const doc = await loadUserDoc(user.uid);
   $('settings-name-input').value = user.displayName || doc.displayName || '';
+  $('settings-bio').value = doc.bio || '';
+  $('settings-twitter').value = doc.twitter ? '@' + doc.twitter : '';
   renderSettingsAvatar(doc.photoDataURL || user.photoURL || null, user);
   $('settings-profile-msg').textContent = '';
   $('settings-profile-msg').className = 'settings-msg';
@@ -2670,6 +2688,22 @@ $('settings-save-btn')?.addEventListener('click', async () => {
     msg.textContent = '✓ Saved!'; msg.className = 'settings-msg ok';
   } catch(e) {
     msg.textContent = e.message || 'Failed to save.'; msg.className = 'settings-msg error';
+  }
+});
+
+$('settings-save-profile-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  const msg = $('settings-profile-msg2');
+  if (!user) return;
+  const bio = $('settings-bio').value.trim();
+  const twitter = $('settings-twitter').value.trim().replace(/^@/, '');
+  try {
+    msg.textContent = 'Saving…'; msg.className = 'settings-msg';
+    await fbDb.collection('users').doc(user.uid).set({ bio, twitter }, { merge: true });
+    msg.textContent = 'Saved!'; msg.className = 'settings-msg ok';
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+  } catch(e) {
+    msg.textContent = 'Failed to save.'; msg.className = 'settings-msg error';
   }
 });
 
@@ -2845,5 +2879,36 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 </script>
+
+<!-- Profile modal (leaderboard click) -->
+<div id="profile-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;">
+  <div id="profile-modal" style="background:var(--bg-2);border:1px solid var(--border-strong);border-radius:20px;padding:32px 28px;max-width:360px;width:100%;position:relative;animation:pop 0.25s ease-out;">
+    <button id="profile-modal-close" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--ink-3);font-size:22px;cursor:pointer;line-height:1;">✕</button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:20px;">
+      <div id="pm-avatar" style="width:72px;height:72px;border-radius:50%;border:2px solid var(--accent);background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--accent);overflow:hidden;flex-shrink:0;"></div>
+      <div id="pm-name" style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;text-align:center;"></div>
+      <div id="pm-twitter" style="display:none;font-size:13px;color:var(--accent);"></div>
+    </div>
+    <div id="pm-bio" style="font-size:14px;color:var(--ink-2);line-height:1.6;text-align:center;margin-bottom:20px;min-height:20px;"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Easy</div>
+        <div id="pm-easy" style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;">—</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Med</div>
+        <div id="pm-medium" style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;">—</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Hard</div>
+        <div id="pm-hard" style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;">—</div>
+      </div>
+    </div>
+    <div style="margin-top:8px;background:var(--accent-glow);border:1px solid var(--accent-line);border-radius:8px;padding:10px;text-align:center;">
+      <div style="font-size:10px;color:var(--accent-soft);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Total this week</div>
+      <div id="pm-total" style="font-family:'Fraunces',serif;font-size:24px;font-weight:700;color:var(--accent-soft);">—</div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
