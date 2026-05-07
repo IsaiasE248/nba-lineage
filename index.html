@@ -1457,23 +1457,23 @@ const POOL_MEDIUM = [
   { a: 172, b: 278  },  // Paul George ↔ Lillard
 ];
 
-// Hard: cross-era 3-4 hops — careers never overlapped
+// Hard: cross-era 3-4 hops — players from different generations with era-bridge overlap
 const POOL_HARD = [
-  { a: 237, b: 2994 },  // LeBron ↔ Magic Johnson
-  { a: 140, b: 2931 },  // KD ↔ Michael Jordan
-  { a: 115, b: 2994 },  // Curry ↔ Magic Johnson
-  { a: 237, b: 2937 },  // LeBron ↔ Charles Barkley
-  { a: 140, b: 2937 },  // KD ↔ Charles Barkley
-  { a: 278, b: 2871 },  // Lillard ↔ John Stockton
-  { a: 192, b: 2931 },  // Harden ↔ Michael Jordan
-  { a: 278, b: 583  },  // Lillard ↔ Karl Malone
-  { a: 434, b: 2994 },  // Tatum ↔ Magic Johnson
-  { a: 115, b: 1043 },  // Curry ↔ Kobe Bryant
-  { a: 246, b: 1043 },  // Jokic ↔ Kobe Bryant
-  { a: 145, b: 1043 },  // Embiid ↔ Kobe Bryant
-  { a: 278, b: 346  },  // Lillard ↔ Dirk Nowitzki
-  { a: 57,  b: 1043 },  // Booker ↔ Kobe Bryant
-  { a: 132, b: 1089 },  // Doncic ↔ Tim Duncan
+  { a: 236, b: 1043 },  // Giannis ↔ Kobe Bryant        (overlapped 2013-16)
+  { a: 140, b: 2931 },  // KD ↔ Michael Jordan           (KD rookie yr, MJ Wizards)
+  { a: 115, b: 1089 },  // Curry ↔ Tim Duncan            (overlapped 2009-16)
+  { a: 237, b: 2937 },  // LeBron ↔ Charles Barkley      (LeBron rookie yr, Barkley last yr)
+  { a: 140, b: 1089 },  // KD ↔ Tim Duncan               (overlapped 2007-16)
+  { a: 278, b: 1043 },  // Lillard ↔ Kobe Bryant         (overlapped 2012-16)
+  { a: 192, b: 1089 },  // Harden ↔ Tim Duncan           (overlapped 2009-16)
+  { a: 278, b: 346  },  // Lillard ↔ Dirk Nowitzki       (overlapped 2012-19)
+  { a: 434, b: 346  },  // Tatum ↔ Dirk Nowitzki         (overlapped 2017-19)
+  { a: 115, b: 1043 },  // Curry ↔ Kobe Bryant           (overlapped 2009-16)
+  { a: 246, b: 1043 },  // Jokic ↔ Kobe Bryant           (overlapped 2015-16)
+  { a: 145, b: 1043 },  // Embiid ↔ Kobe Bryant          (overlapped 2016)
+  { a: 57,  b: 1043 },  // Booker ↔ Kobe Bryant          (overlapped 2015-16)
+  { a: 132, b: 1089 },  // Doncic ↔ Tim Duncan           (Doncic rookie yr, Duncan last yr)
+  { a: 192, b: 346  },  // Harden ↔ Dirk Nowitzki        (overlapped 2009-19)
 ];
 
 const POOLS = { easy: POOL_EASY, medium: POOL_MEDIUM, hard: POOL_HARD };
@@ -1596,22 +1596,33 @@ function photoUrl(player, size) {
 function makeSearchAvatar(player) {
   const el = document.createElement("div");
   el.className = "avatar";
-  const [c1, c2] = fallbackColors(player.id);
-  el.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
-
-  const initialsEl = document.createElement("span");
-  initialsEl.className = "av-initials";
-  initialsEl.textContent = initials(player.first_name, player.last_name);
-  el.appendChild(initialsEl);
-
   const url = photoUrl(player, "260x190");
   if (url) {
+    // Has a photo — show neutral background while loading, no initials flash
+    el.style.background = "var(--surface-3)";
     const img = document.createElement("img");
     img.alt = "";
     img.onload = () => img.classList.add("loaded");
-    img.onerror = () => img.remove();
+    img.onerror = () => {
+      // Photo failed — fall back to gradient + initials
+      const [c1, c2] = fallbackColors(player.id);
+      el.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+      const ini = document.createElement("span");
+      ini.className = "av-initials";
+      ini.textContent = initials(player.first_name, player.last_name);
+      el.appendChild(ini);
+      img.remove();
+    };
     img.src = url;
     el.appendChild(img);
+  } else {
+    // No photo — always show gradient + initials
+    const [c1, c2] = fallbackColors(player.id);
+    el.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+    const ini = document.createElement("span");
+    ini.className = "av-initials";
+    ini.textContent = initials(player.first_name, player.last_name);
+    el.appendChild(ini);
   }
   return el;
 }
