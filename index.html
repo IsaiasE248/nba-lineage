@@ -1031,7 +1031,29 @@
           <span>Status</span>
           <span id="settings-verify-status"></span>
         </div>
+
+        <div id="settings-email-change-wrap">
+          <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Change email</label>
+          <input class="settings-input" id="settings-new-email" type="email" placeholder="New email address" autocomplete="off">
+          <div class="settings-msg" id="settings-email-msg" style="margin-top:8px;"></div>
+          <button class="settings-save-btn" id="settings-email-btn" style="margin-top:10px;">Update email</button>
+        </div>
+
+        <div>
+          <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Password reset</label>
+          <p style="font-size:13px;color:var(--ink-3);margin-bottom:10px;">We'll send a reset link to your email address.</p>
+          <div class="settings-msg" id="settings-pw-msg" style="margin-bottom:8px;"></div>
+          <button class="settings-save-btn" id="settings-reset-pw-btn" style="background:var(--surface-2);color:var(--ink);border:1px solid var(--border-strong);">Send password reset email</button>
+        </div>
+
         <button class="settings-signout-btn" id="settings-signout-btn">Sign out</button>
+      </div>
+
+      <div class="settings-card" style="border-color:rgba(248,113,113,0.3);">
+        <div class="settings-card-title" style="color:var(--red);">Danger zone</div>
+        <p style="font-size:14px;color:var(--ink-2);">Permanently delete your account and all your scores. This cannot be undone.</p>
+        <div class="settings-msg" id="settings-delete-msg" style="margin-top:4px;"></div>
+        <button class="settings-signout-btn" id="settings-delete-btn" style="border-color:var(--red);margin-top:4px;">Delete my account</button>
       </div>
 
     </div>
@@ -2022,11 +2044,12 @@ $("how-link").addEventListener("click", (e) => {
 });
 
 async function boot() {
+  state.difficulty = 'easy';
   els.date.textContent = todayDate();
   els.num.textContent = "#" + state.puzzleNum;
-  $("difficulty-label").textContent = "Medium";
-  $("nav-medium")?.classList.add("active");
-  $("nav-easy")?.classList.remove("active");
+  $("difficulty-label").textContent = "Easy";
+  $("nav-easy")?.classList.add("active");
+  $("nav-medium")?.classList.remove("active");
   updateStreakBadge();
 
   try {
@@ -2043,8 +2066,7 @@ async function boot() {
     renderChainRow();
     markCompletedTabs();
 
-    // If today's medium puzzle already solved, restore locked state
-    const saved = localStorage.getItem(`lineage:medium:${state.puzzleNum}`);
+    const saved = localStorage.getItem(`lineage:easy:${state.puzzleNum}`);
     if (saved) {
       restoreSolvedChain(saved);
     } else {
@@ -2289,7 +2311,19 @@ $('google-signin-btn')?.addEventListener('click', async () => {
 });
 $('auth-skip')?.addEventListener('click', () => { $('auth-overlay').classList.remove('show'); pendingScore = null; });
 $('nav-play')?.addEventListener('click', () => showView('game'));
-$('nav-signin')?.addEventListener('click', () => $('auth-overlay').classList.add('show'));
+$('nav-signin')?.addEventListener('click', () => {
+  // Default to sign-up mode when opened from nav
+  emailAuthMode = 'create';
+  $('auth-google-panel').style.display = 'none';
+  $('auth-email-panel').style.display = 'block';
+  $('tab-email-auth').classList.add('active');
+  $('tab-google-auth').classList.remove('active');
+  $('auth-name').style.display = 'block';
+  $('auth-email-submit').textContent = 'Create account';
+  $('auth-mode-toggle').textContent = 'Already have an account? Sign in';
+  $('auth-error').textContent = '';
+  $('auth-overlay').classList.add('show');
+});
 $('nav-signout')?.addEventListener('click', () => fbAuth.signOut());
 $('nav-leaderboard')?.addEventListener('click', showLeaderboardView);
 $('nav-settings')?.addEventListener('click', showSettingsView);
@@ -2338,10 +2372,10 @@ $('auth-email-submit')?.addEventListener('click', async () => {
       'auth/email-already-in-use': 'That email is already registered. Try signing in.',
       'auth/invalid-email': 'Invalid email address.',
       'auth/weak-password': 'Password must be at least 6 characters.',
-      'auth/user-not-found': 'No account found with that email.',
+      'auth/user-not-found': 'No account exists with that email.',
       'auth/wrong-password': 'Incorrect password.',
-      'auth/invalid-credential': 'Incorrect email or password.',
-      'auth/invalid-login-credentials': 'Incorrect email or password.',
+      'auth/invalid-credential': emailAuthMode === 'signin' ? 'No account exists with that email, or the password is incorrect.' : 'Incorrect email or password.',
+      'auth/invalid-login-credentials': 'No account exists with that email, or the password is incorrect.',
       'auth/too-many-requests': 'Too many attempts. Try again later.',
     };
     $('auth-error').textContent = msgs[e.code] || e.message || 'Something went wrong.';
@@ -2365,7 +2399,11 @@ async function loadSettingsView() {
 
   // Account info
   $('settings-email').textContent = user.email || '—';
-  const verified = user.emailVerified || user.providerData?.some(p => p.providerId === 'google.com');
+  const isGoogle = user.providerData?.some(p => p.providerId === 'google.com');
+  const verified = user.emailVerified || isGoogle;
+  // Hide email/password change for Google users (managed by Google)
+  if ($('settings-email-change-wrap')) $('settings-email-change-wrap').style.display = isGoogle ? 'none' : 'block';
+  if ($('settings-reset-pw-btn')) $('settings-reset-pw-btn').style.display = isGoogle ? 'none' : 'block';
   $('settings-verify-status').textContent = verified ? '✓ Verified' : '✗ Not verified';
   $('settings-verify-status').style.color = verified ? 'var(--green)' : 'var(--red)';
   $('settings-verify-banner').style.display = verified ? 'none' : 'flex';
@@ -2426,6 +2464,54 @@ $('settings-save-btn')?.addEventListener('click', async () => {
 });
 
 $('settings-signout-btn')?.addEventListener('click', () => { fbAuth.signOut(); showView('game'); });
+
+$('settings-reset-pw-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  const msg = $('settings-pw-msg');
+  if (!user?.email) return;
+  try {
+    await fbAuth.sendPasswordResetEmail(user.email);
+    msg.textContent = `✓ Reset email sent to ${user.email}`; msg.className = 'settings-msg ok';
+  } catch(e) {
+    msg.textContent = e.message; msg.className = 'settings-msg error';
+  }
+});
+
+$('settings-email-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  const newEmail = $('settings-new-email').value.trim();
+  const msg = $('settings-email-msg');
+  if (!newEmail) { msg.textContent = 'Enter a new email address.'; msg.className = 'settings-msg error'; return; }
+  try {
+    await user.updateEmail(newEmail);
+    await user.sendEmailVerification();
+    msg.textContent = '✓ Email updated. Check your inbox to verify the new address.'; msg.className = 'settings-msg ok';
+    $('settings-email').textContent = newEmail;
+    $('settings-new-email').value = '';
+  } catch(e) {
+    const msgs = {
+      'auth/requires-recent-login': 'Sign out and sign back in before changing your email.',
+      'auth/email-already-in-use': 'That email is already in use.',
+      'auth/invalid-email': 'Invalid email address.',
+    };
+    msg.textContent = msgs[e.code] || e.message; msg.className = 'settings-msg error';
+  }
+});
+
+$('settings-delete-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  const msg = $('settings-delete-msg');
+  if (!confirm('Delete your account permanently? This cannot be undone.')) return;
+  try {
+    // Delete Firestore user doc and leaderboard entries
+    await fbDb.collection('users').doc(user.uid).delete().catch(() => {});
+    await user.delete();
+    showView('game');
+  } catch(e) {
+    const errs = { 'auth/requires-recent-login': 'Sign out and sign back in before deleting your account.' };
+    msg.textContent = errs[e.code] || e.message; msg.className = 'settings-msg error';
+  }
+});
 
 $('settings-resend-btn')?.addEventListener('click', async () => {
   const user = fbAuth.currentUser;
