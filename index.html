@@ -1068,9 +1068,20 @@
           <p style="font-size:13px;color:var(--ink-2);margin-bottom:10px;" id="settings-delete-step2-msg">Enter your password to confirm deletion.</p>
           <input class="settings-input" id="settings-delete-pw" type="password" placeholder="Your password" autocomplete="current-password">
           <div class="settings-msg" id="settings-delete-msg" style="margin-top:8px;"></div>
-          <div style="display:flex;gap:10px;margin-top:10px;">
+          <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
             <button class="settings-signout-btn" id="settings-delete-confirm-btn" style="border-color:var(--red);">Confirm deletion</button>
             <button class="settings-signout-btn" id="settings-delete-cancel-btn">Cancel</button>
+          </div>
+          <p style="font-size:12px;color:var(--ink-3);margin-top:10px;">Can't access your email or password? <a href="#" id="settings-delete-noaccess-link" style="color:var(--ink-2);">Click here</a></p>
+        </div>
+
+        <!-- Step 3: no-password fallback for locked-out unverified users -->
+        <div id="settings-delete-step3" style="display:none;">
+          <p style="font-size:13px;color:var(--ink-2);margin-bottom:6px;">Can't access your email or password?</p>
+          <p style="font-size:13px;color:var(--ink-3);margin-bottom:12px;">We can clear all your data and sign you out. Your login will stop working since you can't recover it anyway.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="settings-signout-btn" id="settings-delete-cleardata-btn" style="border-color:var(--red);">Clear my data &amp; sign out</button>
+            <button class="settings-signout-btn" id="settings-delete-cancel2-btn">Cancel</button>
           </div>
         </div>
       </div>
@@ -2461,6 +2472,7 @@ async function loadSettingsView() {
   // Reset delete flow
   $('settings-delete-step1').style.display = 'block';
   $('settings-delete-step2').style.display = 'none';
+  $('settings-delete-step3').style.display = 'none';
   $('settings-delete-msg').textContent = '';
   $('settings-delete-step2-msg').textContent = 'Enter your password to confirm deletion.';
 }
@@ -2629,6 +2641,33 @@ $('settings-delete-confirm-btn')?.addEventListener('click', async () => {
     };
     msg.textContent = errs[e.code] || e.message; msg.className = 'settings-msg error';
   }
+});
+
+// Step 2 → Step 3 link (can't access email/password)
+$('settings-delete-noaccess-link')?.addEventListener('click', e => {
+  e.preventDefault();
+  $('settings-delete-step2').style.display = 'none';
+  $('settings-delete-step3').style.display = 'block';
+});
+
+// Step 3: Clear data & sign out (orphan auth account, wipe Firestore, sign out)
+$('settings-delete-cleardata-btn')?.addEventListener('click', async () => {
+  if (!confirm('This will delete all your saved data and sign you out. Your account login will no longer work. Continue?')) return;
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  try {
+    await fbDb.collection('users').doc(user.uid).delete().catch(() => {});
+    await fbAuth.signOut();
+    showView('game');
+  } catch(e) {
+    alert('Something went wrong: ' + e.message);
+  }
+});
+
+// Step 3: Cancel → back to Step 1
+$('settings-delete-cancel2-btn')?.addEventListener('click', () => {
+  $('settings-delete-step3').style.display = 'none';
+  $('settings-delete-step1').style.display = 'block';
 });
 
 $('settings-resend-btn')?.addEventListener('click', async () => {
