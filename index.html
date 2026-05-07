@@ -831,8 +831,10 @@
     border-radius: var(--radius-lg);
     display: none;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
   }
+  /* clip only the decorative top line, not the whole panel */
+  .complete::before { clip-path: inset(0); }
   .complete::before {
     content: '';
     position: absolute; top: 0; left: 0; right: 0;
@@ -1283,9 +1285,9 @@
     <div class="sub">Nicely done. Here's how you scored.</div>
     <div class="score-grid">
       <div class="score-cell" data-tooltip="Number of hops in your chain. Fewer steps = higher efficiency bonus."><div class="k">Steps</div><div class="v" id="r-steps">—</div></div>
-      <div class="score-cell" data-tooltip="Obscure players score more.\nRarity = 20 − career seasons.\nEach point = +25 to your final score."><div class="k">Rarity</div><div class="v" id="r-rarity">—</div></div>
-      <div class="score-cell" data-tooltip="1000 ÷ steps^1.4 (rounded down).\nFewer bridge players = much higher efficiency."><div class="k">Efficiency</div><div class="v" id="r-eff">—</div></div>
-      <div class="score-cell total" data-tooltip="Efficiency + (Rarity × 25).\nRarity is heavily weighted — one deep bench player can double your score."><div class="k">Final score</div><div class="v" id="r-total">—</div></div>
+      <div class="score-cell" data-tooltip="Obscure players score more.&#10;Rarity = 20 − career seasons.&#10;Each point = +25 to final score."><div class="k">Rarity</div><div class="v" id="r-rarity">—</div></div>
+      <div class="score-cell" data-tooltip="1000 ÷ steps^1.4, rounded down.&#10;Fewer bridge players = much higher efficiency."><div class="k">Efficiency</div><div class="v" id="r-eff">—</div></div>
+      <div class="score-cell total" data-tooltip="Efficiency + (Rarity × 25).&#10;Rarity is heavily weighted — one deep bench player can double your score."><div class="k">Final score</div><div class="v" id="r-total">—</div></div>
     </div>
     <div class="ach-wrap" id="ach-wrap" style="display:none">
       <h4>Achievements</h4>
