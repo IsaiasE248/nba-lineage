@@ -918,6 +918,73 @@
     animation: shimmer 1.4s linear infinite;
   }
   @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* ── MOBILE ─────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    /* Navbar */
+    .navbar { top: 10px; width: calc(100% - 16px); }
+    .nav-inner { padding: 8px 10px; gap: 6px; }
+    .brand { font-size: 16px; gap: 7px; }
+    .brand span { display: none; } /* hide "Lineage" text, keep icon */
+    .streak-badge { padding: 4px 8px; font-size: 11px; gap: 3px; }
+    .nav-link { padding: 6px 9px; font-size: 12px; }
+
+    /* Main layout */
+    .wrap { padding: 80px 14px 60px; }
+
+    /* Hero */
+    .hero { margin-bottom: 28px; }
+    .hero h1 { font-size: clamp(32px, 9vw, 48px); margin-bottom: 10px; }
+    .hero p { font-size: 14px; }
+
+    /* Difficulty tabs */
+    .diff-tabs { gap: 6px; margin-bottom: 24px; }
+    .diff-tab { padding: 10px 0; font-size: 13px; }
+
+    /* Player cards — shrink so 2 fit side-by-side on small screens */
+    .player-card { width: 148px; }
+
+    /* Chain row */
+    .chain-row { gap: 8px; margin-bottom: 20px; }
+
+    /* Search */
+    .search-wrap { gap: 8px; }
+
+    /* Controls */
+    .controls { gap: 8px; }
+    .btn { padding: 10px 16px; font-size: 13px; }
+
+    /* Complete panel */
+    .complete { padding: 20px 16px; }
+    .complete h3 { font-size: 22px; }
+    .score-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .score-cell { padding: 10px; }
+
+    /* Stats popup */
+    .stats-popup .inner { padding: 20px 16px; }
+    .stats-top { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stats-top .sc .v { font-size: 18px; }
+
+    /* Help / how-to popup */
+    .popup-inner { padding: 24px 18px; }
+
+    /* Settings page */
+    #settings-view { padding: 88px 14px 60px; }
+    .settings-card { padding: 20px 16px; }
+    .settings-inner h1 { font-size: 26px; }
+    .settings-avatar-wrap { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+    /* Leaderboard page */
+    #leaderboard-view { padding-top: 76px; padding-bottom: 40px; }
+    .lb-page-inner { padding: 0 14px; }
+    .lb-title { font-size: 24px; }
+    .lb-page-header { margin-bottom: 24px; }
+    .lb-back-btn { width: 90px; font-size: 13px; padding: 7px 12px; }
+
+    /* Auth modal */
+    .auth-modal { padding: 28px 20px; border-radius: 18px; }
+    .auth-modal h2 { font-size: 22px; }
+  }
 </style>
 </head>
 <body>
