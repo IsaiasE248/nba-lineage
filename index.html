@@ -1044,13 +1044,11 @@
 
         <div id="settings-pw-wrap">
           <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Change password</label>
+          <input class="settings-input" id="settings-current-pw" type="password" placeholder="Current password" autocomplete="current-password" style="margin-bottom:8px;">
           <input class="settings-input" id="settings-new-pw" type="password" placeholder="New password" autocomplete="new-password" style="margin-bottom:8px;">
           <input class="settings-input" id="settings-confirm-pw" type="password" placeholder="Confirm new password" autocomplete="new-password">
           <div class="settings-msg" id="settings-pw-msg" style="margin-top:8px;"></div>
-          <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
-            <button class="settings-save-btn" id="settings-change-pw-btn">Change password</button>
-            <button class="settings-save-btn" id="settings-reset-pw-btn" style="background:var(--surface-2);color:var(--ink);border:1px solid var(--border-strong);">Send reset email instead</button>
-          </div>
+          <button class="settings-save-btn" id="settings-change-pw-btn" style="margin-top:10px;">Change password</button>
         </div>
 
         <button class="settings-signout-btn" id="settings-signout-btn">Sign out</button>
@@ -2447,13 +2445,12 @@ async function loadSettingsView() {
   $('settings-verify-status').style.color = verified ? 'var(--green)' : 'var(--red)';
   $('settings-verify-banner').style.display = verified ? 'none' : 'flex';
 
-  // Lock profile editing behind verification
-  const canEdit = verified;
-  $('settings-name-input').disabled = !canEdit;
-  $('settings-save-btn').disabled = !canEdit;
-  $('settings-upload-label').style.opacity = canEdit ? '1' : '0.4';
-  $('settings-upload-label').style.pointerEvents = canEdit ? 'auto' : 'none';
-  $('settings-upload-hint').textContent = canEdit ? 'Square image recommended' : 'Verify your email to upload a photo';
+  // Name is always editable; photo upload requires verification
+  $('settings-name-input').disabled = false;
+  $('settings-save-btn').disabled = false;
+  $('settings-upload-label').style.opacity = verified ? '1' : '0.4';
+  $('settings-upload-label').style.pointerEvents = verified ? 'auto' : 'none';
+  $('settings-upload-hint').textContent = verified ? 'Square image recommended' : 'Verify your email to upload a photo';
 
   // Load current profile data
   const doc = await loadUserDoc(user.uid);
@@ -2510,33 +2507,27 @@ $('settings-signout-btn')?.addEventListener('click', () => { fbAuth.signOut(); s
 
 $('settings-change-pw-btn')?.addEventListener('click', async () => {
   const user = fbAuth.currentUser;
+  const currentPw = $('settings-current-pw').value;
   const newPw = $('settings-new-pw').value;
   const confirmPw = $('settings-confirm-pw').value;
   const msg = $('settings-pw-msg');
+  if (!currentPw) { msg.textContent = 'Enter your current password.'; msg.className = 'settings-msg error'; return; }
   if (!newPw) { msg.textContent = 'Enter a new password.'; msg.className = 'settings-msg error'; return; }
   if (newPw !== confirmPw) { msg.textContent = 'Passwords do not match.'; msg.className = 'settings-msg error'; return; }
   try {
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPw);
+    await user.reauthenticateWithCredential(credential);
     await user.updatePassword(newPw);
-    $('settings-new-pw').value = ''; $('settings-confirm-pw').value = '';
+    $('settings-current-pw').value = ''; $('settings-new-pw').value = ''; $('settings-confirm-pw').value = '';
     msg.textContent = '✓ Password changed.'; msg.className = 'settings-msg ok';
   } catch(e) {
     const errs = {
-      'auth/weak-password': 'Password must be at least 6 characters.',
-      'auth/requires-recent-login': 'Sign out and sign back in before changing your password.',
+      'auth/weak-password': 'New password must be at least 6 characters.',
+      'auth/wrong-password': 'Current password is incorrect.',
+      'auth/invalid-credential': 'Current password is incorrect.',
+      'auth/too-many-requests': 'Too many attempts. Try again later.',
     };
     msg.textContent = errs[e.code] || e.message; msg.className = 'settings-msg error';
-  }
-});
-
-$('settings-reset-pw-btn')?.addEventListener('click', async () => {
-  const user = fbAuth.currentUser;
-  const msg = $('settings-pw-msg');
-  if (!user?.email) return;
-  try {
-    await fbAuth.sendPasswordResetEmail(user.email);
-    msg.textContent = `✓ Reset email sent to ${user.email}`; msg.className = 'settings-msg ok';
-  } catch(e) {
-    msg.textContent = e.message; msg.className = 'settings-msg error';
   }
 });
 
@@ -2582,7 +2573,17 @@ $('settings-delete-btn')?.addEventListener('click', () => {
     return;
   }
 
-  // Email users (verified or not): show password confirmation step
+  if (!user.emailVerified) {
+    // Unverified email: no password needed, just delete
+    fbDb.collection('users').doc(user.uid).delete().catch(() => {});
+    user.delete().then(() => showView('game')).catch(e => {
+      $('settings-delete-msg').textContent = e.message;
+      $('settings-delete-msg').className = 'settings-msg error';
+    });
+    return;
+  }
+
+  // Verified email users: show password confirmation step
   $('settings-delete-step1').style.display = 'none';
   $('settings-delete-step2').style.display = 'block';
   $('settings-delete-pw').value = '';
