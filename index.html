@@ -1148,7 +1148,7 @@
         </div>
 
         <div>
-          <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Display name <span style="color:var(--ink-faint);font-weight:400;">(not unique)</span></label>
+          <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Display name <span style="color:var(--ink-faint);font-weight:400;">(unique, case-insensitive)</span></label>
           <input class="settings-input" id="settings-name-input" type="text" placeholder="Your name" autocomplete="off">
         </div>
 
@@ -2300,6 +2300,28 @@ function weekLabel() {
 
 const MULTIPLIERS = { easy: 1, medium: 1.5, hard: 2 };
 
+// ── Username uniqueness ───────────────────────────────────────────────────────
+// usernames collection: doc ID = lowercase name, value = { uid }
+// Returns true if the name is available or already owned by this uid
+async function isUsernameAvailable(name, uid) {
+  if (!name) return true;
+  const key = name.toLowerCase().trim();
+  const snap = await fbDb.collection('usernames').doc(key).get();
+  return !snap.exists || snap.data().uid === uid;
+}
+
+// Atomically release old name and claim new name
+async function claimUsername(newName, previousName, uid) {
+  const batch = fbDb.batch();
+  const newKey = newName.toLowerCase().trim();
+  const oldKey = previousName ? previousName.toLowerCase().trim() : null;
+  if (oldKey && oldKey !== newKey) {
+    batch.delete(fbDb.collection('usernames').doc(oldKey));
+  }
+  batch.set(fbDb.collection('usernames').doc(newKey), { uid });
+  await batch.commit();
+}
+
 // Save completed puzzle score to Firestore
 async function saveScoreToFirestore(diff, rawScore) {
   const user = fbAuth.currentUser;
@@ -2621,8 +2643,21 @@ $('auth-email-submit')?.addEventListener('click', async () => {
   if (!email || !password) { $('auth-error').textContent = 'Please fill in all fields.'; return; }
   try {
     if (emailAuthMode === 'create') {
+      if (name) {
+        $('auth-error').style.color = '';
+        $('auth-error').textContent = 'Checking name…';
+        const available = await isUsernameAvailable(name, null);
+        if (!available) {
+          $('auth-error').style.color = '';
+          $('auth-error').textContent = 'That name is already taken. Choose another.';
+          return;
+        }
+      }
       const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
-      if (name) await cred.user.updateProfile({ displayName: name });
+      if (name) {
+        await cred.user.updateProfile({ displayName: name });
+        await claimUsername(name, null, cred.user.uid);
+      }
       await cred.user.sendEmailVerification();
       $('auth-error').style.color = 'var(--green)';
       $('auth-error').textContent = '✓ Account created! Check your inbox (and spam folder) for a verification email.';
@@ -2722,13 +2757,27 @@ $('settings-save-btn')?.addEventListener('click', async () => {
   if (!user) return;
   const name = $('settings-name-input').value.trim();
   const msg = $('settings-profile-msg');
-  msg.textContent = 'Saving…'; msg.className = 'settings-msg';
+  if (!name && !settingsPhotoDataURL) return;
   try {
+    if (name) {
+      msg.textContent = 'Checking name…'; msg.className = 'settings-msg';
+      const available = await isUsernameAvailable(name, user.uid);
+      if (!available) {
+        msg.textContent = 'That name is already taken. Try another.';
+        msg.className = 'settings-msg error';
+        return;
+      }
+    }
+    msg.textContent = 'Saving…'; msg.className = 'settings-msg';
+    const previousName = user.displayName;
     const updates = {};
     if (name) updates.displayName = name;
     if (settingsPhotoDataURL) updates.photoDataURL = settingsPhotoDataURL;
     await fbDb.collection('users').doc(user.uid).set(updates, { merge: true });
-    if (name) await user.updateProfile({ displayName: name });
+    if (name) {
+      await user.updateProfile({ displayName: name });
+      await claimUsername(name, previousName, user.uid);
+    }
     updateNavAvatar(user, settingsPhotoDataURL || (await loadUserDoc(user.uid)).photoDataURL || null);
     settingsPhotoDataURL = null;
     msg.textContent = '✓ Saved!'; msg.className = 'settings-msg ok';
