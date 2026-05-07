@@ -1063,9 +1063,9 @@
           <button class="settings-signout-btn" id="settings-delete-btn" style="border-color:var(--red);">Delete my account</button>
         </div>
 
-        <!-- Step 2: password confirmation (verified email users only) -->
+        <!-- Step 2: password confirmation -->
         <div id="settings-delete-step2" style="display:none;">
-          <p style="font-size:13px;color:var(--ink-2);margin-bottom:10px;">Enter your password to confirm deletion.</p>
+          <p style="font-size:13px;color:var(--ink-2);margin-bottom:10px;" id="settings-delete-step2-msg">Enter your password to confirm deletion.</p>
           <input class="settings-input" id="settings-delete-pw" type="password" placeholder="Your password" autocomplete="current-password">
           <div class="settings-msg" id="settings-delete-msg" style="margin-top:8px;"></div>
           <div style="display:flex;gap:10px;margin-top:10px;">
@@ -2462,6 +2462,7 @@ async function loadSettingsView() {
   $('settings-delete-step1').style.display = 'block';
   $('settings-delete-step2').style.display = 'none';
   $('settings-delete-msg').textContent = '';
+  $('settings-delete-step2-msg').textContent = 'Enter your password to confirm deletion.';
 }
 
 function renderSettingsAvatar(photoSrc, user) {
@@ -2574,25 +2575,19 @@ $('settings-delete-btn')?.addEventListener('click', () => {
   }
 
   if (!user.emailVerified) {
-    // Unverified email: no password needed, just delete
+    // Unverified email: try direct delete first; only ask for password if Firebase forces re-auth
     fbDb.collection('users').doc(user.uid).delete().catch(() => {});
     user.delete()
       .then(() => showView('game'))
-      .catch(async e => {
+      .catch(e => {
         if (e.code === 'auth/requires-recent-login') {
-          // Session too old — sign out and back in silently by re-sending sign-in link isn't possible,
-          // so ask for password as a one-time re-auth step
-          const pw = prompt('To confirm deletion, enter your password:');
-          if (!pw) return;
-          try {
-            const credential = firebase.auth.EmailAuthProvider.credential(user.email, pw);
-            await user.reauthenticateWithCredential(credential);
-            await fbDb.collection('users').doc(user.uid).delete().catch(() => {});
-            await user.delete();
-            showView('game');
-          } catch(e2) {
-            alert('Could not delete account: ' + (e2.message || e2));
-          }
+          // Session expired — show inline password step with explanation
+          $('settings-delete-step2-msg').textContent = 'Your session expired. Enter your password once to complete deletion.';
+          $('settings-delete-step1').style.display = 'none';
+          $('settings-delete-step2').style.display = 'block';
+          $('settings-delete-pw').value = '';
+          $('settings-delete-msg').textContent = '';
+          $('settings-delete-pw').focus();
         } else {
           alert('Could not delete account: ' + e.message);
         }
