@@ -245,50 +245,66 @@
   }
   .auth-skip:hover { color: var(--ink-2); }
 
-  /* PROFILE MODAL */
-  .profile-overlay {
-    display: none; position: fixed; inset: 0; z-index: 200;
-    background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
-    align-items: center; justify-content: center;
-  }
-  .profile-overlay.show { display: flex; }
-  .profile-modal {
+  /* SETTINGS PAGE */
+  #settings-view { display: none; min-height: 100dvh; padding: 120px 24px 80px; }
+  #settings-view.active { display: block; }
+  .settings-inner { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+  .settings-inner h1 { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 700; }
+  .settings-card {
     background: var(--surface); border: 1px solid var(--border-strong);
-    border-radius: var(--radius-lg); padding: 36px 32px; width: 100%; max-width: 400px;
-    margin: 20px; display: flex; flex-direction: column; gap: 16px;
+    border-radius: var(--radius-lg); padding: 28px; display: flex; flex-direction: column; gap: 18px;
   }
-  .profile-modal h2 { font-family: 'Fraunces', serif; font-size: 22px; margin-bottom: 4px; }
-  .profile-avatar-row {
-    display: flex; align-items: center; gap: 16px; padding: 16px;
-    background: var(--surface-2); border-radius: var(--radius); margin-bottom: 4px;
-  }
-  .profile-avatar-big {
-    width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
-    border: 2px solid var(--accent); flex-shrink: 0;
+  .settings-card-title { font-size: 13px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .settings-avatar-wrap { display: flex; align-items: center; gap: 20px; }
+  .settings-avatar {
+    width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--accent);
     background: var(--surface-3); display: flex; align-items: center; justify-content: center;
-    font-size: 26px; font-weight: 700; color: var(--accent);
+    font-size: 28px; font-weight: 700; color: var(--accent); flex-shrink: 0; overflow: hidden;
   }
-  .profile-avatar-info { flex: 1; }
-  .profile-avatar-info p { font-size: 13px; color: var(--ink-3); margin-top: 4px; }
-  .profile-input {
+  .settings-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .settings-upload-btn {
+    display: inline-block; padding: 8px 16px; background: var(--surface-2);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 600; cursor: pointer; color: var(--ink-2);
+    transition: background 0.15s;
+  }
+  .settings-upload-btn:hover { background: var(--surface-3); }
+  .settings-input {
     width: 100%; padding: 12px 14px; background: var(--surface-2);
     border: 1px solid var(--border); border-radius: var(--radius-sm);
     color: var(--ink); font-family: 'Space Grotesk', sans-serif; font-size: 15px;
   }
-  .profile-input:focus { outline: none; border-color: var(--accent); }
-  .profile-input::placeholder { color: var(--ink-faint); }
-  .profile-save-btn {
-    width: 100%; padding: 13px; background: var(--accent); color: #000;
+  .settings-input:focus { outline: none; border-color: var(--accent); }
+  .settings-input::placeholder { color: var(--ink-faint); }
+  .settings-save-btn {
+    padding: 13px 24px; background: var(--accent); color: #000;
     border: none; border-radius: 10px; font-family: 'Space Grotesk', sans-serif;
-    font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; align-self: flex-start;
   }
-  .profile-save-btn:hover { opacity: 0.9; }
-  .profile-error { color: var(--red); font-size: 13px; min-height: 18px; }
-  .profile-success { color: var(--green); font-size: 13px; min-height: 18px; }
-  .profile-section-label { font-size: 12px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
-  .profile-close { background: none; border: none; color: var(--ink-3); font-size: 13px; cursor: pointer; margin-top: 4px; font-family: 'Space Grotesk', sans-serif; }
-  .profile-close:hover { color: var(--ink-2); }
-  #nav-avatar { cursor: pointer; }
+  .settings-save-btn:hover { opacity: 0.9; }
+  .settings-save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .settings-msg { font-size: 13px; min-height: 18px; }
+  .settings-msg.error { color: var(--red); }
+  .settings-msg.ok { color: var(--green); }
+  .settings-info-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .settings-info-row span { font-size: 14px; color: var(--ink-2); }
+  .settings-signout-btn {
+    background: none; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    color: var(--red); font-family: 'Space Grotesk', sans-serif; font-size: 14px;
+    padding: 10px 18px; cursor: pointer; transition: background 0.15s;
+  }
+  .settings-signout-btn:hover { background: var(--red-bg); }
+  .settings-verify-banner {
+    background: var(--yellow-bg); border: 1px solid var(--yellow); border-radius: var(--radius-sm);
+    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .settings-verify-banner p { font-size: 14px; color: var(--yellow); margin: 0; }
+  .settings-resend-btn {
+    background: none; border: 1px solid var(--yellow); border-radius: var(--radius-sm);
+    color: var(--yellow); font-size: 13px; font-weight: 600; padding: 6px 12px;
+    cursor: pointer; white-space: nowrap; font-family: 'Space Grotesk', sans-serif;
+  }
+  .settings-lock-note { font-size: 13px; color: var(--ink-3); }
 
   /* LEADERBOARD */
   .lb-table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -919,13 +935,13 @@
       <div class="nav-links">
         <button class="nav-link active" id="nav-play">Play</button>
         <button class="nav-link" id="nav-leaderboard">🏆 Leaderboard</button>
+        <button class="nav-link" id="nav-settings" style="display:none;">⚙ Settings</button>
         <button class="nav-link" id="nav-howto">How to play</button>
         <button class="nav-link" id="nav-scoring">Scoring</button>
         <button class="nav-link" id="nav-stats">Stats</button>
       </div>
       <div id="nav-user" style="display:none;align-items:center;gap:8px;margin-left:6px;">
-        <img id="nav-avatar" src="" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">
-        <button class="nav-link" id="nav-signout" style="font-size:12px;padding:4px 10px;">Sign out</button>
+        <div id="nav-avatar" title="Settings" style="width:30px;height:30px;border-radius:50%;border:2px solid var(--accent);cursor:pointer;overflow:hidden;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;"></div>
       </div>
       <button class="nav-link" id="nav-signin" style="display:none;background:var(--accent);color:#000;font-weight:700;">Sign in</button>
     </div>
@@ -964,33 +980,61 @@
   </div>
 </div>
 
-<!-- Profile modal -->
-<div class="profile-overlay" id="profile-overlay">
-  <div class="profile-modal">
-    <h2>Your Profile</h2>
+<!-- Settings full-page view -->
+<div id="settings-view">
+  <div class="settings-inner">
+    <h1>⚙ Settings</h1>
 
-    <div class="profile-avatar-row">
-      <div class="profile-avatar-big" id="profile-avatar-big"></div>
-      <div class="profile-avatar-info">
-        <strong id="profile-display-name-label">—</strong>
-        <p id="profile-email-label" style="color:var(--ink-3);font-size:13px;margin-top:2px;"></p>
-      </div>
+    <div id="settings-signin-prompt" style="display:none;text-align:center;padding:60px 0;">
+      <p style="color:var(--ink-2);margin-bottom:20px;font-size:16px;">Sign in to access your settings.</p>
+      <button class="google-btn" id="settings-signin-btn" style="max-width:280px;margin:0 auto;">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        Sign in to continue
+      </button>
     </div>
 
-    <div class="profile-section-label">Display name</div>
-    <input class="profile-input" id="profile-name-input" type="text" placeholder="Your name" autocomplete="off">
+    <div id="settings-content" style="display:none;">
 
-    <div class="profile-section-label">Photo URL <span style="color:var(--ink-faint);font-weight:400;">(optional)</span></div>
-    <input class="profile-input" id="profile-photo-input" type="url" placeholder="https://..." autocomplete="off">
+      <div class="settings-card">
+        <div class="settings-card-title">Profile</div>
 
-    <div class="profile-section-label">New password <span style="color:var(--ink-faint);font-weight:400;">(leave blank to keep current)</span></div>
-    <input class="profile-input" id="profile-password-input" type="password" placeholder="New password" autocomplete="new-password">
+        <div class="settings-verify-banner" id="settings-verify-banner" style="display:none;">
+          <p>⚠ Verify your email to customize your profile.</p>
+          <button class="settings-resend-btn" id="settings-resend-btn">Resend email</button>
+        </div>
 
-    <div class="profile-error" id="profile-error"></div>
-    <div class="profile-success" id="profile-success"></div>
+        <div class="settings-avatar-wrap">
+          <div class="settings-avatar" id="settings-avatar"></div>
+          <div>
+            <label class="settings-upload-btn" for="settings-photo-input" id="settings-upload-label">Upload photo</label>
+            <input type="file" id="settings-photo-input" accept="image/*" style="display:none;">
+            <p style="font-size:12px;color:var(--ink-3);margin-top:6px;" id="settings-upload-hint">Square image recommended</p>
+          </div>
+        </div>
 
-    <button class="profile-save-btn" id="profile-save-btn">Save changes</button>
-    <button class="profile-close" id="profile-close">Close</button>
+        <div>
+          <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Display name</label>
+          <input class="settings-input" id="settings-name-input" type="text" placeholder="Your name" autocomplete="off">
+        </div>
+
+        <div class="settings-msg" id="settings-profile-msg"></div>
+        <button class="settings-save-btn" id="settings-save-btn">Save changes</button>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">Account</div>
+        <div class="settings-info-row">
+          <span>Email</span>
+          <span id="settings-email" style="color:var(--ink);font-weight:500;"></span>
+        </div>
+        <div class="settings-info-row">
+          <span>Status</span>
+          <span id="settings-verify-status"></span>
+        </div>
+        <button class="settings-signout-btn" id="settings-signout-btn">Sign out</button>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -2080,21 +2124,31 @@ async function loadLeaderboard() {
     .slice(0, 20);
 }
 
-// Switch to leaderboard page view
-function showLeaderboardView() {
-  $('game-view').classList.add('hidden');
-  $('leaderboard-view').classList.add('active');
-  $('nav-leaderboard')?.classList.add('active');
-  $('nav-play')?.classList.remove('active');
+// View switching
+function showView(name) {
+  // hide all secondary views, show/hide game
+  $('leaderboard-view').classList.toggle('active', name === 'leaderboard');
+  $('settings-view').classList.toggle('active', name === 'settings');
+  $('game-view').classList.toggle('hidden', name !== 'game');
+  // nav active states
+  $('nav-play')?.classList.toggle('active', name === 'game');
+  $('nav-leaderboard')?.classList.toggle('active', name === 'leaderboard');
+  $('nav-settings')?.classList.toggle('active', name === 'settings');
   window.scrollTo(0, 0);
+}
+
+function showLeaderboardView() {
+  showView('leaderboard');
   loadLeaderboardView();
 }
 
 function hideLeaderboardView() {
-  $('leaderboard-view').classList.remove('active');
-  $('game-view').classList.remove('hidden');
-  $('nav-play')?.classList.add('active');
-  $('nav-leaderboard')?.classList.remove('active');
+  showView('game');
+}
+
+function showSettingsView() {
+  showView('settings');
+  loadSettingsView();
 }
 
 async function loadLeaderboardView() {
@@ -2150,15 +2204,52 @@ async function loadLeaderboardView() {
   }
 }
 
-// Auth state
-fbAuth.onAuthStateChanged(user => {
-  if (user) {
-    $('nav-user').style.display = 'flex';
-    $('nav-avatar').src = user.photoURL || '';
-    $('nav-signin').style.display = 'none';
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function updateNavAvatar(user, photoDataURL) {
+  if (!user) { $('nav-user').style.display = 'none'; $('nav-signin').style.display = 'block'; $('nav-settings').style.display = 'none'; return; }
+  $('nav-user').style.display = 'flex';
+  $('nav-signin').style.display = 'none';
+  $('nav-settings').style.display = 'block';
+  const av = $('nav-avatar');
+  if (photoDataURL) {
+    av.innerHTML = `<img src="${photoDataURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  } else if (user.photoURL) {
+    av.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
   } else {
-    $('nav-user').style.display = 'none';
-    $('nav-signin').style.display = 'block';
+    av.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
+  }
+}
+
+async function compressImage(file, maxPx = 128) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(maxPx / img.width, maxPx / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.82));
+    };
+    img.src = url;
+  });
+}
+
+async function loadUserDoc(uid) {
+  try { const d = await fbDb.collection('users').doc(uid).get(); return d.exists ? d.data() : {}; } catch { return {}; }
+}
+
+// ── Auth state ────────────────────────────────────────────────────────────────
+
+fbAuth.onAuthStateChanged(async user => {
+  if (user) {
+    const doc = await loadUserDoc(user.uid);
+    updateNavAvatar(user, doc.photoDataURL || null);
+  } else {
+    updateNavAvatar(null);
   }
 });
 
@@ -2176,7 +2267,8 @@ async function signInWithGoogle() {
   }
 }
 
-// After puzzle complete — prompt or save
+// ── After puzzle complete ─────────────────────────────────────────────────────
+
 let pendingScore = null;
 function handlePuzzleComplete(diff, rawScore) {
   if (fbAuth.currentUser) {
@@ -2187,42 +2279,33 @@ function handlePuzzleComplete(diff, rawScore) {
   }
 }
 
-// Auth modal buttons
+// ── Auth modal buttons ────────────────────────────────────────────────────────
+
 $('google-signin-btn')?.addEventListener('click', async () => {
   const ok = await signInWithGoogle();
   if (!ok) return;
   $('auth-overlay').classList.remove('show');
-  if (pendingScore) {
-    await saveScoreToFirestore(pendingScore.diff, pendingScore.rawScore);
-    pendingScore = null;
-  }
+  if (pendingScore) { await saveScoreToFirestore(pendingScore.diff, pendingScore.rawScore); pendingScore = null; }
 });
-$('auth-skip')?.addEventListener('click', () => {
-  $('auth-overlay').classList.remove('show');
-  pendingScore = null;
-});
-$('nav-play')?.addEventListener('click', hideLeaderboardView);
+$('auth-skip')?.addEventListener('click', () => { $('auth-overlay').classList.remove('show'); pendingScore = null; });
+$('nav-play')?.addEventListener('click', () => showView('game'));
 $('nav-signin')?.addEventListener('click', () => $('auth-overlay').classList.add('show'));
 $('nav-signout')?.addEventListener('click', () => fbAuth.signOut());
 $('nav-leaderboard')?.addEventListener('click', showLeaderboardView);
-$('lb-back')?.addEventListener('click', hideLeaderboardView);
-$('lb-google-btn')?.addEventListener('click', async () => {
-  const ok = await signInWithGoogle();
-  if (ok) loadLeaderboardView();
-});
+$('nav-settings')?.addEventListener('click', showSettingsView);
+$('nav-avatar')?.addEventListener('click', showSettingsView);
+$('lb-back')?.addEventListener('click', () => showView('game'));
+$('lb-google-btn')?.addEventListener('click', async () => { const ok = await signInWithGoogle(); if (ok) loadLeaderboardView(); });
+$('settings-signin-btn')?.addEventListener('click', async () => { const ok = await signInWithGoogle(); if (ok) loadSettingsView(); });
 
-// Auth tab switching (Google ↔ Email)
+// Auth tab switching
 $('tab-google-auth')?.addEventListener('click', () => {
-  $('auth-google-panel').style.display = 'block';
-  $('auth-email-panel').style.display = 'none';
-  $('tab-google-auth').classList.add('active');
-  $('tab-email-auth').classList.remove('active');
+  $('auth-google-panel').style.display = 'block'; $('auth-email-panel').style.display = 'none';
+  $('tab-google-auth').classList.add('active'); $('tab-email-auth').classList.remove('active');
 });
 $('tab-email-auth')?.addEventListener('click', () => {
-  $('auth-google-panel').style.display = 'none';
-  $('auth-email-panel').style.display = 'block';
-  $('tab-email-auth').classList.add('active');
-  $('tab-google-auth').classList.remove('active');
+  $('auth-google-panel').style.display = 'none'; $('auth-email-panel').style.display = 'block';
+  $('tab-email-auth').classList.add('active'); $('tab-google-auth').classList.remove('active');
 });
 
 // Email sign in / create account
@@ -2244,14 +2327,12 @@ $('auth-email-submit')?.addEventListener('click', async () => {
     if (emailAuthMode === 'create') {
       const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
       if (name) await cred.user.updateProfile({ displayName: name });
+      await cred.user.sendEmailVerification();
     } else {
       await fbAuth.signInWithEmailAndPassword(email, password);
     }
     $('auth-overlay').classList.remove('show');
-    if (pendingScore) {
-      await saveScoreToFirestore(pendingScore.diff, pendingScore.rawScore);
-      pendingScore = null;
-    }
+    if (pendingScore) { await saveScoreToFirestore(pendingScore.diff, pendingScore.rawScore); pendingScore = null; }
   } catch(e) {
     const msgs = {
       'auth/email-already-in-use': 'That email is already registered. Try signing in.',
@@ -2267,66 +2348,94 @@ $('auth-email-submit')?.addEventListener('click', async () => {
   }
 });
 
-// Profile modal
-function openProfileModal() {
+// ── Settings page ─────────────────────────────────────────────────────────────
+
+let settingsPhotoDataURL = null;  // holds newly selected photo before save
+
+async function loadSettingsView() {
   const user = fbAuth.currentUser;
-  if (!user) return;
-  const name = user.displayName || '';
-  const photo = user.photoURL || '';
-  $('profile-name-input').value = name;
-  $('profile-photo-input').value = photo;
-  $('profile-password-input').value = '';
-  $('profile-display-name-label').textContent = name || 'No name set';
-  $('profile-email-label').textContent = user.email || '';
-  $('profile-error').textContent = '';
-  $('profile-success').textContent = '';
-  const big = $('profile-avatar-big');
-  if (photo) {
-    big.innerHTML = `<img src="${photo}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`;
-  } else {
-    big.textContent = (name || user.email || '?')[0].toUpperCase();
+  settingsPhotoDataURL = null;
+  if (!user) {
+    $('settings-signin-prompt').style.display = 'block';
+    $('settings-content').style.display = 'none';
+    return;
   }
-  $('profile-overlay').classList.add('show');
+  $('settings-signin-prompt').style.display = 'none';
+  $('settings-content').style.display = 'block';
+
+  // Account info
+  $('settings-email').textContent = user.email || '—';
+  const verified = user.emailVerified || user.providerData?.some(p => p.providerId === 'google.com');
+  $('settings-verify-status').textContent = verified ? '✓ Verified' : '✗ Not verified';
+  $('settings-verify-status').style.color = verified ? 'var(--green)' : 'var(--red)';
+  $('settings-verify-banner').style.display = verified ? 'none' : 'flex';
+
+  // Lock profile editing behind verification
+  const canEdit = verified;
+  $('settings-name-input').disabled = !canEdit;
+  $('settings-save-btn').disabled = !canEdit;
+  $('settings-upload-label').style.opacity = canEdit ? '1' : '0.4';
+  $('settings-upload-label').style.pointerEvents = canEdit ? 'auto' : 'none';
+  $('settings-upload-hint').textContent = canEdit ? 'Square image recommended' : 'Verify your email to upload a photo';
+
+  // Load current profile data
+  const doc = await loadUserDoc(user.uid);
+  $('settings-name-input').value = user.displayName || doc.displayName || '';
+  renderSettingsAvatar(doc.photoDataURL || user.photoURL || null, user);
+  $('settings-profile-msg').textContent = '';
+  $('settings-profile-msg').className = 'settings-msg';
 }
 
-$('nav-avatar')?.addEventListener('click', openProfileModal);
+function renderSettingsAvatar(photoSrc, user) {
+  const av = $('settings-avatar');
+  if (photoSrc) {
+    av.innerHTML = `<img src="${photoSrc}" alt="">`;
+  } else {
+    av.textContent = (user?.displayName || user?.email || '?')[0].toUpperCase();
+    av.innerHTML = av.innerHTML; // force re-render
+  }
+}
 
-$('profile-close')?.addEventListener('click', () => $('profile-overlay').classList.remove('show'));
-$('profile-overlay')?.addEventListener('click', e => { if (e.target === $('profile-overlay')) $('profile-overlay').classList.remove('show'); });
-
-$('profile-save-btn')?.addEventListener('click', async () => {
+$('settings-photo-input')?.addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
   const user = fbAuth.currentUser;
   if (!user) return;
-  const name = $('profile-name-input').value.trim();
-  const photo = $('profile-photo-input').value.trim();
-  const password = $('profile-password-input').value;
-  $('profile-error').textContent = '';
-  $('profile-success').textContent = '';
+  settingsPhotoDataURL = await compressImage(file);
+  renderSettingsAvatar(settingsPhotoDataURL, user);
+});
+
+$('settings-save-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const name = $('settings-name-input').value.trim();
+  const msg = $('settings-profile-msg');
+  msg.textContent = 'Saving…'; msg.className = 'settings-msg';
   try {
-    if (name !== user.displayName || photo !== (user.photoURL || '')) {
-      await user.updateProfile({ displayName: name, photoURL: photo || null });
-    }
-    if (password) {
-      await user.updatePassword(password);
-    }
-    // Refresh nav avatar
-    $('nav-avatar').src = user.photoURL || '';
-    $('nav-avatar').style.display = user.photoURL ? 'block' : 'none';
-    $('profile-success').textContent = 'Changes saved!';
-    $('profile-display-name-label').textContent = name || 'No name set';
-    const big = $('profile-avatar-big');
-    if (user.photoURL) {
-      big.innerHTML = `<img src="${user.photoURL}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`;
-    } else {
-      big.textContent = (name || user.email || '?')[0].toUpperCase();
-    }
+    const updates = {};
+    if (name) updates.displayName = name;
+    if (settingsPhotoDataURL) updates.photoDataURL = settingsPhotoDataURL;
+    await fbDb.collection('users').doc(user.uid).set(updates, { merge: true });
+    if (name) await user.updateProfile({ displayName: name });
+    updateNavAvatar(user, settingsPhotoDataURL || (await loadUserDoc(user.uid)).photoDataURL || null);
+    settingsPhotoDataURL = null;
+    msg.textContent = '✓ Saved!'; msg.className = 'settings-msg ok';
   } catch(e) {
-    const msgs = {
-      'auth/requires-recent-login': 'Please sign out and sign back in before changing your password.',
-      'auth/weak-password': 'Password must be at least 6 characters.',
-      'auth/invalid-profile-attribute': 'Invalid photo URL.',
-    };
-    $('profile-error').textContent = msgs[e.code] || e.message;
+    msg.textContent = e.message || 'Failed to save.'; msg.className = 'settings-msg error';
+  }
+});
+
+$('settings-signout-btn')?.addEventListener('click', () => { fbAuth.signOut(); showView('game'); });
+
+$('settings-resend-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  try {
+    await user.sendEmailVerification();
+    $('settings-resend-btn').textContent = 'Sent!';
+    setTimeout(() => { $('settings-resend-btn').textContent = 'Resend email'; }, 4000);
+  } catch(e) {
+    alert(e.message);
   }
 });
 
