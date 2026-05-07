@@ -2565,25 +2565,24 @@ $('settings-delete-btn')?.addEventListener('click', () => {
   const user = fbAuth.currentUser;
   if (!user) return;
   const isGoogle = user.providerData?.some(p => p.providerId === 'google.com');
-  const verified = user.emailVerified || isGoogle;
-
-  if (!verified) {
-    // Unverified: just confirm and delete
-    if (!confirm('Delete your account permanently? This cannot be undone.')) return;
-    fbDb.collection('users').doc(user.uid).delete().catch(() => {});
-    user.delete().then(() => showView('game')).catch(e => alert(e.message));
-    return;
-  }
+  if (!confirm('Delete your account permanently? This cannot be undone.')) return;
 
   if (isGoogle) {
-    // Google users: confirm and delete (Google manages re-auth)
-    if (!confirm('Delete your account permanently? This cannot be undone.')) return;
-    fbDb.collection('users').doc(user.uid).delete().catch(() => {});
-    user.delete().then(() => showView('game')).catch(e => alert(e.message));
+    // Google users: re-authenticate via popup then delete
+    user.reauthenticateWithPopup(gProvider)
+      .then(() => fbDb.collection('users').doc(user.uid).delete().catch(() => {}))
+      .then(() => user.delete())
+      .then(() => showView('game'))
+      .catch(e => {
+        if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+          $('settings-delete-msg').textContent = e.message;
+          $('settings-delete-msg').className = 'settings-msg error';
+        }
+      });
     return;
   }
 
-  // Verified email users: show password confirmation step
+  // Email users (verified or not): show password confirmation step
   $('settings-delete-step1').style.display = 'none';
   $('settings-delete-step2').style.display = 'block';
   $('settings-delete-pw').value = '';
@@ -2612,6 +2611,7 @@ $('settings-delete-confirm-btn')?.addEventListener('click', async () => {
     const errs = {
       'auth/wrong-password': 'Incorrect password.',
       'auth/invalid-credential': 'Incorrect password.',
+      'auth/invalid-login-credentials': 'Incorrect password.',
       'auth/too-many-requests': 'Too many attempts. Try again later.',
     };
     msg.textContent = errs[e.code] || e.message; msg.className = 'settings-msg error';
