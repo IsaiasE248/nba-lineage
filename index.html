@@ -219,6 +219,25 @@
     cursor: pointer; transition: opacity 0.15s;
   }
   .google-btn:hover { opacity: 0.9; }
+  .auth-tabs { display: flex; gap: 6px; margin-bottom: 20px; background: var(--surface); border-radius: 10px; padding: 4px; }
+  .auth-tab { flex: 1; padding: 8px; border: none; border-radius: 7px; background: none; color: var(--ink-3); font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .auth-tab.active { background: var(--surface-2); color: var(--ink); }
+  .auth-input {
+    display: block; width: 100%; padding: 12px 14px; margin-bottom: 10px;
+    background: var(--surface); border: 1px solid var(--border-strong);
+    border-radius: 10px; color: var(--ink); font-family: var(--font-body); font-size: 14px;
+    box-sizing: border-box;
+  }
+  .auth-input:focus { outline: none; border-color: var(--accent); }
+  .auth-error { color: #f87171; font-size: 13px; margin-bottom: 10px; min-height: 18px; }
+  .auth-submit-btn {
+    width: 100%; padding: 13px; background: var(--accent); color: #000;
+    border: none; border-radius: 10px; font-family: var(--font-body);
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+  }
+  .auth-submit-btn:hover { opacity: 0.9; }
+  .auth-toggle { display: block; margin: 12px auto 0; background: none; border: none; color: var(--ink-3); font-size: 13px; cursor: pointer; font-family: var(--font-body); }
+  .auth-toggle:hover { color: var(--ink-2); }
   .auth-skip {
     margin-top: 14px; background: none; border: none;
     color: var(--ink-3); font-size: 13px; cursor: pointer;
@@ -605,7 +624,7 @@
     border-radius: var(--radius);
     max-height: 360px;
     overflow-y: auto;
-    z-index: 10;
+    z-index: 50;
     display: none;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
   }
@@ -853,10 +872,11 @@
     <div style="display:flex;align-items:center;gap:10px;">
       <span class="streak-badge" id="streak-badge" title="Current streak">🔥 0</span>
       <div class="nav-links">
+        <button class="nav-link active" id="nav-play">Play</button>
+        <button class="nav-link" id="nav-leaderboard">🏆 Leaderboard</button>
         <button class="nav-link" id="nav-howto">How to play</button>
         <button class="nav-link" id="nav-scoring">Scoring</button>
         <button class="nav-link" id="nav-stats">Stats</button>
-        <button class="nav-link" id="nav-leaderboard">🏆 Leaderboard</button>
       </div>
       <div id="nav-user" style="display:none;align-items:center;gap:8px;margin-left:6px;">
         <img id="nav-avatar" src="" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">
@@ -872,11 +892,29 @@
   <div class="auth-modal">
     <div class="auth-ball">🏀</div>
     <h2>Join the leaderboard</h2>
-    <p>Save your score and compete with other players this week. Resets every Monday.</p>
-    <button class="google-btn" id="google-signin-btn">
-      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-      Continue with Google
-    </button>
+    <p>Save your score and compete with other players this week.</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-google-auth">Google</button>
+      <button class="auth-tab" id="tab-email-auth">Email</button>
+    </div>
+
+    <div id="auth-google-panel">
+      <button class="google-btn" id="google-signin-btn">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <div id="auth-email-panel" style="display:none;">
+      <input class="auth-input" id="auth-email" type="email" placeholder="Email address" autocomplete="email">
+      <input class="auth-input" id="auth-password" type="password" placeholder="Password" autocomplete="current-password">
+      <input class="auth-input" id="auth-name" type="text" placeholder="Display name (new accounts only)" style="display:none;" autocomplete="name">
+      <div class="auth-error" id="auth-error"></div>
+      <button class="auth-submit-btn" id="auth-email-submit">Sign in</button>
+      <button class="auth-toggle" id="auth-mode-toggle">No account? Create one</button>
+    </div>
+
     <button class="auth-skip" id="auth-skip">Maybe later</button>
   </div>
 </div>
@@ -885,12 +923,8 @@
 <div id="leaderboard-view">
   <div class="lb-page-inner">
     <div class="lb-page-header">
-      <button class="lb-back-btn" id="lb-back">← Back to game</button>
-      <div>
-        <h1 class="lb-title">🏆 Leaderboard</h1>
-        <div id="lb-week-label" class="lb-subtitle"></div>
-      </div>
-      <div style="width:120px;"></div>
+      <h1 class="lb-title">🏆 Leaderboard</h1>
+      <div id="lb-week-label" class="lb-subtitle"></div>
     </div>
 
     <div id="lb-signin-prompt" style="display:none;text-align:center;padding:60px 0;">
@@ -1455,7 +1489,7 @@ function renderChainRow() {
 // ---------- SEARCH ----------
 els.search.addEventListener("input", () => {
   const q = els.search.value.trim();
-  if (q.length < 2) { hideResults(); return; }
+  if (q.length < 1) { hideResults(); return; }
   doSearch(q);
 });
 
@@ -1957,6 +1991,8 @@ async function loadLeaderboard() {
 function showLeaderboardView() {
   $('game-view').classList.add('hidden');
   $('leaderboard-view').classList.add('active');
+  $('nav-leaderboard')?.classList.add('active');
+  $('nav-play')?.classList.remove('active');
   window.scrollTo(0, 0);
   loadLeaderboardView();
 }
@@ -1964,6 +2000,8 @@ function showLeaderboardView() {
 function hideLeaderboardView() {
   $('leaderboard-view').classList.remove('active');
   $('game-view').classList.remove('hidden');
+  $('nav-play')?.classList.add('active');
+  $('nav-leaderboard')?.classList.remove('active');
 }
 
 async function loadLeaderboardView() {
@@ -2070,6 +2108,7 @@ $('auth-skip')?.addEventListener('click', () => {
   $('auth-overlay').classList.remove('show');
   pendingScore = null;
 });
+$('nav-play')?.addEventListener('click', hideLeaderboardView);
 $('nav-signin')?.addEventListener('click', signInWithGoogle);
 $('nav-signout')?.addEventListener('click', () => fbAuth.signOut());
 $('nav-leaderboard')?.addEventListener('click', showLeaderboardView);
@@ -2077,6 +2116,52 @@ $('lb-back')?.addEventListener('click', hideLeaderboardView);
 $('lb-google-btn')?.addEventListener('click', async () => {
   const ok = await signInWithGoogle();
   if (ok) loadLeaderboardView();
+});
+
+// Auth tab switching (Google ↔ Email)
+$('tab-google-auth')?.addEventListener('click', () => {
+  $('auth-google-panel').style.display = 'block';
+  $('auth-email-panel').style.display = 'none';
+  $('tab-google-auth').classList.add('active');
+  $('tab-email-auth').classList.remove('active');
+});
+$('tab-email-auth')?.addEventListener('click', () => {
+  $('auth-google-panel').style.display = 'none';
+  $('auth-email-panel').style.display = 'block';
+  $('tab-email-auth').classList.add('active');
+  $('tab-google-auth').classList.remove('active');
+});
+
+// Email sign in / create account
+let emailAuthMode = 'signin';
+$('auth-mode-toggle')?.addEventListener('click', () => {
+  emailAuthMode = emailAuthMode === 'signin' ? 'create' : 'signin';
+  $('auth-name').style.display = emailAuthMode === 'create' ? 'block' : 'none';
+  $('auth-email-submit').textContent = emailAuthMode === 'create' ? 'Create account' : 'Sign in';
+  $('auth-mode-toggle').textContent = emailAuthMode === 'create' ? 'Already have an account? Sign in' : 'No account? Create one';
+  $('auth-error').textContent = '';
+});
+$('auth-email-submit')?.addEventListener('click', async () => {
+  const email = $('auth-email').value.trim();
+  const password = $('auth-password').value;
+  const name = $('auth-name').value.trim();
+  $('auth-error').textContent = '';
+  if (!email || !password) { $('auth-error').textContent = 'Please fill in all fields.'; return; }
+  try {
+    if (emailAuthMode === 'create') {
+      const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
+      if (name) await cred.user.updateProfile({ displayName: name });
+    } else {
+      await fbAuth.signInWithEmailAndPassword(email, password);
+    }
+    $('auth-overlay').classList.remove('show');
+    if (pendingScore) {
+      await saveScoreToFirestore(pendingScore.diff, pendingScore.rawScore);
+      pendingScore = null;
+    }
+  } catch(e) {
+    $('auth-error').textContent = e.message.replace('Firebase: ', '').replace(/ \(auth\/.*?\)\.?/, '');
+  }
 });
 
 // Scroll-reveal
