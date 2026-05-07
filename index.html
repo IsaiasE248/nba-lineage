@@ -588,6 +588,45 @@
   .ach-badge { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--ink-3); }
   .ach-badge.earned { border-color: var(--accent-line); background: var(--accent-glow); color: var(--accent-soft); }
 
+  /* CUSTOM TOOLTIPS */
+  [data-tooltip] { position: relative; cursor: help; }
+  [data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%; transform: translateX(-50%);
+    background: var(--surface-3);
+    border: 1px solid var(--border-strong);
+    color: var(--ink-2);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px; font-weight: 400; line-height: 1.5;
+    padding: 8px 12px;
+    border-radius: 8px;
+    width: max-content; max-width: 200px;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s 0.1s;
+    z-index: 200;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    white-space: pre-wrap;
+  }
+  [data-tooltip]:hover::after { opacity: 1; }
+  /* small arrow pointing down */
+  [data-tooltip]::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%; transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--border-strong);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s 0.1s;
+    z-index: 201;
+  }
+  [data-tooltip]:hover::before { opacity: 1; }
+
   /* SEARCH RESULT PREVIEW */
   .result-item .name-col { display: flex; flex-direction: column; min-width: 0; flex: 1; }
   .result-item .preview-line { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1243,10 +1282,10 @@
     <h3>Chain complete</h3>
     <div class="sub">Nicely done. Here's how you scored.</div>
     <div class="score-grid">
-      <div class="score-cell"><div class="k">Steps</div><div class="v" id="r-steps">—</div></div>
-      <div class="score-cell"><div class="k">Rarity</div><div class="v" id="r-rarity">—</div></div>
-      <div class="score-cell"><div class="k">Efficiency</div><div class="v" id="r-eff">—</div></div>
-      <div class="score-cell total"><div class="k">Final score</div><div class="v" id="r-total">—</div></div>
+      <div class="score-cell" data-tooltip="Number of hops in your chain. Fewer steps = higher efficiency bonus."><div class="k">Steps</div><div class="v" id="r-steps">—</div></div>
+      <div class="score-cell" data-tooltip="Obscure players score more.\nRarity = 20 − career seasons.\nEach point = +25 to your final score."><div class="k">Rarity</div><div class="v" id="r-rarity">—</div></div>
+      <div class="score-cell" data-tooltip="1000 ÷ steps^1.4 (rounded down).\nFewer bridge players = much higher efficiency."><div class="k">Efficiency</div><div class="v" id="r-eff">—</div></div>
+      <div class="score-cell total" data-tooltip="Efficiency + (Rarity × 25).\nRarity is heavily weighted — one deep bench player can double your score."><div class="k">Final score</div><div class="v" id="r-total">—</div></div>
     </div>
     <div class="ach-wrap" id="ach-wrap" style="display:none">
       <h4>Achievements</h4>
@@ -1941,7 +1980,7 @@ function finishGame() {
       const badge = document.createElement("span");
       badge.className = "ach-badge earned";
       badge.textContent = `${a.icon} ${a.label}`;
-      badge.title = a.desc;
+      badge.dataset.tooltip = a.desc;
       els.achList.appendChild(badge);
     });
   }
