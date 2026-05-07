@@ -6,7 +6,7 @@
 <title>NBA Lineage</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0b0d12;
@@ -20,10 +20,10 @@
     --ink-2: #b6bbc6;
     --ink-3: #7a8194;
     --ink-faint: #4a5163;
-    --accent: #ff6b35;
-    --accent-soft: #ff8a5e;
-    --accent-glow: rgba(255, 107, 53, 0.18);
-    --accent-line: rgba(255, 107, 53, 0.4);
+    --accent: #f59e0b;
+    --accent-soft: #fbbf24;
+    --accent-glow: rgba(245, 158, 11, 0.18);
+    --accent-line: rgba(245, 158, 11, 0.4);
     --green: #4ade80;
     --green-bg: rgba(74, 222, 128, 0.1);
     --red: #f87171;
@@ -35,24 +35,25 @@
     --radius-lg: 16px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
   html, body {
     background: var(--bg);
     color: var(--ink);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
     font-size: 15px;
     line-height: 1.5;
-    min-height: 100vh;
+    min-height: 100dvh;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
+  /* Grain overlay */
   body::before {
     content: '';
-    position: fixed; top: 50%; left: -200px;
-    width: 400px; height: 400px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    transform: translateY(-50%);
-    pointer-events: none; z-index: -1; opacity: 0.5;
+    position: fixed; inset: 0; z-index: 999;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
   }
   body::after {
     content: '';
@@ -65,15 +66,19 @@
 
   /* NAVBAR */
   .navbar {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(11, 13, 18, 0.8);
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 50;
+    width: calc(100% - 48px);
+    max-width: 1100px;
+    background: rgba(11, 13, 18, 0.75);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border-bottom: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
   }
   .nav-inner {
-    max-width: 1140px; margin: 0 auto;
-    padding: 14px 24px;
+    padding: 10px 16px;
     display: flex; align-items: center; justify-content: space-between; gap: 24px;
   }
   .brand {
@@ -102,10 +107,10 @@
   .nav-link.active { color: var(--ink); background: var(--surface-2); }
 
   /* MAIN */
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 56px 24px 80px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 108px 24px 80px; }
 
   /* HERO */
-  .hero { text-align: center; margin-bottom: 48px; }
+  .hero { text-align: left; margin-bottom: 48px; }
   .hero .eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 6px 14px;
@@ -114,6 +119,7 @@
     border-radius: 999px;
     font-size: 12px; color: var(--ink-2); font-weight: 500;
     margin-bottom: 20px;
+    letter-spacing: 0.01em;
   }
   .hero .eyebrow .dot {
     width: 6px; height: 6px; border-radius: 50%;
@@ -122,18 +128,20 @@
   }
   .hero h1 {
     font-family: 'Fraunces', Georgia, serif;
-    font-size: clamp(40px, 7vw, 64px);
-    font-weight: 700; line-height: 1.05;
-    letter-spacing: -0.025em;
-    margin-bottom: 12px;
+    font-size: clamp(44px, 7vw, 72px);
+    font-weight: 700; line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 14px;
+    text-wrap: balance;
   }
   .hero h1 em { font-style: italic; font-weight: 400; color: var(--accent); }
-  .hero p { font-size: 16px; color: var(--ink-2); max-width: 480px; margin: 0 auto; }
+  .hero p { font-size: 16px; color: var(--ink-2); max-width: 440px; line-height: 1.6; }
 
   /* CHAIN ROW: start card + bridges + end card, all in one horizontal flow */
   .chain-row {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     margin-bottom: 32px;
     overflow-x: auto;
@@ -141,37 +149,37 @@
     scrollbar-width: thin;
     scrollbar-color: var(--surface-2) transparent;
   }
+  .chain-row.overflow { justify-content: flex-start; }
   .chain-row::-webkit-scrollbar { height: 8px; }
   .chain-row::-webkit-scrollbar-track { background: transparent; }
   .chain-row::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
 
-  /* TRADING CARDS */
+  /* TRADING CARDS — double-bezel */
+  .player-card-shell {
+    flex-shrink: 0;
+    padding: 3px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-strong);
+    border-radius: calc(var(--radius) + 3px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07);
+  }
   .player-card {
     position: relative;
     flex-shrink: 0;
+    width: 220px;
+    aspect-ratio: 3 / 4;
     border-radius: var(--radius);
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     background: var(--surface);
-    border: 1px solid var(--border-strong);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255,255,255,0.08);
     cursor: default;
-    transition: transform 0.2s, border-color 0.2s;
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
-  /* Big card sizes (Start, End) */
-  .player-card.big {
-    width: 220px;
-    aspect-ratio: 3 / 4;
-  }
-  /* Mini card sizes (chain bridges) */
-  .player-card.mini {
-    width: 130px;
-    aspect-ratio: 3 / 4;
-    cursor: default;
-  }
-  .player-card.mini:hover { border-color: var(--accent-line); }
+  .player-card-shell:hover .player-card { transform: translateY(-2px); }
 
   .player-card .bg-gradient {
     position: absolute; inset: 0; z-index: 0;
@@ -188,26 +196,9 @@
     transition: opacity 0.3s;
   }
   .player-card .photo.loaded { opacity: 1; }
-  .player-card .fallback {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Fraunces', Georgia, serif;
-    font-weight: 700;
-    color: rgba(255,255,255,0.85);
-    letter-spacing: -0.02em;
-    text-shadow: 0 4px 16px rgba(0,0,0,0.3);
-  }
-  .player-card.big .fallback { font-size: clamp(40px, 6vw, 60px); }
-  .player-card.mini .fallback { font-size: 32px; }
 
   .player-card .badge {
     position: absolute; z-index: 3;
-    width: 28px; height: 28px;
-    border-radius: 50%;
     background: rgba(255, 255, 255, 0.95);
     color: #1a0e05;
     display: flex; align-items: center; justify-content: center;
@@ -215,9 +206,19 @@
     font-weight: 700;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
-  .player-card .badge.tl { top: 10px; left: 10px; }
-  .player-card .badge.tr { top: 10px; right: 10px; }
-  .player-card.mini .badge { display: none; }
+  .player-card .badge.tl {
+    top: 10px; left: 10px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+  }
+  .player-card .badge.tr {
+    top: 10px; right: 10px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
 
   .player-card .name-bar {
     position: relative; z-index: 2;
@@ -235,8 +236,7 @@
     letter-spacing: -0.01em;
     color: #fff;
   }
-  .player-card.big .name { font-size: 16px; }
-  .player-card.mini .name { font-size: 13px; }
+  .player-card .name { font-size: 16px; }
   .player-card .team {
     font-size: 10px;
     color: rgba(255,255,255,0.55);
@@ -244,7 +244,6 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
-  .player-card.mini .team { display: none; }
 
   .player-card .label {
     position: absolute; z-index: 3;
@@ -260,7 +259,6 @@
     pointer-events: none;
   }
   .player-card.end .label { background: var(--ink); color: var(--bg); }
-  .player-card.mini .label { display: none; }
 
   .player-card.invalid { border-color: var(--red); animation: shake 0.4s ease-in-out; }
   .player-card.invalid::after {
@@ -271,8 +269,8 @@
     pointer-events: none;
   }
 
-  /* Pop-in animation for new chain mini-cards */
-  .player-card.mini { animation: pop 0.3s ease-out; }
+  /* Pop-in animation for bridge cards */
+  .player-card.bridge { animation: pop 0.3s ease-out; }
   @keyframes pop {
     from { transform: scale(0.85); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -296,7 +294,7 @@
   /* Empty-state placeholder card slots */
   .placeholder-card {
     flex-shrink: 0;
-    width: 130px;
+    width: 220px;
     aspect-ratio: 3 / 4;
     border: 2px dashed var(--border-strong);
     border-radius: var(--radius);
@@ -309,6 +307,73 @@
     padding: 12px;
   }
 
+  /* CONNECTION PILLS — shown between valid linked cards after chain is verified */
+  .conn-pill {
+    flex-shrink: 0; align-self: center;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 6px 10px;
+    background: var(--surface); border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    text-align: center; min-width: 84px;
+  }
+  .conn-pill .cp-season { font-size: 11px; font-weight: 700; color: var(--accent-soft); letter-spacing: 0.03em; }
+  .conn-pill .cp-team { font-size: 10px; color: var(--ink-3); line-height: 1.25; }
+
+  /* BROKEN LINK */
+  .chain-arrow.broken { color: var(--red); }
+
+  /* STREAK BADGE */
+  .streak-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--ink-3);
+  }
+  .streak-badge.hot { border-color: var(--accent-line); color: var(--accent-soft); background: var(--accent-glow); }
+
+  /* STATS POPUP */
+  .stats-popup {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px; z-index: 100;
+  }
+  .stats-popup.show { display: flex; animation: fadeIn 0.2s ease-out; }
+  .stats-popup .inner {
+    max-width: 520px; width: 100%;
+    background: var(--surface); border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg); padding: 28px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    max-height: 85vh; overflow-y: auto;
+  }
+  .stats-top {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin: 16px 0 20px;
+  }
+  .stats-top .sc {
+    padding: 12px; background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm); text-align: center;
+  }
+  .stats-top .sc .k { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .stats-top .sc .v { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; }
+  .stats-top .sc.accent-cell .v { color: var(--accent-soft); }
+  .history-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .history-tbl th { color: var(--ink-3); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+  .history-tbl td { padding: 9px 8px; color: var(--ink-2); border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  .history-tbl tr:last-child td { border-bottom: none; }
+
+  /* ACHIEVEMENTS */
+  .ach-wrap { margin-top: 20px; }
+  .ach-wrap h4 { font-size: 11px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .ach-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ach-badge { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--ink-3); }
+  .ach-badge.earned { border-color: var(--accent-line); background: var(--accent-glow); color: var(--accent-soft); }
+
+  /* SEARCH RESULT PREVIEW */
+  .result-item .name-col { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+  .result-item .preview-line { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
   /* AVATARS (used in search dropdown only) */
   .avatar {
     display: inline-flex;
@@ -316,7 +381,7 @@
     flex-shrink: 0;
     width: 36px; height: 36px;
     border-radius: 50%;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Fraunces', serif;
     font-weight: 700;
     font-size: 13px;
     color: #fff;
@@ -378,17 +443,18 @@
   .input-wrap { position: relative; }
   .search-input {
     width: 100%;
-    padding: 14px 16px;
+    padding: 15px 20px;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
     color: var(--ink);
     font-family: inherit;
     font-size: 15px;
     outline: none;
-    border-radius: var(--radius);
-    transition: border-color 0.15s, box-shadow 0.15s;
+    border-radius: var(--radius-lg);
+    transition: border-color 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s cubic-bezier(0.16,1,0.3,1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
   }
-  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.04); }
   .search-input::placeholder { color: var(--ink-faint); }
   .search-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -473,7 +539,7 @@
   /* CONTROLS */
   .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
   .btn {
-    padding: 10px 18px;
+    padding: 10px 20px;
     background: transparent;
     border: 1px solid var(--border-strong);
     color: var(--ink);
@@ -481,20 +547,23 @@
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    border-radius: var(--radius-sm);
-    transition: all 0.15s;
+    border-radius: 999px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 0.01em;
   }
-  .btn:hover { border-color: rgba(255,255,255,0.25); background: var(--surface-2); }
+  .btn:hover { border-color: rgba(255,255,255,0.28); background: var(--surface-2); transform: translateY(-1px); }
+  .btn:active { transform: scale(0.97) translateY(0); }
   .btn.primary {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
     font-weight: 600;
-    box-shadow: 0 4px 16px rgba(255,107,53,0.25);
+    box-shadow: 0 4px 20px rgba(255,107,53,0.3);
   }
-  .btn.primary:hover { background: var(--accent-soft); border-color: var(--accent-soft); }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn:disabled:hover { background: transparent; border-color: var(--border-strong); }
+  .btn.primary:hover { background: var(--accent-soft); border-color: var(--accent-soft); box-shadow: 0 6px 24px rgba(255,107,53,0.4); }
+  .btn.primary:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+  .btn:disabled:hover { background: transparent; border-color: var(--border-strong); box-shadow: none; }
 
   /* COMPLETE */
   .complete {
@@ -600,13 +669,26 @@
   .help-popup .close { margin-top: 20px; width: 100%; }
 
   footer {
-    margin-top: 56px;
-    text-align: center;
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-align: left;
     font-size: 12px;
     color: var(--ink-faint);
+    letter-spacing: 0.02em;
   }
-  footer a { color: var(--ink-3); text-decoration: none; }
+  footer a { color: var(--ink-3); text-decoration: none; transition: color 0.15s; }
   footer a:hover { color: var(--accent); }
+
+  /* Scroll-reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
 
   /* SKELETON */
   .skel {
@@ -630,30 +712,35 @@
       </span>
       <span>Lineage</span>
     </a>
-    <div class="nav-links">
-      <button class="nav-link active">Daily</button>
-      <button class="nav-link" id="nav-howto">How to play</button>
-      <button class="nav-link" id="nav-scoring">Scoring</button>
-      <button class="nav-link" id="nav-stats">Stats</button>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="streak-badge" id="streak-badge" title="Current streak">🔥 0</span>
+      <div class="nav-links">
+        <button class="nav-link active" id="nav-easy">Easy</button>
+        <button class="nav-link" id="nav-medium">Medium</button>
+        <button class="nav-link" id="nav-hard">Hard</button>
+        <button class="nav-link" id="nav-howto">How to play</button>
+        <button class="nav-link" id="nav-scoring">Scoring</button>
+        <button class="nav-link" id="nav-stats">Stats</button>
+      </div>
     </div>
   </div>
 </nav>
 
 <div class="wrap">
 
-  <div class="hero">
+  <div class="hero reveal">
     <div class="eyebrow">
       <span class="dot"></span>
-      <span>Daily <span id="daily-date">—</span> · Puzzle <span id="puzzle-num">—</span></span>
+      <span>Daily <span id="daily-date">—</span> · Puzzle <span id="puzzle-num">—</span> · <span id="difficulty-label">Medium</span></span>
     </div>
     <h1>Two players, <em>one chain</em>.</h1>
     <p>Connect them through teammates who shared a team for at least one season.</p>
   </div>
 
   <!-- The full chain row: start card, then any added bridge cards, then end card -->
-  <div class="chain-row" id="chain-row"></div>
+  <div class="chain-row reveal reveal-delay-1" id="chain-row"></div>
 
-  <div class="section-head">
+  <div class="section-head reveal reveal-delay-2">
     <h2>Build your chain</h2>
     <div class="stat-row">
       <span class="stat"><b id="step-count">0</b> steps</span>
@@ -662,7 +749,7 @@
     </div>
   </div>
 
-  <div class="input-wrap">
+  <div class="input-wrap reveal reveal-delay-2">
     <input
       id="search"
       class="search-input"
@@ -675,12 +762,12 @@
     <div class="results" id="results"></div>
   </div>
 
-  <div class="status" id="status">
+  <div class="status reveal reveal-delay-2" id="status">
     <span class="spinner"></span>
     <span>Loading database…</span>
   </div>
 
-  <div class="controls">
+  <div class="controls reveal reveal-delay-2">
     <button class="btn primary" id="check-btn" disabled>Check chain</button>
     <button class="btn" id="undo-btn">Undo</button>
     <button class="btn" id="reset-btn">Reset</button>
@@ -694,6 +781,10 @@
       <div class="score-cell"><div class="k">Rarity</div><div class="v" id="r-rarity">—</div></div>
       <div class="score-cell"><div class="k">Efficiency</div><div class="v" id="r-eff">—</div></div>
       <div class="score-cell total"><div class="k">Final score</div><div class="v" id="r-total">—</div></div>
+    </div>
+    <div class="ach-wrap" id="ach-wrap" style="display:none">
+      <h4>Achievements</h4>
+      <div class="ach-list" id="ach-list"></div>
     </div>
     <div class="controls" style="margin-top: 20px;">
       <button class="btn primary" id="share-btn">Copy share</button>
@@ -730,17 +821,104 @@
   </div>
 </div>
 
+<div class="help-popup" id="howto-popup">
+  <div class="inner">
+    <h3>How to play</h3>
+    <div class="lead">Connect the Start player to the End player through NBA teammates.</div>
+    <div class="item">
+      <div class="item-label">The rule</div>
+      <div class="item-body">Each link must be two players who were on the <strong>same team in the same season</strong>. No exceptions.</div>
+    </div>
+    <div class="item">
+      <div class="item-label">Building your chain</div>
+      <div class="item-body">Type a player name to search, then add them one at a time between Start and End. When you're ready, click <strong>Check chain</strong>.</div>
+    </div>
+    <div class="item">
+      <div class="item-label">Scoring</div>
+      <div class="item-body">Shorter chains score higher. Using obscure, short-career players adds rarity bonus points. Click <strong>Scoring</strong> in the nav for the full breakdown.</div>
+    </div>
+    <div class="item">
+      <div class="item-label">Difficulty</div>
+      <div class="item-body">Choose <strong>Easy</strong>, <strong>Medium</strong>, or <strong>Hard</strong> from the nav. Each has its own daily puzzle and streak — harder pairs require more hops and more obscure connections.</div>
+    </div>
+    <button class="btn primary close" id="howto-close">Got it</button>
+  </div>
+</div>
+
+<div class="stats-popup" id="stats-popup">
+  <div class="inner">
+    <h3>Your stats</h3>
+    <div class="lead" style="font-size:14px;color:var(--ink-3);margin-bottom:0">Puzzle history stored locally in your browser.</div>
+    <div class="stats-top" id="stats-top">
+      <div class="sc"><div class="k">Played</div><div class="v" id="st-played">0</div></div>
+      <div class="sc"><div class="k">Best score</div><div class="v" id="st-best">—</div></div>
+      <div class="sc"><div class="k">Avg steps</div><div class="v" id="st-avg">—</div></div>
+      <div class="sc accent-cell"><div class="k">Streak</div><div class="v" id="st-streak">0</div></div>
+    </div>
+    <table class="history-tbl">
+      <thead><tr><th>Puzzle</th><th>Score</th><th>Steps</th><th>Rarity</th></tr></thead>
+      <tbody id="st-body"></tbody>
+    </table>
+    <button class="btn primary" id="stats-close" style="margin-top:20px;width:100%">Close</button>
+  </div>
+</div>
+
 <script>
 /* =========================================================================
    NBA LINEAGE — card-style with real photos
    ========================================================================= */
 
-const DAILY_POOL = [
-  { a: 237, b: 140 }, { a: 115, b: 278 }, { a: 15,  b: 79  },
-  { a: 274, b: 472 }, { a: 79,  b: 237 }, { a: 472, b: 140 },
-  { a: 115, b: 237 }, { a: 274, b: 115 }, { a: 15,  b: 278 },
-  { a: 140, b: 79  },
+// Easy: famous teammates — 1-hop direct connections
+const POOL_EASY = [
+  { a: 237, b: 472 },  // LeBron ↔ Westbrook
+  { a: 237, b: 228 },  // LeBron ↔ Kyrie Irving
+  { a: 237, b: 117 },  // LeBron ↔ Anthony Davis
+  { a: 237, b: 17  },  // LeBron ↔ Carmelo Anthony
+  { a: 237, b: 461 },  // LeBron ↔ Dwyane Wade
+  { a: 140, b: 472 },  // KD ↔ Westbrook
+  { a: 140, b: 192 },  // KD ↔ James Harden
+  { a: 140, b: 228 },  // KD ↔ Kyrie Irving
+  { a: 472, b: 192 },  // Westbrook ↔ Harden
+  { a: 237, b: 140 },  // LeBron ↔ KD (2 hops)
+  { a: 237, b: 115 },  // LeBron ↔ Curry (2 hops)
+  { a: 367, b: 192 },  // Chris Paul ↔ Harden (Rockets era)
 ];
+
+// Medium: cross-era + niche players, 3-hop chains
+const POOL_MEDIUM = [
+  { a: 246, b: 830  },  // Jokic ↔ Sam Cassell
+  { a: 434, b: 1249 },  // Tatum ↔ Metta World Peace
+  { a: 322, b: 1237 },  // Donovan Mitchell ↔ Baron Davis
+  { a: 434, b: 1378 },  // Tatum ↔ Shane Battier
+  { a: 2931, b: 224 },  // Michael Jordan ↔ Andre Iguodala
+  { a: 2937, b: 1771},  // Charles Barkley ↔ Joakim Noah
+  { a: 2981, b: 1439},  // David Robinson ↔ Caron Butler
+  { a: 540, b: 1378  }, // Hakeem Olajuwon ↔ Shane Battier
+  { a: 278, b: 2871  }, // Lillard ↔ John Stockton
+  { a: 115, b: 552   }, // Curry ↔ Dennis Rodman
+  { a: 132, b: 965   }, // Luka ↔ Antonio McDyess
+  { a: 237, b: 2851  }, // LeBron ↔ Larry Bird
+];
+
+// Hard: 4-hop cross-era chains — modern stars vs. 1980s legends
+const POOL_HARD = [
+  { a: 278,  b: 2851 },  // Lillard ↔ Larry Bird
+  { a: 79,   b: 2851 },  // Jimmy Butler ↔ Larry Bird
+  { a: 172,  b: 2851 },  // Paul George ↔ Larry Bird
+  { a: 117,  b: 2851 },  // Anthony Davis ↔ Larry Bird
+  { a: 246,  b: 2851 },  // Jokic ↔ Larry Bird
+  { a: 145,  b: 2851 },  // Joel Embiid ↔ Larry Bird
+  { a: 132,  b: 2851 },  // Luka Doncic ↔ Larry Bird
+  { a: 434,  b: 2994 },  // Jayson Tatum ↔ Magic Johnson
+  { a: 434,  b: 2851 },  // Jayson Tatum ↔ Larry Bird
+  { a: 57,   b: 2994 },  // Devin Booker ↔ Magic Johnson
+  { a: 57,   b: 2851 },  // Devin Booker ↔ Larry Bird
+  { a: 322,  b: 2851 },  // Donovan Mitchell ↔ Larry Bird
+  { a: 2994, b: 1920 },  // Magic Johnson ↔ Patrick Ewing
+  { a: 2851, b: 1920 },  // Larry Bird ↔ Patrick Ewing
+];
+
+const POOLS = { easy: POOL_EASY, medium: POOL_MEDIUM, hard: POOL_HARD };
 
 function dayIndex() {
   const epoch = Date.UTC(2024, 0, 1);
@@ -759,6 +937,9 @@ const state = {
   chain: [],
   used: new Set(),
   complete: false,
+  connections: [],   // [{season, teamName}] per link, populated after valid check
+  brokenLink: -1,    // arrow index of first broken link, -1 if none
+  difficulty: 'medium',
   resultsList: [],
   activeIdx: -1,
 };
@@ -777,25 +958,71 @@ const els = {
   rSteps: $("r-steps"), rRarity: $("r-rarity"), rEff: $("r-eff"), rTotal: $("r-total"),
   shareBtn: $("share-btn"),
   helpBtn: $("help-btn"), helpPopup: $("help-popup"), helpClose: $("help-close"),
+  streakBadge: $("streak-badge"),
+  statsPopup: $("stats-popup"), statsClose: $("stats-close"),
+  stPlayed: $("st-played"), stBest: $("st-best"), stAvg: $("st-avg"), stStreak: $("st-streak"),
+  stBody: $("st-body"),
+  achWrap: $("ach-wrap"), achList: $("ach-list"),
 };
 
-// Team primary colors for card gradients (factual public team identifiers)
+const ACHIEVEMENTS = [
+  { id: "two_hop",   icon: "⚡", label: "Two-Hop",    desc: "Solve with just 1 bridge player",           check: (b) => b.length === 1 },
+  { id: "efficient", icon: "🎯", label: "Efficient",   desc: "Solve in 2 bridges or fewer",               check: (b) => b.length <= 2 },
+  { id: "rare_find", icon: "💎", label: "Rare Find",   desc: "Use a bridge with rarity ≥ 15",             check: (b) => b.some(p => p.rarity >= 15) },
+  { id: "deep_cut",  icon: "🕵️", label: "Deep Cut",    desc: "Use a bridge with rarity ≥ 18",             check: (b) => b.some(p => p.rarity >= 18) },
+  { id: "journeyman",icon: "🗺️", label: "Journeyman",  desc: "Use a bridge who played for 5+ teams",      check: (b) => b.some(p => new Set(p._ref.team_seasons.map(t => t.team_id)).size >= 5) },
+  { id: "veteran",   icon: "🏆", label: "Veteran",     desc: "Use a bridge with 12+ seasons",             check: (b) => b.some(p => new Set(p._ref.team_seasons.map(t => t.season)).size >= 12) },
+  { id: "centurion", icon: "💯", label: "Centurion",   desc: "Score 500 or higher",                       check: (b, total) => total >= 500 },
+];
+
+function getStreak(diff) {
+  const today = dayIndex();
+  const key = (d) => `lineage:${diff}:${d}`;
+  let d = localStorage.getItem(key(today)) ? today : today - 1;
+  let streak = 0;
+  while (d >= 0 && localStorage.getItem(key(d))) { streak++; d--; }
+  return streak;
+}
+
+function updateStreakBadge() {
+  const s = getStreak(state.difficulty);
+  els.streakBadge.textContent = `🔥 ${s}`;
+  els.streakBadge.classList.toggle("hot", s >= 3);
+  els.streakBadge.title = s === 1 ? "1-day streak" : `${s}-day streak`;
+}
+
+// Team primary + secondary colors for card gradients
 const TEAM_COLORS = {
-  1:  ["#E03A3E", "#1d1d1d"], 2:  ["#007A33", "#1d1d1d"],
-  3:  ["#000000", "#a8aab0"], 4:  ["#1D1160", "#00788C"],
-  5:  ["#CE1141", "#1d1d1d"], 6:  ["#860038", "#041E42"],
-  7:  ["#00538C", "#002B5E"], 8:  ["#0E2240", "#FEC524"],
-  9:  ["#C8102E", "#1d428a"], 10: ["#1D428A", "#FFC72C"],
-  11: ["#CE1141", "#000000"], 12: ["#002D62", "#FDBB30"],
-  13: ["#C8102E", "#1d428a"], 14: ["#552583", "#FDB927"],
-  15: ["#5D76A9", "#12173F"], 16: ["#98002E", "#F9A01B"],
-  17: ["#00471B", "#EEE1C6"], 18: ["#0C2340", "#236192"],
-  19: ["#0C2340", "#C8102E"], 20: ["#006BB6", "#F58426"],
-  21: ["#007AC1", "#EF3B24"], 22: ["#0077C0", "#C4CED4"],
-  23: ["#006BB6", "#ED174C"], 24: ["#1d1160", "#E56020"],
-  25: ["#E03A3E", "#000000"], 26: ["#5A2D81", "#63727A"],
-  27: ["#C4CED4", "#1d1d1d"], 28: ["#CE1141", "#000000"],
-  29: ["#002B5C", "#00471B"], 30: ["#002B5C", "#E31837"],
+  1:  ["#E03A3E", "#C1D32F"],  // Hawks: red + lime
+  2:  ["#007A33", "#BA9653"],  // Celtics: green + gold
+  3:  ["#1d1d1d", "#7b8b8f"],  // Nets: black + silver
+  4:  ["#1D1160", "#00788C"],  // Hornets: purple + teal
+  5:  ["#CE1141", "#1d1d1d"],  // Bulls: red + black
+  6:  ["#860038", "#041E42"],  // Cavaliers: wine + navy
+  7:  ["#00538C", "#B8C4CA"],  // Mavericks: blue + silver
+  8:  ["#0E2240", "#FEC524"],  // Nuggets: navy + gold
+  9:  ["#C8102E", "#1D428A"],  // Pistons: red + blue
+  10: ["#1D428A", "#FFC72C"],  // Warriors: blue + gold
+  11: ["#CE1141", "#9ea2a2"],  // Rockets: red + silver
+  12: ["#002D62", "#FDBB30"],  // Pacers: navy + gold
+  13: ["#C8102E", "#1D428A"],  // Clippers: red + blue
+  14: ["#552583", "#FDB927"],  // Lakers: purple + gold
+  15: ["#5D76A9", "#12173F"],  // Grizzlies: slate + navy
+  16: ["#98002E", "#F9A01B"],  // Heat: red + gold
+  17: ["#00471B", "#EEE1C6"],  // Bucks: green + cream
+  18: ["#0C2340", "#78BE20"],  // Timberwolves: navy + lime
+  19: ["#0C2340", "#C8102E"],  // Pelicans: navy + red
+  20: ["#006BB6", "#F58426"],  // Knicks: blue + orange
+  21: ["#007AC1", "#EF3B24"],  // Thunder: blue + orange
+  22: ["#0077C0", "#C4CED4"],  // Magic: blue + silver
+  23: ["#006BB6", "#ED174C"],  // 76ers: blue + red
+  24: ["#1D1160", "#E56020"],  // Suns: purple + orange
+  25: ["#E03A3E", "#1d1d1d"],  // Trail Blazers: red + black
+  26: ["#5A2D81", "#63727A"],  // Kings: purple + pewter
+  27: ["#8a8d8f", "#1d1d1d"],  // Spurs: silver + black
+  28: ["#CE1141", "#1d1d1d"],  // Raptors: red + black
+  29: ["#002B5C", "#00471B"],  // Jazz: navy + green
+  30: ["#002B5C", "#E31837"],  // Wizards: navy + red
 };
 function teamColors(teamId) { return TEAM_COLORS[teamId] || ["#2a3142", "#1a1f2e"]; }
 
@@ -842,10 +1069,10 @@ function makeSearchAvatar(player) {
   return el;
 }
 
-// Build a trading-card element. `kind` = 'big' | 'mini'. `role` = 'start' | 'end' | null
-function makeCard(player, kind, role) {
+// Build a trading-card element. `role` = 'start' | 'end' | 'bridge' | null
+function makeCard(player, role) {
   const card = document.createElement("div");
-  card.className = `player-card ${kind}` + (role ? " " + role : "");
+  card.className = "player-card" + (role ? " " + role : "");
 
   const team = latestTeam(player);
   const [c1, c2] = team ? teamColors(team.id) : fallbackColors(player.id);
@@ -853,19 +1080,13 @@ function makeCard(player, kind, role) {
   // Background gradient
   const bg = document.createElement("div");
   bg.className = "bg-gradient";
-  bg.style.background = `radial-gradient(ellipse at top, ${c1} 0%, ${c2} 70%, #0f1320 100%)`;
+  bg.style.background = `linear-gradient(150deg, ${c1} 0%, ${c2} 55%, #080a10 100%)`;
   card.appendChild(bg);
 
-  // Initials fallback (always present, sits behind photo)
-  const fallback = document.createElement("div");
-  fallback.className = "fallback";
-  fallback.textContent = initials(player.first_name, player.last_name);
-  card.appendChild(fallback);
-
-  // Photo (loads async, fades in over fallback)
+  // Photo (loads async, fades in over gradient)
   const photo = document.createElement("div");
   photo.className = "photo";
-  const url = photoUrl(player, kind === "big" ? "1040x760" : "260x190");
+  const url = photoUrl(player, "1040x760");
   if (url) {
     const img = new Image();
     img.onload = () => {
@@ -876,46 +1097,50 @@ function makeCard(player, kind, role) {
   }
   card.appendChild(photo);
 
-  // Badges (big cards only): jersey number TL, draft year TR
-  if (kind === "big") {
-    if (player.jersey_number) {
-      const badgeTl = document.createElement("div");
-      badgeTl.className = "badge tl";
-      badgeTl.textContent = "#" + player.jersey_number;
-      card.appendChild(badgeTl);
-    }
-    if (player.draft_year) {
-      const badgeTr = document.createElement("div");
-      badgeTr.className = "badge tr";
-      badgeTr.textContent = "'" + String(player.draft_year).slice(-2);
-      card.appendChild(badgeTr);
-    }
-
-    // Role label (Start / End)
-    if (role) {
-      const label = document.createElement("div");
-      label.className = "label";
-      label.textContent = role === "start" ? "Start" : "End";
-      card.appendChild(label);
-    }
+  // Badges: jersey number TL, draft year TR
+  if (player.jersey_number) {
+    const badgeTl = document.createElement("div");
+    badgeTl.className = "badge tl";
+    badgeTl.textContent = "#" + player.jersey_number;
+    card.appendChild(badgeTl);
+  }
+  if (player.team_seasons?.length) {
+    const seasons = player.team_seasons.map(t => t.season);
+    const first = Math.min(...seasons);
+    const last = Math.max(...seasons);
+    const badgeTr = document.createElement("div");
+    badgeTr.className = "badge tr";
+    badgeTr.textContent = String(first).slice(-2) + "–" + String(last + 1).slice(-2);
+    card.appendChild(badgeTr);
   }
 
-  // Name bar
+  // Role label (Start / End only)
+  if (role === "start" || role === "end") {
+    const label = document.createElement("div");
+    label.className = "label";
+    label.textContent = role === "start" ? "Start" : "End";
+    card.appendChild(label);
+  }
+
+  // Name bar (always includes team line)
   const nameBar = document.createElement("div");
   nameBar.className = "name-bar";
   const nameEl = document.createElement("div");
   nameEl.className = "name";
   nameEl.textContent = `${player.first_name} ${player.last_name}`;
   nameBar.appendChild(nameEl);
-  if (kind === "big") {
-    const teamEl = document.createElement("div");
-    teamEl.className = "team";
-    teamEl.textContent = team?.full_name || "—";
-    nameBar.appendChild(teamEl);
-  }
+  const teamEl = document.createElement("div");
+  teamEl.className = "team";
+  const lastSeason = player.team_seasons?.length
+    ? Math.max(...player.team_seasons.map(t => t.season)) : 0;
+  teamEl.textContent = lastSeason < 2024 ? "Retired" : (team?.full_name || "—");
+  nameBar.appendChild(teamEl);
   card.appendChild(nameBar);
 
-  return card;
+  const shell = document.createElement("div");
+  shell.className = "player-card-shell";
+  shell.appendChild(card);
+  return shell;
 }
 
 // ---------- DATA ----------
@@ -944,9 +1169,10 @@ function shareTeamSeason(p1, p2) {
   return overlap;
 }
 function pickDailyPair() {
-  const start = state.puzzleNum % DAILY_POOL.length;
-  for (let off = 0; off < DAILY_POOL.length; off++) {
-    const p = DAILY_POOL[(start + off) % DAILY_POOL.length];
+  const pool = POOLS[state.difficulty];
+  const start = state.puzzleNum % pool.length;
+  for (let off = 0; off < pool.length; off++) {
+    const p = pool[(start + off) % pool.length];
     if (state.data.players[p.a] && state.data.players[p.b]) return p;
   }
   const sorted = Object.values(state.data.players)
@@ -955,7 +1181,7 @@ function pickDailyPair() {
 }
 function latestTeam(p) {
   if (!p.team_seasons?.length) return null;
-  const latest = p.team_seasons.reduce((acc, t) => t.season > acc.season ? t : acc, p.team_seasons[0]);
+  const latest = p.team_seasons.reduce((acc, t) => t.season >= acc.season ? t : acc, p.team_seasons[0]);
   return state.data.teams[latest.team_id] || null;
 }
 function setStatus(msg, kind) {
@@ -964,84 +1190,64 @@ function setStatus(msg, kind) {
 }
 
 // ---------- BOOT ----------
-async function boot() {
-  els.date.textContent = todayDate();
-  els.num.textContent = "#" + state.puzzleNum;
 
-  try {
-    state.data = await loadData();
-    buildIndex(state.data);
-
-    const pair = pickDailyPair();
-    state.startPlayer = state.data.players[pair.a];
-    state.endPlayer = state.data.players[pair.b];
-
-    state.used.add(state.startPlayer.id);
-    state.used.add(state.endPlayer.id);
-
-    renderChainRow();
-
-    els.search.disabled = false;
-    setStatus(`Add players who connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
-    els.search.focus();
-  } catch (e) {
-    setStatus("Failed to load: " + e.message, "bad");
-  }
-}
-
-// Builds the entire horizontal chain: [Start big] → [bridge mini]... → [End big]
+// Builds the entire horizontal chain: [Start] → [bridge]... → [End]
 function renderChainRow() {
   els.chainRow.innerHTML = "";
 
-  // Start card
-  els.chainRow.appendChild(makeCard(state.startPlayer, "big", "start"));
-
-  // Arrow + bridges + arrows + (placeholder if empty + not complete)
   const bridges = state.chain.filter(p => p.role !== "start" && p.role !== "end");
 
-  if (bridges.length === 0 && !state.complete) {
-    // Show one placeholder slot to hint at the next pick
-    const arrow1 = document.createElement("span");
-    arrow1.className = "chain-arrow";
-    arrow1.textContent = "→";
-    els.chainRow.appendChild(arrow1);
+  function makeArrow(idx) {
+    // After a successful check: show connection pill
+    if (state.complete && state.connections[idx]) {
+      const c = state.connections[idx];
+      const pill = document.createElement("div");
+      pill.className = "conn-pill";
+      const season = document.createElement("div");
+      season.className = "cp-season";
+      season.textContent = c.season;
+      const team = document.createElement("div");
+      team.className = "cp-team";
+      team.textContent = c.teamName;
+      pill.appendChild(season);
+      pill.appendChild(team);
+      return pill;
+    }
+    // After a failed check: highlight the broken link
+    const span = document.createElement("span");
+    span.className = "chain-arrow" + (state.brokenLink === idx ? " broken" : "");
+    span.textContent = state.brokenLink === idx ? "✕" : "→";
+    return span;
+  }
 
+  els.chainRow.appendChild(makeCard(state.startPlayer, "start"));
+
+  if (bridges.length === 0 && !state.complete) {
+    els.chainRow.appendChild(makeArrow(0));
     const ph = document.createElement("div");
     ph.className = "placeholder-card";
     ph.textContent = "Add a player";
     els.chainRow.appendChild(ph);
   } else {
-    for (const node of bridges) {
-      const arrow = document.createElement("span");
-      arrow.className = "chain-arrow";
-      arrow.textContent = "→";
-      els.chainRow.appendChild(arrow);
-
-      const card = makeCard(node._ref, "mini");
-      if (node.invalid) card.classList.add("invalid");
-      els.chainRow.appendChild(card);
-    }
+    bridges.forEach((node, i) => {
+      els.chainRow.appendChild(makeArrow(i));
+      const shell = makeCard(node._ref, "bridge");
+      if (node.invalid) shell.querySelector('.player-card').classList.add("invalid");
+      els.chainRow.appendChild(shell);
+    });
   }
 
-  // Trailing arrow + End card
-  const arrowLast = document.createElement("span");
-  arrowLast.className = "chain-arrow";
-  arrowLast.textContent = "→";
-  els.chainRow.appendChild(arrowLast);
+  els.chainRow.appendChild(makeArrow(bridges.length));
+  els.chainRow.appendChild(makeCard(state.endPlayer, "end"));
 
-  els.chainRow.appendChild(makeCard(state.endPlayer, "big", "end"));
-
-  // Update stats
-  // Steps = bridges + 2 (the start→first hop + last→end hop), but only meaningful once chain is checked
-  // For display, show bridges count + 1 (== number of hops if chain were complete)
   els.stepCount.textContent = bridges.length + 1;
   els.rarityScore.textContent = bridges.reduce((s, p) => s + (p.rarity || 0), 0);
   els.checkBtn.disabled = bridges.length < 1 || state.complete;
 
-  // Auto-scroll the row to show the latest pick
-  if (bridges.length > 0) {
-    setTimeout(() => { els.chainRow.scrollLeft = els.chainRow.scrollWidth; }, 50);
-  }
+  requestAnimationFrame(() => {
+    els.chainRow.classList.toggle("overflow", els.chainRow.scrollWidth > els.chainRow.clientWidth);
+    if (bridges.length > 0) els.chainRow.scrollLeft = els.chainRow.scrollWidth;
+  });
 }
 
 // ---------- SEARCH ----------
@@ -1099,11 +1305,35 @@ function renderResults() {
     left.className = "left";
     left.appendChild(makeSearchAvatar(p.ref));
 
+    const nameCol = document.createElement("div");
+    nameCol.className = "name-col";
+
     const nameSpan = document.createElement("span");
     nameSpan.className = "name-text";
     const seasons = p.ref.team_seasons?.length ? new Set(p.ref.team_seasons.map(t => t.season)).size : 0;
     nameSpan.innerHTML = `${p.full}${seasons ? `<span class="yrs">· ${seasons}y</span>` : ""}`;
-    left.appendChild(nameSpan);
+    nameCol.appendChild(nameSpan);
+
+    // Recent teams preview line
+    if (p.ref.team_seasons?.length && state.data) {
+      const sorted = [...p.ref.team_seasons].sort((a, b) => b.season - a.season);
+      const seen = new Set(); const names = [];
+      for (const ts of sorted) {
+        if (!seen.has(ts.team_id)) {
+          seen.add(ts.team_id);
+          const t = state.data.teams[ts.team_id];
+          if (t) names.push(t.full_name.split(" ").slice(-1)[0]);
+        }
+        if (names.length >= 3) break;
+      }
+      if (names.length) {
+        const preview = document.createElement("span");
+        preview.className = "preview-line";
+        preview.textContent = names.join(" · ");
+        nameCol.appendChild(preview);
+      }
+    }
+    left.appendChild(nameCol);
 
     const pos = document.createElement("span");
     pos.className = "pos";
@@ -1162,20 +1392,26 @@ function checkChain() {
     return;
   }
 
-  // Sequence: [start, ...bridges, end]
   const sequence = [state.startPlayer, ...bridges.map(n => n._ref), state.endPlayer];
-  let firstBreak = -1;
+  state.connections = [];
+  state.brokenLink = -1;
+
   for (let i = 0; i < sequence.length - 1; i++) {
     const overlap = shareTeamSeason(sequence[i], sequence[i + 1]);
-    if (!overlap.length && firstBreak < 0) firstBreak = i;
+    if (!overlap.length) {
+      if (state.brokenLink < 0) state.brokenLink = i;
+    } else {
+      // Pick the most recent shared season for the pill
+      const best = overlap.reduce((a, b) => b.season > a.season ? b : a, overlap[0]);
+      state.connections[i] = { season: best.season, teamName: state.data.teams[best.team_id]?.full_name || "—" };
+    }
   }
 
-  if (firstBreak >= 0) {
-    const a = sequence[firstBreak];
-    const b = sequence[firstBreak + 1];
+  if (state.brokenLink >= 0) {
+    const a = sequence[state.brokenLink];
+    const b = sequence[state.brokenLink + 1];
     setStatus(`Broken link: ${a.first_name} ${a.last_name} and ${b.first_name} ${b.last_name} were never teammates.`, "bad");
-    // Mark the offending bridge (the one to the right of the break, except if break is at last position)
-    if (firstBreak < bridges.length) bridges[firstBreak].invalid = true;
+    if (state.brokenLink < bridges.length) bridges[state.brokenLink].invalid = true;
     else if (bridges.length > 0) bridges[bridges.length - 1].invalid = true;
     renderChainRow();
     return;
@@ -1189,7 +1425,7 @@ function checkChain() {
 function finishGame() {
   els.search.disabled = true;
   const bridges = state.chain.filter(p => p.role !== "start" && p.role !== "end");
-  const steps = bridges.length + 1;  // hops between players
+  const steps = bridges.length + 1;
   const rarity = bridges.reduce((s, p) => s + (p.rarity || 0), 0);
   const eff = Math.max(0, Math.round(1000 / Math.pow(steps, 1.4)));
   const total = eff + rarity * 25;
@@ -1201,15 +1437,33 @@ function finishGame() {
   els.complete.classList.add("show");
   setStatus("Chain locked. Well played.", "ok");
 
-  const key = `lineage:${state.puzzleNum}`;
-  const prev = JSON.parse(localStorage.getItem(key) || "null");
-  if (!prev || total > prev.total) {
-    localStorage.setItem(key, JSON.stringify({
-      total, steps, rarity,
-      chain: [state.startPlayer.first_name + " " + state.startPlayer.last_name,
-              ...bridges.map(p => p.name),
-              state.endPlayer.first_name + " " + state.endPlayer.last_name],
-    }));
+  // Save to localStorage
+  {
+    const key = `lineage:${state.difficulty}:${state.puzzleNum}`;
+    const prev = JSON.parse(localStorage.getItem(key) || "null");
+    if (!prev || total > prev.total) {
+      localStorage.setItem(key, JSON.stringify({
+        total, steps, rarity,
+        chain: [state.startPlayer.first_name + " " + state.startPlayer.last_name,
+                ...bridges.map(p => p.name),
+                state.endPlayer.first_name + " " + state.endPlayer.last_name],
+      }));
+    }
+    updateStreakBadge();
+  }
+
+  // Achievements
+  const earned = ACHIEVEMENTS.filter(a => a.check(bridges, total));
+  if (earned.length) {
+    els.achWrap.style.display = "";
+    els.achList.innerHTML = "";
+    earned.forEach(a => {
+      const badge = document.createElement("span");
+      badge.className = "ach-badge earned";
+      badge.textContent = `${a.icon} ${a.label}`;
+      badge.title = a.desc;
+      els.achList.appendChild(badge);
+    });
   }
 }
 
@@ -1233,7 +1487,11 @@ els.resetBtn.addEventListener("click", () => {
   state.chain = [];
   state.used = new Set([state.startPlayer.id, state.endPlayer.id]);
   state.complete = false;
+  state.connections = [];
+  state.brokenLink = -1;
   els.complete.classList.remove("show");
+  els.achWrap.style.display = "none";
+  els.achList.innerHTML = "";
   els.search.disabled = false;
   els.search.value = "";
   renderChainRow();
@@ -1264,42 +1522,123 @@ els.helpPopup.addEventListener("click", (e) => {
   if (e.target === els.helpPopup) els.helpPopup.classList.remove("show");
 });
 
-$("nav-howto")?.addEventListener("click", () => {
-  alert(
-    "Connect the Start player to the End player by adding teammates between them.\n\n" +
-    "• Each link must be: same team, same season.\n" +
-    "• Add players one at a time, then click Check chain.\n" +
-    "• Shorter chains and rarer players score higher.\n\n" +
-    "New puzzle every day."
-  );
-});
+$("nav-howto")?.addEventListener("click", () => $("howto-popup").classList.add("show"));
+$("howto-close")?.addEventListener("click", () => $("howto-popup").classList.remove("show"));
+$("howto-popup")?.addEventListener("click", (e) => { if (e.target === $("howto-popup")) $("howto-popup").classList.remove("show"); });
 $("nav-scoring")?.addEventListener("click", () => els.helpPopup.classList.add("show"));
+
 $("nav-stats")?.addEventListener("click", () => {
   const records = [];
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
-    if (k && k.startsWith("lineage:")) {
-      try {
-        const v = JSON.parse(localStorage.getItem(k));
-        records.push({ puzzle: k.split(":")[1], ...v });
-      } catch {}
+    if (k?.startsWith("lineage:")) {
+      try { records.push({ puzzle: +k.split(":")[1], ...JSON.parse(localStorage.getItem(k)) }); } catch {}
     }
   }
-  if (!records.length) {
-    alert("No completed puzzles yet. Finish today's chain to start your record.");
-    return;
-  }
   records.sort((a, b) => b.puzzle - a.puzzle);
-  const lines = records.slice(0, 10).map(r => `Puzzle #${r.puzzle}: ${r.steps} steps · score ${r.total}`);
-  alert("Recent puzzles\n\n" + lines.join("\n"));
+
+  const played = records.length;
+  const best = played ? Math.max(...records.map(r => r.total)) : 0;
+  const avg = played ? (records.reduce((s, r) => s + r.steps, 0) / played).toFixed(1) : "—";
+  const streak = getStreak();
+
+  els.stPlayed.textContent = played;
+  els.stBest.textContent = best || "—";
+  els.stAvg.textContent = avg;
+  els.stStreak.textContent = streak;
+
+  els.stBody.innerHTML = "";
+  if (!played) {
+    els.stBody.innerHTML = `<tr><td colspan="4" style="color:var(--ink-3);text-align:center;padding:20px">No completed puzzles yet.</td></tr>`;
+  } else {
+    records.slice(0, 15).forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>#${r.puzzle}</td><td>${r.total}</td><td>${r.steps}</td><td>${r.rarity}</td>`;
+      els.stBody.appendChild(tr);
+    });
+  }
+  els.statsPopup.classList.add("show");
 });
+
+els.statsClose.addEventListener("click", () => els.statsPopup.classList.remove("show"));
+els.statsPopup.addEventListener("click", (e) => { if (e.target === els.statsPopup) els.statsPopup.classList.remove("show"); });
+
+function switchDifficulty(diff) {
+  if (!state.data || state.difficulty === diff) return;
+  state.difficulty = diff;
+  state.chain = [];
+  state.connections = [];
+  state.brokenLink = -1;
+  state.complete = false;
+  els.complete.classList.remove("show");
+  els.achWrap.style.display = "none";
+  els.search.disabled = false;
+  els.search.value = "";
+
+  const pair = pickDailyPair();
+  state.startPlayer = state.data.players[pair.a];
+  state.endPlayer = state.data.players[pair.b];
+  state.used = new Set([state.startPlayer.id, state.endPlayer.id]);
+
+  // Update active nav button
+  ["easy","medium","hard"].forEach(d => {
+    $(`nav-${d}`)?.classList.toggle("active", d === diff);
+  });
+
+  updateStreakBadge();
+  renderChainRow();
+  $("daily-date").textContent = todayDate();
+  $("puzzle-num").textContent = "#" + state.puzzleNum;
+  $("difficulty-label").textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
+  setStatus(`${diff.charAt(0).toUpperCase()+diff.slice(1)}: Connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
+  els.search.focus();
+}
+
+$("nav-easy")?.addEventListener("click", () => switchDifficulty("easy"));
+$("nav-medium")?.addEventListener("click", () => switchDifficulty("medium"));
+$("nav-hard")?.addEventListener("click", () => switchDifficulty("hard"));
 
 $("how-link").addEventListener("click", (e) => {
   e.preventDefault();
   $("nav-howto").click();
 });
 
+async function boot() {
+  els.date.textContent = todayDate();
+  els.num.textContent = "#" + state.puzzleNum;
+  $("difficulty-label").textContent = "Medium";
+  $("nav-medium")?.classList.add("active");
+  $("nav-easy")?.classList.remove("active");
+  updateStreakBadge();
+
+  try {
+    state.data = await loadData();
+    buildIndex(state.data);
+
+    const pair = pickDailyPair();
+    state.startPlayer = state.data.players[pair.a];
+    state.endPlayer = state.data.players[pair.b];
+
+    state.used.add(state.startPlayer.id);
+    state.used.add(state.endPlayer.id);
+
+    renderChainRow();
+
+    els.search.disabled = false;
+    setStatus(`Add players who connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
+    els.search.focus();
+  } catch (e) {
+    setStatus("Failed to load: " + e.message, "bad");
+  }
+}
+
 boot();
+
+// Scroll-reveal
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 </script>
 </body>
 </html>
