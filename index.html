@@ -2118,14 +2118,63 @@ function restoreSolvedChain(savedJson) {
         state.used.add(player.id);
       }
     }
-    state.connections = saved.connections || [];
-  } catch(e) {}
-  state.complete = true;
-  els.search.disabled = true;
-  els.checkBtn.disabled = true;
-  els.undoBtn.disabled = true;
-  renderChainRow();
-  setStatus("Already solved today. Come back tomorrow for a new puzzle.", "ok");
+
+    // Restore connections — use saved data if present, otherwise recompute from player data
+    if (saved.connections && saved.connections.length > 0) {
+      state.connections = saved.connections;
+    } else {
+      const sequence = [state.startPlayer, ...state.chain.map(n => n._ref), state.endPlayer];
+      state.connections = [];
+      for (let i = 0; i < sequence.length - 1; i++) {
+        const overlap = shareTeamSeason(sequence[i], sequence[i + 1]);
+        if (overlap.length) {
+          const best = overlap.reduce((a, b) => b.season > a.season ? b : a, overlap[0]);
+          state.connections[i] = { season: best.season, teamName: state.data.teams[best.team_id]?.full_name || "—" };
+        }
+      }
+    }
+
+    state.complete = true;
+    els.search.disabled = true;
+    els.checkBtn.disabled = true;
+    els.undoBtn.disabled = true;
+    renderChainRow();
+
+    // Restore the complete panel (score + achievements) so it shows on refresh
+    const bridges = state.chain;
+    const steps  = saved.steps  || (bridges.length + 1);
+    const rarity = saved.rarity || bridges.reduce((s, p) => s + (p.rarity || 0), 0);
+    const eff    = Math.max(0, Math.round(1000 / Math.pow(steps, 1.4)));
+    els.rSteps.textContent  = steps;
+    els.rRarity.textContent = rarity;
+    els.rEff.textContent    = eff;
+    els.rTotal.textContent  = saved.total || (eff + rarity * 25);
+    els.complete.classList.add("show");
+
+    // Restore achievements
+    const earned = ACHIEVEMENTS.filter(a => a.check(bridges, saved.total));
+    if (earned.length) {
+      els.achWrap.style.display = "";
+      els.achList.innerHTML = "";
+      earned.forEach(a => {
+        const badge = document.createElement("span");
+        badge.className = "ach-badge earned";
+        badge.textContent = `${a.icon} ${a.label}`;
+        badge.title = a.desc;
+        els.achList.appendChild(badge);
+      });
+    }
+
+    setStatus("Already solved today. Come back tomorrow for a new puzzle.", "ok");
+  } catch(e) {
+    // Fallback: still lock the UI even if restore fails
+    state.complete = true;
+    els.search.disabled = true;
+    els.checkBtn.disabled = true;
+    els.undoBtn.disabled = true;
+    renderChainRow();
+    setStatus("Already solved today. Come back tomorrow for a new puzzle.", "ok");
+  }
 }
 
 $("nav-easy")?.addEventListener("click", () => switchDifficulty("easy"));
