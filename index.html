@@ -140,6 +140,54 @@
   .hero h1 em { font-style: italic; font-weight: 400; color: var(--accent); }
   .hero p { font-size: 16px; color: var(--ink-2); max-width: 440px; line-height: 1.6; }
 
+  /* LEADERBOARD PAGE VIEW */
+  #leaderboard-view {
+    display: none;
+    min-height: 100vh;
+    padding-top: 100px;
+    padding-bottom: 60px;
+    animation: fadeIn 0.25s ease-out;
+  }
+  #leaderboard-view.active { display: block; }
+  #game-view.hidden { display: none; }
+  .lb-page-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .lb-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+  .lb-back-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--ink-2);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: 120px;
+  }
+  .lb-back-btn:hover { color: var(--ink); border-color: var(--surface-2); }
+  .lb-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 32px;
+    text-align: center;
+    margin: 0;
+  }
+  .lb-subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+
   /* AUTH MODAL */
   .auth-overlay {
     display: none;
@@ -833,30 +881,41 @@
   </div>
 </div>
 
-<!-- Leaderboard popup -->
-<div class="popup" id="leaderboard-popup">
-  <div class="popup-inner" style="max-width:560px;">
-    <button class="popup-close" id="lb-close">×</button>
-    <h2 style="font-family:'Fraunces',Georgia,serif;font-size:24px;margin-bottom:4px;">🏆 Weekly Leaderboard</h2>
-    <div id="lb-week-label" style="font-size:13px;color:var(--ink-3);margin-bottom:20px;"></div>
-    <div id="lb-signin-prompt" style="display:none;text-align:center;padding:24px 0;">
-      <p style="color:var(--ink-2);margin-bottom:16px;">Sign in to save your scores and appear on the leaderboard.</p>
-      <button class="google-btn" id="lb-google-btn">
+<!-- Leaderboard full-page view -->
+<div id="leaderboard-view">
+  <div class="lb-page-inner">
+    <div class="lb-page-header">
+      <button class="lb-back-btn" id="lb-back">← Back to game</button>
+      <div>
+        <h1 class="lb-title">🏆 Leaderboard</h1>
+        <div id="lb-week-label" class="lb-subtitle"></div>
+      </div>
+      <div style="width:120px;"></div>
+    </div>
+
+    <div id="lb-signin-prompt" style="display:none;text-align:center;padding:60px 0;">
+      <p style="color:var(--ink-2);margin-bottom:20px;font-size:16px;">Sign in to save your scores and appear on the leaderboard.</p>
+      <button class="google-btn" id="lb-google-btn" style="max-width:280px;margin:0 auto;">
         <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
         Sign in with Google
       </button>
     </div>
+
     <div id="lb-table-wrap">
-      <table class="lb-table">
-        <thead><tr><th>#</th><th>Player</th><th>Easy</th><th>Med</th><th>Hard</th><th>Total</th></tr></thead>
+      <div id="lb-loading" style="text-align:center;padding:60px;color:var(--ink-3);font-size:16px;">Loading…</div>
+      <table class="lb-table" id="lb-table" style="display:none;">
+        <thead>
+          <tr><th>#</th><th>Player</th><th>Easy</th><th>Med</th><th>Hard</th><th>Total pts</th></tr>
+        </thead>
         <tbody id="lb-body"></tbody>
       </table>
-      <div id="lb-loading" style="text-align:center;padding:32px;color:var(--ink-3);">Loading…</div>
     </div>
-    <div id="lb-my-row" style="display:none;border-top:1px solid var(--border);margin-top:12px;padding-top:12px;font-size:13px;color:var(--ink-2);"></div>
+
+    <div id="lb-my-row" style="display:none;margin-top:16px;padding:14px 16px;border-radius:12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);font-size:14px;color:var(--ink-2);"></div>
   </div>
 </div>
 
+<div id="game-view">
 <div class="wrap">
 
   <div class="hero reveal">
@@ -934,6 +993,7 @@
     <a href="#" id="how-link">How to play</a>
   </footer>
 </div>
+</div><!-- end #game-view -->
 
 <div class="help-popup" id="help-popup">
   <div class="inner">
@@ -1882,33 +1942,47 @@ async function loadLeaderboard() {
     .slice(0, 20);
 }
 
-// Render leaderboard popup
-async function openLeaderboard() {
-  const popup = $('leaderboard-popup');
-  popup.classList.add('show');
+// Switch to leaderboard page view
+function showLeaderboardView() {
+  $('game-view').classList.add('hidden');
+  $('leaderboard-view').classList.add('active');
+  window.scrollTo(0, 0);
+  loadLeaderboardView();
+}
+
+function hideLeaderboardView() {
+  $('leaderboard-view').classList.remove('active');
+  $('game-view').classList.remove('hidden');
+}
+
+async function loadLeaderboardView() {
   $('lb-week-label').textContent = weekLabel();
-  $('lb-loading').style.display = 'block';
   $('lb-body').innerHTML = '';
   $('lb-my-row').style.display = 'none';
+  $('lb-loading').style.display = 'block';
+  $('lb-table') && ($('lb-table').style.display = 'none');
 
   const user = fbAuth.currentUser;
   if (!user) {
     $('lb-signin-prompt').style.display = 'block';
     $('lb-table-wrap').style.display = 'none';
-  } else {
-    $('lb-signin-prompt').style.display = 'none';
-    $('lb-table-wrap').style.display = 'block';
+    $('lb-loading').style.display = 'none';
+    return;
   }
+  $('lb-signin-prompt').style.display = 'none';
+  $('lb-table-wrap').style.display = 'block';
 
   try {
     const rows = await loadLeaderboard();
     $('lb-loading').style.display = 'none';
+    $('lb-table').style.display = 'table';
+
     if (!rows.length) {
-      $('lb-body').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--ink-3)">No scores yet this week. Be the first!</td></tr>';
+      $('lb-body').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--ink-3)">No scores yet this week — be the first!</td></tr>';
       return;
     }
     rows.forEach((r, i) => {
-      const isMe = user && r.uid === user.uid;
+      const isMe = r.uid === user.uid;
       const tr = document.createElement('tr');
       if (isMe) tr.classList.add('me');
       tr.innerHTML = `
@@ -1916,7 +1990,7 @@ async function openLeaderboard() {
         <td><div class="lb-player">
           ${r.photoURL ? `<img class="lb-avatar" src="${r.photoURL}" alt="">` : ''}
           <span class="lb-name">${r.displayName || 'Player'}</span>
-          ${isMe ? '<span style="font-size:11px;color:var(--accent);margin-left:4px;">you</span>' : ''}
+          ${isMe ? '<span style="font-size:11px;color:var(--accent);margin-left:6px;">you</span>' : ''}
         </div></td>
         <td>${r.easy || 0}</td>
         <td>${r.medium || 0}</td>
@@ -1925,12 +1999,12 @@ async function openLeaderboard() {
       $('lb-body').appendChild(tr);
     });
 
-    if (user && !rows.find(r => r.uid === user.uid)) {
+    if (!rows.find(r => r.uid === user.uid)) {
       $('lb-my-row').style.display = 'block';
       $('lb-my-row').textContent = "You haven't scored this week yet — complete a puzzle to appear here.";
     }
   } catch(e) {
-    $('lb-loading').textContent = 'Failed to load leaderboard.';
+    $('lb-loading').textContent = 'Failed to load. Check your connection.';
   }
 }
 
@@ -1947,7 +2021,17 @@ fbAuth.onAuthStateChanged(user => {
 });
 
 async function signInWithGoogle() {
-  try { await fbAuth.signInWithPopup(gProvider); } catch(e) { console.warn('Sign-in cancelled'); }
+  try {
+    await fbAuth.signInWithPopup(gProvider);
+    return true;
+  } catch(e) {
+    if (e.code === 'auth/unauthorized-domain') {
+      alert('Sign-in blocked: this domain isn\'t authorized in Firebase.\nGo to Firebase → Authentication → Settings → Authorized domains and add this site\'s domain.');
+    } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+      alert('Sign-in failed: ' + e.message);
+    }
+    return false;
+  }
 }
 
 // After puzzle complete — prompt or save
@@ -1963,7 +2047,8 @@ function handlePuzzleComplete(diff, rawScore) {
 
 // Auth modal buttons
 $('google-signin-btn')?.addEventListener('click', async () => {
-  await signInWithGoogle();
+  const ok = await signInWithGoogle();
+  if (!ok) return;
   $('auth-overlay').classList.remove('show');
   if (pendingScore) {
     await saveScoreToFirestore(pendingScore.diff, pendingScore.rawScore);
@@ -1976,14 +2061,11 @@ $('auth-skip')?.addEventListener('click', () => {
 });
 $('nav-signin')?.addEventListener('click', signInWithGoogle);
 $('nav-signout')?.addEventListener('click', () => fbAuth.signOut());
-$('nav-leaderboard')?.addEventListener('click', openLeaderboard);
-$('lb-close')?.addEventListener('click', () => $('leaderboard-popup').classList.remove('show'));
+$('nav-leaderboard')?.addEventListener('click', showLeaderboardView);
+$('lb-back')?.addEventListener('click', hideLeaderboardView);
 $('lb-google-btn')?.addEventListener('click', async () => {
-  await signInWithGoogle();
-  openLeaderboard();
-});
-$('leaderboard-popup')?.addEventListener('click', e => {
-  if (e.target === $('leaderboard-popup')) $('leaderboard-popup').classList.remove('show');
+  const ok = await signInWithGoogle();
+  if (ok) loadLeaderboardView();
 });
 
 // Scroll-reveal
