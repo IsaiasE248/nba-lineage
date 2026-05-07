@@ -690,7 +690,7 @@
   .help-btn:hover { background: var(--accent); color: #fff; }
 
   /* SEARCH */
-  .input-wrap { position: relative; }
+  .input-wrap { position: relative; z-index: 10; }
   .search-input {
     width: 100%;
     padding: 15px 20px;
@@ -2342,7 +2342,10 @@ async function saveScoreToFirestore(diff, rawScore) {
   data[diff]  = (data[diff]  || 0) + pts;
   data.total  = (data.total  || 0) + pts;
   data.displayName = user.displayName;
-  data.photoURL    = user.photoURL || '';
+  // Prefer custom uploaded photo over Google photo
+  const userDoc = await fbDb.collection('users').doc(user.uid).get();
+  const customPhoto = userDoc.exists ? (userDoc.data().photoDataURL || '') : '';
+  data.photoURL = customPhoto || user.photoURL || '';
   await ref.set(data);
 }
 
@@ -2417,7 +2420,9 @@ async function loadLeaderboardView() {
       tr.innerHTML = `
         <td class="lb-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
         <td><div class="lb-player">
-          ${r.photoURL ? `<img class="lb-avatar" src="${r.photoURL}" alt="">` : ''}
+          ${r.photoURL
+            ? `<img class="lb-avatar" src="${r.photoURL}" alt="">`
+            : `<div class="lb-avatar" style="background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);border-radius:50%;">${(r.displayName||'P')[0].toUpperCase()}</div>`}
           <span class="lb-name">${r.displayName || 'Player'}</span>
           ${isMe ? '<span style="font-size:11px;color:var(--accent);margin-left:6px;">you</span>' : ''}
         </div></td>
