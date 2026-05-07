@@ -410,14 +410,26 @@
   .streak-badge.hot { border-color: var(--accent-line); color: var(--accent-soft); background: var(--accent-glow); }
 
   /* STATS POPUP */
-  .stats-popup {
+  .popup, .stats-popup {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.75);
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     display: none; align-items: center; justify-content: center;
     padding: 20px; z-index: 100;
   }
-  .stats-popup.show { display: flex; animation: fadeIn 0.2s ease-out; }
+  .popup.show, .stats-popup.show { display: flex; animation: fadeIn 0.2s ease-out; }
+  .popup-inner {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px; width: 100%; max-width: 480px;
+    position: relative; max-height: 85vh; overflow-y: auto;
+  }
+  .popup-close {
+    position: absolute; top: 16px; right: 16px;
+    background: none; border: none; color: var(--ink-3);
+    font-size: 22px; cursor: pointer; line-height: 1;
+  }
+  .popup-close:hover { color: var(--ink); }
+  .stats-popup { }
   .stats-popup .inner {
     max-width: 520px; width: 100%;
     background: var(--surface); border: 1px solid var(--border-strong);
