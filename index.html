@@ -622,7 +622,6 @@
 
   /* SEARCH RESULT PREVIEW */
   .result-item .name-col { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-  .result-item .preview-line { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* AVATARS (used in search dropdown only) */
   .avatar {
@@ -1872,25 +1871,6 @@ function renderResults() {
     nameSpan.innerHTML = `${p.full}${seasons ? `<span class="yrs">· ${seasons}y</span>` : ""}`;
     nameCol.appendChild(nameSpan);
 
-    // Recent teams preview line
-    if (p.ref.team_seasons?.length && state.data) {
-      const sorted = [...p.ref.team_seasons].sort((a, b) => b.season - a.season);
-      const seen = new Set(); const names = [];
-      for (const ts of sorted) {
-        if (!seen.has(ts.team_id)) {
-          seen.add(ts.team_id);
-          const t = state.data.teams[ts.team_id];
-          if (t) names.push(t.full_name.split(" ").slice(-1)[0]);
-        }
-        if (names.length >= 3) break;
-      }
-      if (names.length) {
-        const preview = document.createElement("span");
-        preview.className = "preview-line";
-        preview.textContent = names.join(" · ");
-        nameCol.appendChild(preview);
-      }
-    }
     left.appendChild(nameCol);
 
     const pos = document.createElement("span");
