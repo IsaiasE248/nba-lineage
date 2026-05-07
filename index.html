@@ -159,6 +159,8 @@
   }
   .diff-tab:hover { color: var(--ink); border-color: var(--surface-2); background: var(--surface); }
   .diff-tab.active { color: var(--accent); border-color: var(--accent); background: rgba(245,158,11,0.08); }
+  .diff-tab.done { color: #22c55e; border-color: #22c55e; background: rgba(34,197,94,0.08); }
+  .diff-tab.done.active { color: #22c55e; border-color: #22c55e; }
 
   /* CHAIN ROW: start card + bridges + end card, all in one horizontal flow */
   .chain-row {
@@ -1477,7 +1479,13 @@ function finishGame() {
       }));
     }
     updateStreakBadge();
+    markCompletedTabs();
   }
+
+  // Lock input so completed puzzle can't be edited
+  els.search.disabled = true;
+  els.checkBtn.disabled = true;
+  els.undoBtn.disabled = true;
 
   // Achievements
   const earned = ACHIEVEMENTS.filter(a => a.check(bridges, total));
@@ -1590,6 +1598,19 @@ $("nav-stats")?.addEventListener("click", () => {
 els.statsClose.addEventListener("click", () => els.statsPopup.classList.remove("show"));
 els.statsPopup.addEventListener("click", (e) => { if (e.target === els.statsPopup) els.statsPopup.classList.remove("show"); });
 
+function markCompletedTabs() {
+  ["easy","medium","hard"].forEach(d => {
+    const key = `lineage:${d}:${dayIndex()}`;
+    const done = !!localStorage.getItem(key);
+    const tab = $(`tab-${d}`);
+    if (!tab) return;
+    tab.classList.toggle("done", done);
+    // Show checkmark in label if done
+    const label = d.charAt(0).toUpperCase() + d.slice(1);
+    tab.textContent = done ? `${label} ✓` : label;
+  });
+}
+
 function switchDifficulty(diff) {
   if (!state.data || state.difficulty === diff) return;
   state.difficulty = diff;
@@ -1599,7 +1620,6 @@ function switchDifficulty(diff) {
   state.complete = false;
   els.complete.classList.remove("show");
   els.achWrap.style.display = "none";
-  els.search.disabled = false;
   els.search.value = "";
 
   const pair = pickDailyPair();
@@ -1618,8 +1638,22 @@ function switchDifficulty(diff) {
   $("daily-date").textContent = todayDate();
   $("puzzle-num").textContent = "#" + state.puzzleNum;
   $("difficulty-label").textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
-  setStatus(`${diff.charAt(0).toUpperCase()+diff.slice(1)}: Connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
-  els.search.focus();
+
+  // If already solved today, restore completed state and lock editing
+  const saved = localStorage.getItem(`lineage:${diff}:${state.puzzleNum}`);
+  if (saved) {
+    state.complete = true;
+    els.search.disabled = true;
+    els.checkBtn.disabled = true;
+    els.undoBtn.disabled = true;
+    setStatus("Already solved today. Come back tomorrow for a new puzzle.", "ok");
+  } else {
+    els.search.disabled = false;
+    els.checkBtn.disabled = false;
+    els.undoBtn.disabled = false;
+    setStatus(`${diff.charAt(0).toUpperCase()+diff.slice(1)}: Connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
+    els.search.focus();
+  }
 }
 
 $("nav-easy")?.addEventListener("click", () => switchDifficulty("easy"));
@@ -1651,10 +1685,21 @@ async function boot() {
     state.used.add(state.endPlayer.id);
 
     renderChainRow();
+    markCompletedTabs();
 
-    els.search.disabled = false;
-    setStatus(`Add players who connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
-    els.search.focus();
+    // If today's medium puzzle already solved, restore locked state
+    const saved = localStorage.getItem(`lineage:medium:${state.puzzleNum}`);
+    if (saved) {
+      state.complete = true;
+      els.search.disabled = true;
+      els.checkBtn.disabled = true;
+      els.undoBtn.disabled = true;
+      setStatus("Already solved today. Come back tomorrow for a new puzzle.", "ok");
+    } else {
+      els.search.disabled = false;
+      setStatus(`Add players who connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
+      els.search.focus();
+    }
   } catch (e) {
     setStatus("Failed to load: " + e.message, "bad");
   }
