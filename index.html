@@ -715,8 +715,9 @@
     <div style="display:flex;align-items:center;gap:10px;">
       <span class="streak-badge" id="streak-badge" title="Current streak">🔥 0</span>
       <div class="nav-links">
-        <button class="nav-link active" id="nav-daily">Daily</button>
-        <button class="nav-link" id="nav-practice">Practice</button>
+        <button class="nav-link active" id="nav-easy">Easy</button>
+        <button class="nav-link" id="nav-medium">Medium</button>
+        <button class="nav-link" id="nav-hard">Hard</button>
         <button class="nav-link" id="nav-howto">How to play</button>
         <button class="nav-link" id="nav-scoring">Scoring</button>
         <button class="nav-link" id="nav-stats">Stats</button>
@@ -730,7 +731,7 @@
   <div class="hero reveal">
     <div class="eyebrow">
       <span class="dot"></span>
-      <span>Daily <span id="daily-date">—</span> · Puzzle <span id="puzzle-num">—</span></span>
+      <span>Daily <span id="daily-date">—</span> · Puzzle <span id="puzzle-num">—</span> · <span id="difficulty-label">Medium</span></span>
     </div>
     <h1>Two players, <em>one chain</em>.</h1>
     <p>Connect them through teammates who shared a team for at least one season.</p>
@@ -837,8 +838,8 @@
       <div class="item-body">Shorter chains score higher. Using obscure, short-career players adds rarity bonus points. Click <strong>Scoring</strong> in the nav for the full breakdown.</div>
     </div>
     <div class="item">
-      <div class="item-label">Daily puzzle</div>
-      <div class="item-body">A new pair drops every day. Use <strong>Practice</strong> mode to play unlimited extra rounds without affecting your streak.</div>
+      <div class="item-label">Difficulty</div>
+      <div class="item-body">Choose <strong>Easy</strong>, <strong>Medium</strong>, or <strong>Hard</strong> from the nav. Each has its own daily puzzle and streak — harder pairs require more hops and more obscure connections.</div>
     </div>
     <button class="btn primary close" id="howto-close">Got it</button>
   </div>
@@ -867,12 +868,57 @@
    NBA LINEAGE — card-style with real photos
    ========================================================================= */
 
-const DAILY_POOL = [
-  { a: 237, b: 140 }, { a: 115, b: 278 }, { a: 15,  b: 79  },
-  { a: 274, b: 472 }, { a: 79,  b: 237 }, { a: 472, b: 140 },
-  { a: 115, b: 237 }, { a: 274, b: 115 }, { a: 15,  b: 278 },
-  { a: 140, b: 79  },
+// Easy: famous teammates — 1-hop direct connections
+const POOL_EASY = [
+  { a: 237, b: 472 },  // LeBron ↔ Westbrook
+  { a: 237, b: 228 },  // LeBron ↔ Kyrie Irving
+  { a: 237, b: 117 },  // LeBron ↔ Anthony Davis
+  { a: 237, b: 17  },  // LeBron ↔ Carmelo Anthony
+  { a: 237, b: 461 },  // LeBron ↔ Dwyane Wade
+  { a: 140, b: 472 },  // KD ↔ Westbrook
+  { a: 140, b: 192 },  // KD ↔ James Harden
+  { a: 140, b: 228 },  // KD ↔ Kyrie Irving
+  { a: 472, b: 192 },  // Westbrook ↔ Harden
+  { a: 237, b: 140 },  // LeBron ↔ KD (2 hops)
+  { a: 237, b: 115 },  // LeBron ↔ Curry (2 hops)
+  { a: 367, b: 192 },  // Chris Paul ↔ Harden (Rockets era)
 ];
+
+// Medium: cross-era + niche players, 3-hop chains
+const POOL_MEDIUM = [
+  { a: 246, b: 830  },  // Jokic ↔ Sam Cassell
+  { a: 434, b: 1249 },  // Tatum ↔ Metta World Peace
+  { a: 322, b: 1237 },  // Donovan Mitchell ↔ Baron Davis
+  { a: 434, b: 1378 },  // Tatum ↔ Shane Battier
+  { a: 2931, b: 224 },  // Michael Jordan ↔ Andre Iguodala
+  { a: 2937, b: 1771},  // Charles Barkley ↔ Joakim Noah
+  { a: 2981, b: 1439},  // David Robinson ↔ Caron Butler
+  { a: 540, b: 1378  }, // Hakeem Olajuwon ↔ Shane Battier
+  { a: 278, b: 2871  }, // Lillard ↔ John Stockton
+  { a: 115, b: 552   }, // Curry ↔ Dennis Rodman
+  { a: 132, b: 965   }, // Luka ↔ Antonio McDyess
+  { a: 237, b: 2851  }, // LeBron ↔ Larry Bird
+];
+
+// Hard: 4-hop cross-era chains — modern stars vs. 1980s legends
+const POOL_HARD = [
+  { a: 278,  b: 2851 },  // Lillard ↔ Larry Bird
+  { a: 79,   b: 2851 },  // Jimmy Butler ↔ Larry Bird
+  { a: 172,  b: 2851 },  // Paul George ↔ Larry Bird
+  { a: 117,  b: 2851 },  // Anthony Davis ↔ Larry Bird
+  { a: 246,  b: 2851 },  // Jokic ↔ Larry Bird
+  { a: 145,  b: 2851 },  // Joel Embiid ↔ Larry Bird
+  { a: 132,  b: 2851 },  // Luka Doncic ↔ Larry Bird
+  { a: 434,  b: 2994 },  // Jayson Tatum ↔ Magic Johnson
+  { a: 434,  b: 2851 },  // Jayson Tatum ↔ Larry Bird
+  { a: 57,   b: 2994 },  // Devin Booker ↔ Magic Johnson
+  { a: 57,   b: 2851 },  // Devin Booker ↔ Larry Bird
+  { a: 322,  b: 2851 },  // Donovan Mitchell ↔ Larry Bird
+  { a: 2994, b: 1920 },  // Magic Johnson ↔ Patrick Ewing
+  { a: 2851, b: 1920 },  // Larry Bird ↔ Patrick Ewing
+];
+
+const POOLS = { easy: POOL_EASY, medium: POOL_MEDIUM, hard: POOL_HARD };
 
 function dayIndex() {
   const epoch = Date.UTC(2024, 0, 1);
@@ -893,7 +939,7 @@ const state = {
   complete: false,
   connections: [],   // [{season, teamName}] per link, populated after valid check
   brokenLink: -1,    // arrow index of first broken link, -1 if none
-  practice: false,
+  difficulty: 'medium',
   resultsList: [],
   activeIdx: -1,
 };
@@ -929,16 +975,17 @@ const ACHIEVEMENTS = [
   { id: "centurion", icon: "💯", label: "Centurion",   desc: "Score 500 or higher",                       check: (b, total) => total >= 500 },
 ];
 
-function getStreak() {
+function getStreak(diff) {
   const today = dayIndex();
-  let d = localStorage.getItem(`lineage:${today}`) ? today : today - 1;
+  const key = (d) => `lineage:${diff}:${d}`;
+  let d = localStorage.getItem(key(today)) ? today : today - 1;
   let streak = 0;
-  while (d >= 0 && localStorage.getItem(`lineage:${d}`)) { streak++; d--; }
+  while (d >= 0 && localStorage.getItem(key(d))) { streak++; d--; }
   return streak;
 }
 
 function updateStreakBadge() {
-  const s = getStreak();
+  const s = getStreak(state.difficulty);
   els.streakBadge.textContent = `🔥 ${s}`;
   els.streakBadge.classList.toggle("hot", s >= 3);
   els.streakBadge.title = s === 1 ? "1-day streak" : `${s}-day streak`;
@@ -1122,9 +1169,10 @@ function shareTeamSeason(p1, p2) {
   return overlap;
 }
 function pickDailyPair() {
-  const start = state.puzzleNum % DAILY_POOL.length;
-  for (let off = 0; off < DAILY_POOL.length; off++) {
-    const p = DAILY_POOL[(start + off) % DAILY_POOL.length];
+  const pool = POOLS[state.difficulty];
+  const start = state.puzzleNum % pool.length;
+  for (let off = 0; off < pool.length; off++) {
+    const p = pool[(start + off) % pool.length];
     if (state.data.players[p.a] && state.data.players[p.b]) return p;
   }
   const sorted = Object.values(state.data.players)
@@ -1389,9 +1437,9 @@ function finishGame() {
   els.complete.classList.add("show");
   setStatus("Chain locked. Well played.", "ok");
 
-  // Save to localStorage (skip for practice mode)
-  if (!state.practice) {
-    const key = `lineage:${state.puzzleNum}`;
+  // Save to localStorage
+  {
+    const key = `lineage:${state.difficulty}:${state.puzzleNum}`;
     const prev = JSON.parse(localStorage.getItem(key) || "null");
     if (!prev || total > prev.total) {
       localStorage.setItem(key, JSON.stringify({
@@ -1515,50 +1563,40 @@ $("nav-stats")?.addEventListener("click", () => {
 els.statsClose.addEventListener("click", () => els.statsPopup.classList.remove("show"));
 els.statsPopup.addEventListener("click", (e) => { if (e.target === els.statsPopup) els.statsPopup.classList.remove("show"); });
 
-$("nav-daily")?.addEventListener("click", () => {
-  if (state.practice) {
-    state.practice = false;
-    state.chain = [];
-    state.connections = [];
-    state.brokenLink = -1;
-    state.complete = false;
-    els.complete.classList.remove("show");
-    els.achWrap.style.display = "none";
-    els.search.disabled = false;
-    els.search.value = "";
-    // Restore daily pair
-    state.used = new Set([state.startPlayer.id, state.endPlayer.id]);
-    renderChainRow();
-    setStatus(`Add players who connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
-  }
-});
-
-// Pre-verified player IDs that have real NBA CDN headshots (10+ seasons, active 2010+)
-const PRACTICE_IDS = new Set([3,6,10,12,13,17,20,21,29,30,31,33,34,37,39,40,45,48,51,54,57,59,70,75,77,79,80,81,83,84,86,88,90,94,95,100,103,104,105,107,108,111,112,114,115,117,118,125,129,130,136,137,138,139,140,144,145,150,153,155,158,160,164,167,169,170,171,172,173,176,177,178,179,182,184,185,186,188,189,191,192,193,195,196,197,200,203,204,210,211,214,215,217,219,220,223,224,225,226,227,228,236,237,241,242,246,247,249,250,251,262,263,267,268,271,273,274,275,277,278,280,282,283,284,285,286,290,294,301,303,304,305,306,311,315,316,318,319,325,326,328,329,335,337,340,344,346,349,357,358,360,363,365,367,368,371,373,376,377,378,379,380,383,387,388,389,391,393,400,401,402,403,404,405,406,409,411,415,416,420,423,424,431,435,436,443,444,447,450,451,452,455,458,460,461,465,467,469,472,474,475,481,482,487,489,491,493,735,879,948,957,965,1012,1016,1020,1036,1039,1043,1087,1089,1097,1161,1162,1168,1197,1199,1222,1227,1237,1242,1247,1249,1281,1290,1299,1344,1346,1364,1373,1376,1389,1412,1429,1433,1439,1441,1470,1471,1476,1479,1481,1482,1486,1497,1499,1513,1514,1522,1528,1533,1535,1536,1552,1557,1593,1598,1599,1601,1617,1619,1620,1627,1635,1641,1670,1677,1686,1700,1732,1739,1746,1757,1764,1768,1771,1774,1775,1777,1784,1791,1801,1812,1818,2189]);
-
-$("nav-practice")?.addEventListener("click", () => {
-  if (!state.data) return;
-  const eligible = Object.values(state.data.players).filter(p => PRACTICE_IDS.has(p.id));
-  const a = eligible[Math.floor(Math.random() * eligible.length)];
-  let b = eligible[Math.floor(Math.random() * eligible.length)];
-  while (b.id === a.id) b = eligible[Math.floor(Math.random() * eligible.length)];
-
-  state.practice = true;
-  state.startPlayer = a;
-  state.endPlayer = b;
+function switchDifficulty(diff) {
+  if (!state.data || state.difficulty === diff) return;
+  state.difficulty = diff;
   state.chain = [];
   state.connections = [];
   state.brokenLink = -1;
   state.complete = false;
-  state.used = new Set([a.id, b.id]);
   els.complete.classList.remove("show");
   els.achWrap.style.display = "none";
   els.search.disabled = false;
   els.search.value = "";
+
+  const pair = pickDailyPair();
+  state.startPlayer = state.data.players[pair.a];
+  state.endPlayer = state.data.players[pair.b];
+  state.used = new Set([state.startPlayer.id, state.endPlayer.id]);
+
+  // Update active nav button
+  ["easy","medium","hard"].forEach(d => {
+    $(`nav-${d}`)?.classList.toggle("active", d === diff);
+  });
+
+  updateStreakBadge();
   renderChainRow();
-  setStatus(`Practice: Connect ${a.last_name} to ${b.last_name}. Results won't affect your streak.`, "warn");
+  $("daily-date").textContent = todayDate();
+  $("puzzle-num").textContent = "#" + state.puzzleNum;
+  $("difficulty-label").textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
+  setStatus(`${diff.charAt(0).toUpperCase()+diff.slice(1)}: Connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
   els.search.focus();
-});
+}
+
+$("nav-easy")?.addEventListener("click", () => switchDifficulty("easy"));
+$("nav-medium")?.addEventListener("click", () => switchDifficulty("medium"));
+$("nav-hard")?.addEventListener("click", () => switchDifficulty("hard"));
 
 $("how-link").addEventListener("click", (e) => {
   e.preventDefault();
@@ -1568,6 +1606,9 @@ $("how-link").addEventListener("click", (e) => {
 async function boot() {
   els.date.textContent = todayDate();
   els.num.textContent = "#" + state.puzzleNum;
+  $("difficulty-label").textContent = "Medium";
+  $("nav-medium")?.classList.add("active");
+  $("nav-easy")?.classList.remove("active");
   updateStreakBadge();
 
   try {
