@@ -245,6 +245,51 @@
   }
   .auth-skip:hover { color: var(--ink-2); }
 
+  /* PROFILE MODAL */
+  .profile-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+  }
+  .profile-overlay.show { display: flex; }
+  .profile-modal {
+    background: var(--surface); border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg); padding: 36px 32px; width: 100%; max-width: 400px;
+    margin: 20px; display: flex; flex-direction: column; gap: 16px;
+  }
+  .profile-modal h2 { font-family: 'Fraunces', serif; font-size: 22px; margin-bottom: 4px; }
+  .profile-avatar-row {
+    display: flex; align-items: center; gap: 16px; padding: 16px;
+    background: var(--surface-2); border-radius: var(--radius); margin-bottom: 4px;
+  }
+  .profile-avatar-big {
+    width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
+    border: 2px solid var(--accent); flex-shrink: 0;
+    background: var(--surface-3); display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 700; color: var(--accent);
+  }
+  .profile-avatar-info { flex: 1; }
+  .profile-avatar-info p { font-size: 13px; color: var(--ink-3); margin-top: 4px; }
+  .profile-input {
+    width: 100%; padding: 12px 14px; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--ink); font-family: 'Space Grotesk', sans-serif; font-size: 15px;
+  }
+  .profile-input:focus { outline: none; border-color: var(--accent); }
+  .profile-input::placeholder { color: var(--ink-faint); }
+  .profile-save-btn {
+    width: 100%; padding: 13px; background: var(--accent); color: #000;
+    border: none; border-radius: 10px; font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+  }
+  .profile-save-btn:hover { opacity: 0.9; }
+  .profile-error { color: var(--red); font-size: 13px; min-height: 18px; }
+  .profile-success { color: var(--green); font-size: 13px; min-height: 18px; }
+  .profile-section-label { font-size: 12px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .profile-close { background: none; border: none; color: var(--ink-3); font-size: 13px; cursor: pointer; margin-top: 4px; font-family: 'Space Grotesk', sans-serif; }
+  .profile-close:hover { color: var(--ink-2); }
+  #nav-avatar { cursor: pointer; }
+
   /* LEADERBOARD */
   .lb-table { width: 100%; border-collapse: collapse; font-size: 14px; }
   .lb-table th { text-align: left; padding: 8px 10px; color: var(--ink-3); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
@@ -916,6 +961,36 @@
     </div>
 
     <button class="auth-skip" id="auth-skip">Maybe later</button>
+  </div>
+</div>
+
+<!-- Profile modal -->
+<div class="profile-overlay" id="profile-overlay">
+  <div class="profile-modal">
+    <h2>Your Profile</h2>
+
+    <div class="profile-avatar-row">
+      <div class="profile-avatar-big" id="profile-avatar-big"></div>
+      <div class="profile-avatar-info">
+        <strong id="profile-display-name-label">—</strong>
+        <p id="profile-email-label" style="color:var(--ink-3);font-size:13px;margin-top:2px;"></p>
+      </div>
+    </div>
+
+    <div class="profile-section-label">Display name</div>
+    <input class="profile-input" id="profile-name-input" type="text" placeholder="Your name" autocomplete="off">
+
+    <div class="profile-section-label">Photo URL <span style="color:var(--ink-faint);font-weight:400;">(optional)</span></div>
+    <input class="profile-input" id="profile-photo-input" type="url" placeholder="https://..." autocomplete="off">
+
+    <div class="profile-section-label">New password <span style="color:var(--ink-faint);font-weight:400;">(leave blank to keep current)</span></div>
+    <input class="profile-input" id="profile-password-input" type="password" placeholder="New password" autocomplete="new-password">
+
+    <div class="profile-error" id="profile-error"></div>
+    <div class="profile-success" id="profile-success"></div>
+
+    <button class="profile-save-btn" id="profile-save-btn">Save changes</button>
+    <button class="profile-close" id="profile-close">Close</button>
   </div>
 </div>
 
@@ -1684,6 +1759,7 @@ function finishGame() {
         chain: [state.startPlayer.first_name + " " + state.startPlayer.last_name,
                 ...bridges.map(p => p.name),
                 state.endPlayer.first_name + " " + state.endPlayer.last_name],
+        connections: state.connections,
       }));
     }
     updateStreakBadge();
@@ -1882,6 +1958,7 @@ function restoreSolvedChain(savedJson) {
         state.used.add(player.id);
       }
     }
+    state.connections = saved.connections || [];
   } catch(e) {}
   state.complete = true;
   els.search.disabled = true;
@@ -2187,6 +2264,69 @@ $('auth-email-submit')?.addEventListener('click', async () => {
       'auth/too-many-requests': 'Too many attempts. Try again later.',
     };
     $('auth-error').textContent = msgs[e.code] || e.message || 'Something went wrong.';
+  }
+});
+
+// Profile modal
+function openProfileModal() {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const name = user.displayName || '';
+  const photo = user.photoURL || '';
+  $('profile-name-input').value = name;
+  $('profile-photo-input').value = photo;
+  $('profile-password-input').value = '';
+  $('profile-display-name-label').textContent = name || 'No name set';
+  $('profile-email-label').textContent = user.email || '';
+  $('profile-error').textContent = '';
+  $('profile-success').textContent = '';
+  const big = $('profile-avatar-big');
+  if (photo) {
+    big.innerHTML = `<img src="${photo}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`;
+  } else {
+    big.textContent = (name || user.email || '?')[0].toUpperCase();
+  }
+  $('profile-overlay').classList.add('show');
+}
+
+$('nav-avatar')?.addEventListener('click', openProfileModal);
+
+$('profile-close')?.addEventListener('click', () => $('profile-overlay').classList.remove('show'));
+$('profile-overlay')?.addEventListener('click', e => { if (e.target === $('profile-overlay')) $('profile-overlay').classList.remove('show'); });
+
+$('profile-save-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const name = $('profile-name-input').value.trim();
+  const photo = $('profile-photo-input').value.trim();
+  const password = $('profile-password-input').value;
+  $('profile-error').textContent = '';
+  $('profile-success').textContent = '';
+  try {
+    if (name !== user.displayName || photo !== (user.photoURL || '')) {
+      await user.updateProfile({ displayName: name, photoURL: photo || null });
+    }
+    if (password) {
+      await user.updatePassword(password);
+    }
+    // Refresh nav avatar
+    $('nav-avatar').src = user.photoURL || '';
+    $('nav-avatar').style.display = user.photoURL ? 'block' : 'none';
+    $('profile-success').textContent = 'Changes saved!';
+    $('profile-display-name-label').textContent = name || 'No name set';
+    const big = $('profile-avatar-big');
+    if (user.photoURL) {
+      big.innerHTML = `<img src="${user.photoURL}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`;
+    } else {
+      big.textContent = (name || user.email || '?')[0].toUpperCase();
+    }
+  } catch(e) {
+    const msgs = {
+      'auth/requires-recent-login': 'Please sign out and sign back in before changing your password.',
+      'auth/weak-password': 'Password must be at least 6 characters.',
+      'auth/invalid-profile-attribute': 'Invalid photo URL.',
+    };
+    $('profile-error').textContent = msgs[e.code] || e.message;
   }
 });
 
