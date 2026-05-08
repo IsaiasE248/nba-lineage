@@ -3512,6 +3512,14 @@ $('tab-google-auth')?.addEventListener('click', () => {
 $('tab-email-auth')?.addEventListener('click', () => {
   $('auth-google-panel').style.display = 'none'; $('auth-email-panel').style.display = 'block';
   $('tab-email-auth').classList.add('active'); $('tab-google-auth').classList.remove('active');
+  // Default to sign-up when triggered from post-solve prompt (guest has no account yet)
+  if (pendingScore && emailAuthMode !== 'signin') {
+    emailAuthMode = 'create';
+    $('auth-name').style.display = 'block';
+    $('auth-email-submit').textContent = 'Create account';
+    $('auth-mode-toggle').textContent = 'Already have an account? Sign in';
+    $('auth-error').textContent = '';
+  }
 });
 
 // Email sign in / create account
