@@ -2342,68 +2342,103 @@ function roundRect(ctx, x, y, w, h, r) {
 
 const HINT_PENALTIES = [25, 50, 75]; // per stage
 
+function sortByRecognisability(arr) {
+  // Prefer longest career, tiebreak by most recent last season
+  arr.sort((a, b) => {
+    if (a.rarity !== b.rarity) return a.rarity - b.rarity;
+    const lastA = Math.max(...a.p.team_seasons.map(t => t.season));
+    const lastB = Math.max(...b.p.team_seasons.map(t => t.season));
+    return lastB - lastA;
+  });
+}
+
 function pickHintTarget() {
   const lastInChain = state.chain.length > 0
     ? state.chain[state.chain.length - 1]._ref
     : state.startPlayer;
   const endP = state.endPlayer;
-  const candidates = [];
+
+  // ── Try direct bridge first (connects lastInChain → hint → endPlayer) ──
+  const direct = [];
   for (const p of Object.values(state.data.players)) {
     if (state.used.has(p.id)) continue;
-    const toEnd   = shareTeamSeason(p, endP);
-    const toLast  = shareTeamSeason(lastInChain, p);
+    const toEnd  = shareTeamSeason(p, endP);
+    const toLast = shareTeamSeason(lastInChain, p);
     if (toEnd.length && toLast.length) {
-      const seasons = new Set(p.team_seasons.map(t => t.season)).size;
-      const rarity  = Math.max(1, Math.round(20 - Math.min(seasons, 20)));
-      // best shared season with lastInChain (most recent)
+      const seasons   = new Set(p.team_seasons.map(t => t.season)).size;
+      const rarity    = Math.max(1, Math.round(20 - Math.min(seasons, 20)));
       const bestToLast = toLast.reduce((a, b) => b.season > a.season ? b : a);
-      // best shared season with endPlayer (most recent)
       const bestToEnd  = toEnd.reduce((a, b)  => b.season > a.season ? b : a);
-      candidates.push({ p, rarity, bestToLast, bestToEnd });
+      direct.push({ p, rarity, bestToLast, bestToEnd, isDirect: true });
     }
   }
-  if (!candidates.length) return null;
 
-  // For hints, prefer the most recognisable player:
-  // 1. Most career seasons (ascending rarity = longer career = more famous)
-  // 2. Among ties, prefer the most recent last season (active/modern players)
-  // 3. Filter out anyone with < 3 seasons unless they're the only option
-  const wellKnown = candidates.filter(c => {
-    const seasons = new Set(c.p.team_seasons.map(t => t.season)).size;
-    return seasons >= 3;
+  if (direct.length) {
+    const known = direct.filter(c => new Set(c.p.team_seasons.map(t => t.season)).size >= 3);
+    const pool  = known.length ? known : direct;
+    sortByRecognisability(pool);
+    return pool[0];
+  }
+
+  // ── No direct bridge — find the best stepping stone ──
+  // A stepping stone connects to lastInChain AND has played for many teams
+  // (high connectivity = more likely to open up new paths toward endPlayer)
+  const stepping = [];
+  for (const p of Object.values(state.data.players)) {
+    if (state.used.has(p.id)) continue;
+    const toLast = shareTeamSeason(lastInChain, p);
+    if (!toLast.length) continue;
+    const seasons   = new Set(p.team_seasons.map(t => t.season)).size;
+    const teamCount = new Set(p.team_seasons.map(t => t.team_id)).size;
+    const rarity    = Math.max(1, Math.round(20 - Math.min(seasons, 20)));
+    const bestToLast = toLast.reduce((a, b) => b.season > a.season ? b : a);
+    stepping.push({ p, rarity, seasons, teamCount, bestToLast, bestToEnd: null, isDirect: false });
+  }
+
+  if (!stepping.length) return null;
+
+  // Prefer: 3+ seasons, then most teams played for (most connected), then most seasons
+  const knownStepping = stepping.filter(c => c.seasons >= 3);
+  const stepPool = knownStepping.length ? knownStepping : stepping;
+  stepPool.sort((a, b) => {
+    if (b.teamCount !== a.teamCount) return b.teamCount - a.teamCount;
+    return b.seasons - a.seasons;
   });
-  const pool = wellKnown.length ? wellKnown : candidates;
-
-  pool.sort((a, b) => {
-    // Primary: most seasons played (lowest rarity first)
-    if (a.rarity !== b.rarity) return a.rarity - b.rarity;
-    // Tiebreak: most recent career
-    const lastA = Math.max(...a.p.team_seasons.map(t => t.season));
-    const lastB = Math.max(...b.p.team_seasons.map(t => t.season));
-    return lastB - lastA;
-  });
-
-  return pool[0];
+  return stepPool[0];
 }
 
 function renderHintArea() {
   const hintArea = $('hint-area');
   if (!hintArea || !state.hintTarget) return;
-  const { p, bestToLast, bestToEnd } = state.hintTarget;
+  const { p, bestToLast, bestToEnd, isDirect } = state.hintTarget;
   const lastInChain = state.chain.length > 0
     ? state.chain[state.chain.length - 1]._ref
     : state.startPlayer;
   const lastTeamName = state.data.teams[bestToLast.team_id]?.full_name || 'a team';
-  const endTeamName  = state.data.teams[bestToEnd.team_id]?.full_name  || 'a team';
 
   let clue = '';
-  if (state.hintStep === 1) {
-    clue = `They played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong>.`;
-  } else if (state.hintStep === 2) {
-    const ini = `${p.first_name[0]}. ${p.last_name}`;
-    clue = `Their name is <strong>${ini}</strong> — played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong>.`;
-  } else if (state.hintStep >= 3) {
-    clue = `<strong>${p.first_name} ${p.last_name}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}, then <strong>${endTeamName} ${bestToEnd.season}</strong> with ${state.endPlayer.last_name}.`;
+
+  if (!isDirect) {
+    // Stepping-stone hints — no mention of end player connection
+    if (state.hintStep === 1) {
+      clue = `No direct path yet. Look for someone who played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong> — they connect to many other players.`;
+    } else if (state.hintStep === 2) {
+      const ini = `${p.first_name[0]}. ${p.last_name}`;
+      clue = `Try <strong>${ini}</strong> — played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong> and has connections across many teams.`;
+    } else {
+      clue = `<strong>${p.first_name} ${p.last_name}</strong> — ${lastTeamName} ${bestToLast.season} with ${lastInChain.last_name}. Adding them should open up a path to ${state.endPlayer.last_name}.`;
+    }
+  } else {
+    // Direct-bridge hints
+    const endTeamName = state.data.teams[bestToEnd.team_id]?.full_name || 'a team';
+    if (state.hintStep === 1) {
+      clue = `They played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong>.`;
+    } else if (state.hintStep === 2) {
+      const ini = `${p.first_name[0]}. ${p.last_name}`;
+      clue = `Their name is <strong>${ini}</strong> — played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong>.`;
+    } else {
+      clue = `<strong>${p.first_name} ${p.last_name}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}, then <strong>${endTeamName} ${bestToEnd.season}</strong> with ${state.endPlayer.last_name}.`;
+    }
   }
 
   const totalPenalty = HINT_PENALTIES.slice(0, state.hintStep).reduce((a, b) => a + b, 0);
