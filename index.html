@@ -2492,29 +2492,40 @@ $('hint-btn')?.addEventListener('click', () => {
 function generatePracticePair() {
   const players = Object.values(state.data.players);
 
-  // Only use players with 3+ seasons — more recognisable and more connections
-  const eligible = players.filter(p =>
-    new Set(p.team_seasons.map(t => t.season)).size >= 3
-  );
-
-  // Bucket by era so we can mix players from different generations for variety
-  const modern  = eligible.filter(p => Math.max(...p.team_seasons.map(t => t.season)) >= 2010);
-  const classic = eligible.filter(p => Math.max(...p.team_seasons.map(t => t.season)) < 2010);
+  // Recognisable player pool:
+  //   • career started 1996 or later (no pre-'96 players casual fans won't know)
+  //   • 5+ unique seasons (established careers only, no cup-of-coffee players)
+  const eligible = players.filter(p => {
+    const seasons = p.team_seasons.map(t => t.season);
+    const uniqueSeasons = new Set(seasons).size;
+    const firstSeason   = Math.min(...seasons);
+    return uniqueSeasons >= 5 && firstSeason >= 1996;
+  });
 
   const rand = arr => arr[Math.floor(Math.random() * arr.length)];
 
-  // 60 % chance: cross-era pair (one modern, one classic) for interesting puzzles
-  // 40 % chance: both modern (easier, more familiar names)
-  const wantCrossEra = Math.random() < 0.6 && classic.length > 0;
+  // Two era buckets — both within the recognisable window
+  // "Veterans": debuted 1996-2009, retired 2005-2018  (Dirk, Pierce, Wade era)
+  // "Current":  last season 2016+                     (LeBron, Curry, KD era)
+  const veterans = eligible.filter(p => {
+    const last = Math.max(...p.team_seasons.map(t => t.season));
+    return last >= 2005 && last < 2018;
+  });
+  const current = eligible.filter(p =>
+    Math.max(...p.team_seasons.map(t => t.season)) >= 2016
+  );
+
+  // 50 % cross-era (veteran vs current), 50 % both current
+  const wantCrossEra = Math.random() < 0.5 && veterans.length > 0 && current.length > 0;
 
   for (let attempt = 0; attempt < 60; attempt++) {
     let a, b;
     if (wantCrossEra) {
-      a = rand(modern);
-      b = rand(classic);
+      a = rand(current);
+      b = rand(veterans);
     } else {
-      a = rand(modern);
-      b = rand(modern);
+      a = rand(current);
+      b = rand(current);
     }
     if (!a || !b || a.id === b.id) continue;
     // Skip directly-connected pairs — too easy for practice
@@ -2522,7 +2533,7 @@ function generatePracticePair() {
     return { a: a.id, b: b.id };
   }
 
-  // Fallback: just pick any two different eligible players
+  // Fallback: any two different eligible players
   const a = rand(eligible);
   let b;
   do { b = rand(eligible); } while (!b || b.id === a.id);
