@@ -2363,8 +2363,27 @@ function pickHintTarget() {
     }
   }
   if (!candidates.length) return null;
-  candidates.sort((a, b) => b.rarity - a.rarity);
-  return candidates[0];
+
+  // For hints, prefer the most recognisable player:
+  // 1. Most career seasons (ascending rarity = longer career = more famous)
+  // 2. Among ties, prefer the most recent last season (active/modern players)
+  // 3. Filter out anyone with < 3 seasons unless they're the only option
+  const wellKnown = candidates.filter(c => {
+    const seasons = new Set(c.p.team_seasons.map(t => t.season)).size;
+    return seasons >= 3;
+  });
+  const pool = wellKnown.length ? wellKnown : candidates;
+
+  pool.sort((a, b) => {
+    // Primary: most seasons played (lowest rarity first)
+    if (a.rarity !== b.rarity) return a.rarity - b.rarity;
+    // Tiebreak: most recent career
+    const lastA = Math.max(...a.p.team_seasons.map(t => t.season));
+    const lastB = Math.max(...b.p.team_seasons.map(t => t.season));
+    return lastB - lastA;
+  });
+
+  return pool[0];
 }
 
 function renderHintArea() {
