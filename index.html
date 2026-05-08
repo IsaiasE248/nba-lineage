@@ -2490,43 +2490,105 @@ $('hint-btn')?.addEventListener('click', () => {
 // ── Practice mode ─────────────────────────────────────────────────────────────
 
 function generatePracticePair() {
-  const players = Object.values(state.data.players);
+  // Hand-picked list of household NBA names — every player here is one casual fans will recognise
+  const NOTABLE_IDS = new Set([
+    // ── All-time greats ──────────────────────────────────────────────────
+    237,    // LeBron James
+    1043,   // Kobe Bryant
+    2931,   // Michael Jordan
+    1089,   // Tim Duncan
+    140,    // Kevin Durant
+    115,    // Stephen Curry
+    461,    // Dwyane Wade
+    735,    // Shaquille O'Neal
+    1037,   // Allen Iverson
+    346,    // Dirk Nowitzki
+    236,    // Giannis Antetokounmpo
+    88,     // Vince Carter
+    1087,   // Tracy McGrady
+    2937,   // Charles Barkley
+    2890,   // Reggie Miller
+    1920,   // Patrick Ewing
+    2968,   // Gary Payton
+    879,    // Grant Hill
+    799,    // Penny Hardaway
+    771,    // Alonzo Mourning
+    540,    // Hakeem Olajuwon
+    552,    // Dennis Rodman
+    2933,   // Scottie Pippen
+    2973,   // Shawn Kemp
+    // ── Champions / All-Stars (2000s) ────────────────────────────────────
+    1168,   // Paul Pierce
+    1036,   // Ray Allen
+    1039,   // Steve Nash
+    908,    // Jason Kidd
+    363,    // Tony Parker
+    1412,   // Manu Ginobili
+    1097,   // Chauncey Billups
+    1020,   // Ben Wallace
+    948,    // Rasheed Wallace
+    1059,   // Jermaine O'Neal
+    1237,   // Baron Davis
+    1601,   // Deron Williams
+    1433,   // Amar'e Stoudemire
+    1226,   // Shawn Marion
+    170,    // Pau Gasol
+    1482,   // Chris Bosh
+    1216,   // Lamar Odom
+    1249,   // Ron Artest / Metta World Peace
+    874,    // Jalen Rose
+    738,    // Robert Horry
+    830,    // Sam Cassell
+    401,    // Derrick Rose
+    400,    // Rajon Rondo
+    // ── Stars of the 2010s ───────────────────────────────────────────────
+    17,     // Carmelo Anthony
+    220,    // Dwight Howard
+    367,    // Chris Paul
+    192,    // James Harden
+    472,    // Russell Westbrook
+    228,    // Kyrie Irving
+    274,    // Kawhi Leonard
+    278,    // Damian Lillard
+    172,    // Paul George
+    189,    // Blake Griffin
+    6,      // LaMarcus Aldridge
+    125,    // DeMar DeRozan
+    286,    // Kyle Lowry
+    465,    // Kemba Walker
+    443,    // Klay Thompson
+    185,    // Draymond Green
+    79,     // Jimmy Butler
+    285,    // Kevin Love
+    169,    // Marc Gasol
+    37,     // Bradley Beal
+    104,    // Mike Conley
+    // ── Current generation ───────────────────────────────────────────────
+    117,    // Anthony Davis
+    246,    // Nikola Jokic
+    145,    // Joel Embiid
+    132,    // Luka Doncic
+    434,    // Jayson Tatum
+    57,     // Devin Booker
+    666786, // Ja Morant
+    4,      // Bam Adebayo
+    176,    // Rudy Gobert
+    447,    // Karl-Anthony Towns
+    490,    // Trae Young
+    70,     // Jaylen Brown
+    322,    // Donovan Mitchell
+    666969, // Zion Williamson
+  ]);
 
-  // Recognisable player pool:
-  //   • career started 1996 or later (no pre-'96 players casual fans won't know)
-  //   • 5+ unique seasons (established careers only, no cup-of-coffee players)
-  const eligible = players.filter(p => {
-    const seasons = p.team_seasons.map(t => t.season);
-    const uniqueSeasons = new Set(seasons).size;
-    const firstSeason   = Math.min(...seasons);
-    return uniqueSeasons >= 5 && firstSeason >= 1996;
-  });
+  const allPlayers = Object.values(state.data.players);
+  // Filter to only the curated recognisable names that exist in this dataset
+  const eligible = allPlayers.filter(p => NOTABLE_IDS.has(p.id));
 
   const rand = arr => arr[Math.floor(Math.random() * arr.length)];
 
-  // Two era buckets — both within the recognisable window
-  // "Veterans": debuted 1996-2009, retired 2005-2018  (Dirk, Pierce, Wade era)
-  // "Current":  last season 2016+                     (LeBron, Curry, KD era)
-  const veterans = eligible.filter(p => {
-    const last = Math.max(...p.team_seasons.map(t => t.season));
-    return last >= 2005 && last < 2018;
-  });
-  const current = eligible.filter(p =>
-    Math.max(...p.team_seasons.map(t => t.season)) >= 2016
-  );
-
-  // 50 % cross-era (veteran vs current), 50 % both current
-  const wantCrossEra = Math.random() < 0.5 && veterans.length > 0 && current.length > 0;
-
-  for (let attempt = 0; attempt < 60; attempt++) {
-    let a, b;
-    if (wantCrossEra) {
-      a = rand(current);
-      b = rand(veterans);
-    } else {
-      a = rand(current);
-      b = rand(current);
-    }
+  for (let attempt = 0; attempt < 100; attempt++) {
+    const a = rand(eligible);
+    const b = rand(eligible);
     if (!a || !b || a.id === b.id) continue;
     // Skip directly-connected pairs — too easy for practice
     if (shareTeamSeason(a, b).length > 0) continue;
