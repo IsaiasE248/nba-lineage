@@ -1632,6 +1632,8 @@ const state = {
   archiveDayIndex: null, // used when mode === 'archive'
   hintsUsed: 0,
   hintPenalty: 0,
+  hintTarget: null,     // the player we're revealing hints about
+  hintStep: 0,          // 0=none shown, 1=team, 2=initials, 3=full name
 };
 
 const $ = (id) => document.getElementById(id);
@@ -2050,6 +2052,24 @@ function pickPlayer(player) {
   });
   state.used.add(player.id);
 
+  // If the added player is the one we hinted at, or chain moved on, refresh hint target
+  if (state.hintTarget && state.hintTarget.p.id === player.id) {
+    state.hintTarget = null;
+    state.hintStep = 0;
+    const hintArea = $('hint-area');
+    if (hintArea) hintArea.style.display = 'none';
+    const hintBtn = $('hint-btn');
+    if (hintBtn && !hintBtn.disabled) hintBtn.textContent = '💡 Hint';
+  } else if (state.hintTarget) {
+    // Chain moved — old hint target may no longer be reachable from new last player; reset
+    state.hintTarget = null;
+    state.hintStep = 0;
+    const hintArea = $('hint-area');
+    if (hintArea) hintArea.style.display = 'none';
+    const hintBtn = $('hint-btn');
+    if (hintBtn && !hintBtn.disabled) hintBtn.textContent = '💡 Hint';
+  }
+
   renderChainRow();
   setStatus(`Added ${player.first_name} ${player.last_name}. Add more players or click Check chain.`, "ok");
   els.search.focus();
@@ -2315,48 +2335,96 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 // ── Hint button ───────────────────────────────────────────────────────────────
-$('hint-btn')?.addEventListener('click', () => {
-  if (state.complete || !state.data) return;
-  const MAX_HINTS = 3;
-  if (state.hintsUsed >= MAX_HINTS) return;
+// Stage 1 (-25 pts): team clue only — "Someone who played with X on the [Team]"
+// Stage 2 (-50 pts): initials — "Their name is [F]. [Last]"
+// Stage 3 (-75 pts): full reveal — "[Full Name] — [Team], [season]"
+// Total max penalty: 150 pts. Each stage must be unlocked in order.
 
-  // The "target" is the last player in the chain (not end), we need someone who connects to endPlayer
-  const lastInChain = state.chain.length > 0 ? state.chain[state.chain.length - 1]._ref : state.startPlayer;
+const HINT_PENALTIES = [25, 50, 75]; // per stage
+
+function pickHintTarget() {
+  const lastInChain = state.chain.length > 0
+    ? state.chain[state.chain.length - 1]._ref
+    : state.startPlayer;
   const endP = state.endPlayer;
-
-  // Find players who share a season with both lastInChain AND endPlayer, and aren't already used
   const candidates = [];
-  const allPlayers = Object.values(state.data.players);
-  for (const p of allPlayers) {
+  for (const p of Object.values(state.data.players)) {
     if (state.used.has(p.id)) continue;
-    const linksToCurrent = shareTeamSeason(lastInChain, p).length > 0;
-    const linksToEnd = shareTeamSeason(p, endP).length > 0;
-    if (linksToCurrent && linksToEnd) {
+    const toEnd   = shareTeamSeason(p, endP);
+    const toLast  = shareTeamSeason(lastInChain, p);
+    if (toEnd.length && toLast.length) {
       const seasons = new Set(p.team_seasons.map(t => t.season)).size;
-      const rarity = Math.max(1, Math.round(20 - Math.min(seasons, 20)));
-      candidates.push({ p, rarity });
+      const rarity  = Math.max(1, Math.round(20 - Math.min(seasons, 20)));
+      // best shared season with lastInChain (most recent)
+      const bestToLast = toLast.reduce((a, b) => b.season > a.season ? b : a);
+      // best shared season with endPlayer (most recent)
+      const bestToEnd  = toEnd.reduce((a, b)  => b.season > a.season ? b : a);
+      candidates.push({ p, rarity, bestToLast, bestToEnd });
     }
   }
+  if (!candidates.length) return null;
   candidates.sort((a, b) => b.rarity - a.rarity);
+  return candidates[0];
+}
 
+function renderHintArea() {
   const hintArea = $('hint-area');
-  if (!candidates.length) {
-    hintArea.innerHTML = `<strong>No single-hop hint found.</strong> Try adding another bridge first.`;
-    hintArea.style.display = 'block';
-    return;
+  if (!hintArea || !state.hintTarget) return;
+  const { p, bestToLast, bestToEnd } = state.hintTarget;
+  const lastInChain = state.chain.length > 0
+    ? state.chain[state.chain.length - 1]._ref
+    : state.startPlayer;
+  const lastTeamName = state.data.teams[bestToLast.team_id]?.full_name || 'a team';
+  const endTeamName  = state.data.teams[bestToEnd.team_id]?.full_name  || 'a team';
+
+  let clue = '';
+  if (state.hintStep === 1) {
+    clue = `They played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong>.`;
+  } else if (state.hintStep === 2) {
+    const ini = `${p.first_name[0]}. ${p.last_name}`;
+    clue = `Their name is <strong>${ini}</strong> — played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong>.`;
+  } else if (state.hintStep >= 3) {
+    clue = `<strong>${p.first_name} ${p.last_name}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}, then <strong>${endTeamName} ${bestToEnd.season}</strong> with ${state.endPlayer.last_name}.`;
   }
 
-  state.hintsUsed++;
-  state.hintPenalty += 50;
-  const pick = candidates[0];
-  const fullName = `${pick.p.first_name} ${pick.p.last_name}`;
-  hintArea.innerHTML = `💡 <strong>${fullName}</strong> connects to ${endP.last_name}. <span style="color:var(--ink-3);font-size:12px;">−50 pts (${state.hintsUsed}/${MAX_HINTS} hints used)</span>`;
+  const totalPenalty = HINT_PENALTIES.slice(0, state.hintStep).reduce((a, b) => a + b, 0);
+  hintArea.innerHTML = `💡 ${clue} <span style="color:var(--ink-3);font-size:12px;display:block;margin-top:4px;">−${totalPenalty} pts · Stage ${state.hintStep}/3</span>`;
   hintArea.style.display = 'block';
+}
 
-  const remaining = MAX_HINTS - state.hintsUsed;
+$('hint-btn')?.addEventListener('click', () => {
+  if (state.complete || !state.data) return;
+  const hintArea = $('hint-area');
+
+  // If we have a target and haven't fully revealed it yet, advance the stage
+  if (state.hintTarget && state.hintStep < 3) {
+    state.hintStep++;
+    state.hintsUsed++;
+    state.hintPenalty += HINT_PENALTIES[state.hintStep - 1];
+    renderHintArea();
+  } else {
+    // Need a new target (first hint, or previous target was used/exhausted)
+    const target = pickHintTarget();
+    if (!target) {
+      hintArea.innerHTML = `💡 <strong>No direct bridge found from here.</strong> Try adding another player first to get closer.`;
+      hintArea.style.display = 'block';
+      return;
+    }
+    state.hintTarget = target;
+    state.hintStep = 1;
+    state.hintsUsed++;
+    state.hintPenalty += HINT_PENALTIES[0];
+    renderHintArea();
+  }
+
+  // Update button label
   const hintBtn = $('hint-btn');
-  hintBtn.textContent = remaining > 0 ? `💡 Hint (${remaining} left)` : '💡 No hints left';
-  if (remaining === 0) hintBtn.disabled = true;
+  if (state.hintStep >= 3) {
+    hintBtn.textContent = '💡 Fully revealed';
+    hintBtn.disabled = true;
+  } else {
+    hintBtn.textContent = `💡 More detail (−${HINT_PENALTIES[state.hintStep]} pts)`;
+  }
 });
 
 // ── Practice mode ─────────────────────────────────────────────────────────────
@@ -2581,9 +2649,12 @@ function markCompletedTabs() {
 function resetHints() {
   state.hintsUsed = 0;
   state.hintPenalty = 0;
-  $('hint-btn').disabled = false;
-  $('hint-btn').textContent = '💡 Hint';
-  $('hint-area').style.display = 'none';
+  state.hintTarget = null;
+  state.hintStep = 0;
+  const hintBtn = $('hint-btn');
+  if (hintBtn) { hintBtn.disabled = false; hintBtn.textContent = '💡 Hint'; }
+  const hintArea = $('hint-area');
+  if (hintArea) hintArea.style.display = 'none';
   const penaltyNote = $('hint-penalty-note');
   if (penaltyNote) penaltyNote.style.display = 'none';
 }
