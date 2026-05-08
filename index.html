@@ -1268,6 +1268,13 @@
         <div class="settings-card-title" style="color:var(--red);">Danger zone</div>
         <p style="font-size:14px;color:var(--ink-2);">Permanently delete your account and all your scores. This cannot be undone.</p>
 
+        <!-- Reset puzzle history -->
+        <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">
+          <p style="font-size:13px;color:var(--ink-2);margin-bottom:8px;">Clear your local puzzle solve history so all puzzles show as unplayed. Your leaderboard scores are not affected.</p>
+          <button class="settings-signout-btn" id="settings-reset-puzzles-btn">Reset puzzle history</button>
+          <div class="settings-msg" id="settings-reset-puzzles-msg"></div>
+        </div>
+
         <!-- Step 1: initial button -->
         <div id="settings-delete-step1">
           <button class="settings-signout-btn" id="settings-delete-btn" style="border-color:var(--red);">Delete my account</button>
@@ -2431,7 +2438,7 @@ function renderHintArea() {
     } else if (state.hintStep === 2) {
       clue = `Still no direct bridge. This player was active <strong>${spanStr}</strong> and played for <strong>${new Set(p.team_seasons.map(t => t.team_id)).size} teams</strong> — add them to open more options.`;
     } else {
-      const ini = `${p.first_name[0]}. ${p.last_name}`;
+      const ini = `${p.first_name[0]}. ${p.last_name[0]}.`;
       clue = `Try <strong>${ini}</strong> — ${lastTeamName} ${bestToLast.season} with ${lastInChain.last_name}. They'll open up a path to ${state.endPlayer.last_name}.`;
     }
   } else {
@@ -2442,7 +2449,7 @@ function renderHintArea() {
     } else if (state.hintStep === 2) {
       clue = `They were active <strong>${spanStr}</strong> and also played with <strong>${state.endPlayer.last_name}</strong> on the <strong>${endTeamName}</strong>.`;
     } else {
-      const ini = `${p.first_name[0]}. ${p.last_name}`;
+      const ini = `${p.first_name[0]}. ${p.last_name[0]}.`;
       clue = `Their name is <strong>${ini}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}, <strong>${endTeamName} ${bestToEnd.season}</strong> with ${state.endPlayer.last_name}.`;
     }
   }
@@ -3629,6 +3636,22 @@ $('settings-email-btn')?.addEventListener('click', async () => {
     };
     msg.textContent = msgs[e.code] || e.message; msg.className = 'settings-msg error';
   }
+});
+
+$('settings-reset-puzzles-btn')?.addEventListener('click', () => {
+  if (!confirm('Clear all saved puzzle history? This removes your local solve records so every puzzle shows as unplayed. Your leaderboard scores stay intact.')) return;
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k?.startsWith('lineage:')) keysToRemove.push(k);
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+  updateStreakBadge();
+  markCompletedTabs();
+  const msg = $('settings-reset-puzzles-msg');
+  msg.textContent = `Cleared ${keysToRemove.length} saved puzzle${keysToRemove.length !== 1 ? 's' : ''}.`;
+  msg.className = 'settings-msg ok';
+  setTimeout(() => { msg.textContent = ''; }, 3000);
 });
 
 $('settings-delete-btn')?.addEventListener('click', () => {
