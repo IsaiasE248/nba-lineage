@@ -1339,8 +1339,8 @@
     <p>Connect them through teammates who shared a team for at least one season.</p>
   </div>
 
-  <!-- Difficulty selector -->
-  <div class="diff-tabs reveal">
+  <!-- Difficulty selector (hidden in practice/archive mode) -->
+  <div class="diff-tabs reveal" id="diff-tabs-row">
     <button class="diff-tab" id="tab-easy" onclick="switchDifficulty('easy')">Easy</button>
     <button class="diff-tab active" id="tab-medium" onclick="switchDifficulty('medium')">Medium</button>
     <button class="diff-tab" id="tab-hard" onclick="switchDifficulty('hard')">Hard</button>
@@ -2391,10 +2391,14 @@ function startPractice(diff) {
   $('hint-btn').disabled = false;
 
   updateEyebrow();
+  updateModeUI();
   renderChainRow();
   setStatus(`Practice: Connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
   els.search.focus();
   showView('game');
+  // Override showView's nav-play active — practice should be highlighted
+  $('nav-play')?.classList.remove('active');
+  $('nav-practice')?.classList.add('active');
 }
 
 $('nav-practice')?.addEventListener('click', () => {
@@ -2468,10 +2472,14 @@ function startArchivePuzzle(dayIdx, diff) {
   $('hint-btn').disabled = false;
 
   updateEyebrow();
+  updateModeUI();
   renderChainRow();
   setStatus(`Archive: Connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
   els.search.focus();
   showView('game');
+  // Archive is a popup mode — neither Play nor Practice should be active
+  $('nav-play')?.classList.remove('active');
+  $('nav-practice')?.classList.remove('active');
 }
 
 $('nav-archive')?.addEventListener('click', () => {
@@ -2584,13 +2592,29 @@ function updateEyebrow() {
   const txt = $('eyebrow-text');
   if (!txt) return;
   if (state.mode === 'practice') {
-    txt.innerHTML = `<span class="mode-tag practice">Practice</span><span id="difficulty-label">${state.difficulty.charAt(0).toUpperCase()+state.difficulty.slice(1)}</span>`;
+    txt.innerHTML = `<span class="mode-tag practice">Practice</span><span id="difficulty-label"></span>`;
   } else if (state.mode === 'archive') {
     const archDate = new Date(Date.UTC(2024,0,1) + state.archiveDayIndex * 86400000);
     const dateStr = archDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     txt.innerHTML = `<span class="mode-tag archive">Archive</span>${dateStr} · Puzzle #${state.archiveDayIndex} · <span id="difficulty-label">${state.difficulty.charAt(0).toUpperCase()+state.difficulty.slice(1)}</span>`;
   } else {
     txt.innerHTML = `Daily <span id="daily-date">${todayDate()}</span> · Puzzle <span id="puzzle-num">#${state.puzzleNum}</span> · <span id="difficulty-label">${state.difficulty.charAt(0).toUpperCase()+state.difficulty.slice(1)}</span>`;
+  }
+}
+
+function updateModeUI() {
+  const isDaily = state.mode === 'daily';
+  const isPractice = state.mode === 'practice';
+  // Show diff tabs only in daily mode
+  const diffRow = $('diff-tabs-row');
+  if (diffRow) diffRow.style.display = isDaily ? '' : 'none';
+  // Nav active states
+  $('nav-play')?.classList.toggle('active', isDaily);
+  $('nav-practice')?.classList.toggle('active', isPractice);
+  // Archive never highlights a nav button (it's a popup, not a view)
+  if (state.mode === 'archive') {
+    $('nav-play')?.classList.remove('active');
+    $('nav-practice')?.classList.remove('active');
   }
 }
 
@@ -2621,6 +2645,7 @@ function switchDifficulty(diff) {
   updateStreakBadge();
   renderChainRow();
   updateEyebrow();
+  updateModeUI();
 
   // If already solved today, restore completed state and lock editing
   const saved = localStorage.getItem(`lineage:${diff}:${state.puzzleNum}`);
@@ -2710,6 +2735,7 @@ async function boot() {
   $("nav-medium")?.classList.remove("active");
   updateStreakBadge();
   updateEyebrow();
+  updateModeUI();
 
   try {
     state.data = await loadData();
