@@ -2488,6 +2488,47 @@ $('hint-btn')?.addEventListener('click', () => {
 });
 
 // ── Practice mode ─────────────────────────────────────────────────────────────
+
+function generatePracticePair() {
+  const players = Object.values(state.data.players);
+
+  // Only use players with 3+ seasons — more recognisable and more connections
+  const eligible = players.filter(p =>
+    new Set(p.team_seasons.map(t => t.season)).size >= 3
+  );
+
+  // Bucket by era so we can mix players from different generations for variety
+  const modern  = eligible.filter(p => Math.max(...p.team_seasons.map(t => t.season)) >= 2010);
+  const classic = eligible.filter(p => Math.max(...p.team_seasons.map(t => t.season)) < 2010);
+
+  const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+
+  // 60 % chance: cross-era pair (one modern, one classic) for interesting puzzles
+  // 40 % chance: both modern (easier, more familiar names)
+  const wantCrossEra = Math.random() < 0.6 && classic.length > 0;
+
+  for (let attempt = 0; attempt < 60; attempt++) {
+    let a, b;
+    if (wantCrossEra) {
+      a = rand(modern);
+      b = rand(classic);
+    } else {
+      a = rand(modern);
+      b = rand(modern);
+    }
+    if (!a || !b || a.id === b.id) continue;
+    // Skip directly-connected pairs — too easy for practice
+    if (shareTeamSeason(a, b).length > 0) continue;
+    return { a: a.id, b: b.id };
+  }
+
+  // Fallback: just pick any two different eligible players
+  const a = rand(eligible);
+  let b;
+  do { b = rand(eligible); } while (!b || b.id === a.id);
+  return { a: a.id, b: b.id };
+}
+
 function startPractice(diff) {
   if (!state.data) return;
   state.mode = 'practice';
@@ -2499,14 +2540,8 @@ function startPractice(diff) {
   state.complete = false;
   resetHints();
 
-  // Pick a random pair from any difficulty pool (combined for variety)
-  const allPairs = [...POOL_EASY, ...POOL_MEDIUM, ...POOL_HARD];
-  let pair;
-  for (let attempts = 0; attempts < 50; attempts++) {
-    const candidate = allPairs[Math.floor(Math.random() * allPairs.length)];
-    if (state.data.players[candidate.a] && state.data.players[candidate.b]) { pair = candidate; break; }
-  }
-  if (!pair) { pair = pickDailyPair(); }
+  // Generate a random pair from the full player database — unlimited variety
+  const pair = generatePracticePair();
 
   state.startPlayer = state.data.players[pair.a];
   state.endPlayer = state.data.players[pair.b];
