@@ -2731,8 +2731,11 @@ $("how-link").addEventListener("click", (e) => {
 async function boot() {
   state.difficulty = 'easy';
   state.mode = 'daily';
-  $("nav-easy")?.classList.add("active");
-  $("nav-medium")?.classList.remove("active");
+  // Sync all diff tab active states to match the starting difficulty
+  ["easy","medium","hard"].forEach(d => {
+    $(`tab-${d}`)?.classList.toggle("active", d === "easy");
+    $(`nav-${d}`)?.classList.toggle("active", d === "easy");
+  });
   updateStreakBadge();
   updateEyebrow();
   updateModeUI();
@@ -3161,10 +3164,13 @@ $('auth-skip')?.addEventListener('click', () => { $('auth-overlay').classList.re
 $('nav-play')?.addEventListener('click', () => {
   showView('game');
   if (state.mode !== 'daily' && state.data) {
-    // Return to today's daily puzzle
+    // Return to today's daily puzzle — bypass switchDifficulty's same-diff guard
+    // by temporarily clearing difficulty so the reset always runs
+    const diff = state.difficulty;
+    state.difficulty = null;
     state.mode = 'daily';
     state.archiveDayIndex = null;
-    switchDifficulty(state.difficulty);
+    switchDifficulty(diff);
   }
 });
 $('nav-signin')?.addEventListener('click', () => {
