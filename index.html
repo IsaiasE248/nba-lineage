@@ -2418,26 +2418,32 @@ function renderHintArea() {
 
   let clue = '';
 
+  // Career span shared across both hint types for stage 2
+  const allSeasons = p.team_seasons.map(t => t.season);
+  const firstYear  = Math.min(...allSeasons);
+  const lastYear   = Math.max(...allSeasons);
+  const spanStr    = firstYear === lastYear ? `${firstYear}` : `${firstYear}–${lastYear}`;
+
   if (!isDirect) {
-    // Stepping-stone hints — no mention of end player connection
+    // Stepping-stone path
     if (state.hintStep === 1) {
       clue = `No direct path yet. Look for someone who played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong> — they connect to many other players.`;
     } else if (state.hintStep === 2) {
-      const ini = `${p.first_name[0]}. ${p.last_name}`;
-      clue = `Try <strong>${ini}</strong> — played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong> and has connections across many teams.`;
+      clue = `Still no direct bridge. This player was active <strong>${spanStr}</strong> and played for <strong>${new Set(p.team_seasons.map(t => t.team_id)).size} teams</strong> — add them to open more options.`;
     } else {
-      clue = `<strong>${p.first_name} ${p.last_name}</strong> — ${lastTeamName} ${bestToLast.season} with ${lastInChain.last_name}. Adding them should open up a path to ${state.endPlayer.last_name}.`;
+      const ini = `${p.first_name[0]}. ${p.last_name}`;
+      clue = `Try <strong>${ini}</strong> — ${lastTeamName} ${bestToLast.season} with ${lastInChain.last_name}. They'll open up a path to ${state.endPlayer.last_name}.`;
     }
   } else {
-    // Direct-bridge hints
+    // Direct-bridge path
     const endTeamName = state.data.teams[bestToEnd.team_id]?.full_name || 'a team';
     if (state.hintStep === 1) {
       clue = `They played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong>.`;
     } else if (state.hintStep === 2) {
-      const ini = `${p.first_name[0]}. ${p.last_name}`;
-      clue = `Their name is <strong>${ini}</strong> — played with <strong>${lastInChain.last_name}</strong> on the <strong>${lastTeamName}</strong>.`;
+      clue = `They were active <strong>${spanStr}</strong> and also played with <strong>${state.endPlayer.last_name}</strong> on the <strong>${endTeamName}</strong>.`;
     } else {
-      clue = `<strong>${p.first_name} ${p.last_name}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}, then <strong>${endTeamName} ${bestToEnd.season}</strong> with ${state.endPlayer.last_name}.`;
+      const ini = `${p.first_name[0]}. ${p.last_name}`;
+      clue = `Their name is <strong>${ini}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}, <strong>${endTeamName} ${bestToEnd.season}</strong> with ${state.endPlayer.last_name}.`;
     }
   }
 
