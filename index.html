@@ -2288,7 +2288,7 @@ els.shareBtn.addEventListener("click", () => {
     `${start} → ${end}`,
     `Steps: ${bridges.length + 1} · Score: ${els.rTotal.textContent}`,
     path,
-    'nba-lineage.netlify.app',
+    'hooplineage.com',
   ].join("\n");
   navigator.clipboard.writeText(txt).then(() => {
     els.shareBtn.textContent = "Copied ✓";
@@ -2357,7 +2357,7 @@ $('share-img-btn')?.addEventListener('click', () => {
   ctx.fillText(`Score: ${els.rTotal.textContent}`, PAD + 12, scoreY + 24);
   ctx.fillStyle = '#6b6155';
   ctx.font = '13px "Space Grotesk", sans-serif';
-  ctx.fillText(`${bridges.length + 1} steps · nba-lineage.netlify.app`, PAD + 110, scoreY + 24);
+  ctx.fillText(`${bridges.length + 1} steps · hooplineage.com`, PAD + 110, scoreY + 24);
 
   // Download
   canvas.style.display = 'block';
