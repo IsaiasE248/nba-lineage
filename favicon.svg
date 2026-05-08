@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Dark navy background with rounded corners -->
+  <rect width="32" height="32" rx="6" fill="#0f1320"/>
+
+  <!-- Basketball left half (clipped at vertical center) -->
+  <clipPath id="lh"><rect x="0" y="0" width="15" height="32"/></clipPath>
+  <circle cx="11" cy="16" r="10" fill="#e8920a" clip-path="url(#lh)"/>
+  <!-- Basketball seam lines -->
+  <line x1="11" y1="6" x2="11" y2="26" stroke="#0f1320" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M11 6 Q3 16 11 26" fill="none" stroke="#0f1320" stroke-width="1.6" stroke-linecap="round"/>
+
+  <!-- Connector stem from basketball edge -->
+  <line x1="15" y1="16" x2="19" y2="16" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+
+  <!-- Top-right node -->
+  <line x1="19" y1="16" x2="27" y2="9" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="27" cy="9" r="2.2" fill="#0f1320" stroke="white" stroke-width="1.5"/>
+
+  <!-- Middle-right node -->
+  <circle cx="19" cy="16" r="2.2" fill="#0f1320" stroke="white" stroke-width="1.5"/>
+
+  <!-- Bottom-right node -->
+  <line x1="19" y1="16" x2="27" y2="23" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="27" cy="23" r="2.2" fill="#0f1320" stroke="white" stroke-width="1.5"/>
+
+  <!-- Top node -->
+  <line x1="19" y1="16" x2="19" y2="7" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="19" cy="7" r="2.2" fill="#0f1320" stroke="white" stroke-width="1.5"/>
+</svg>
