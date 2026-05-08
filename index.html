@@ -94,13 +94,14 @@
     font-size: 20px; font-weight: 700; letter-spacing: -0.01em;
   }
   .brand-icon {
-    width: 28px; height: 28px;
-    background: var(--accent);
-    border-radius: 50%;
+    width: 36px; height: 36px;
+    background: transparent;
+    border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 0 1px rgba(232, 146, 10, 0.3), 0 4px 16px rgba(232, 146, 10, 0.25);
     flex-shrink: 0;
+    overflow: hidden;
   }
+  .brand-icon img { width: 36px; height: 36px; object-fit: contain; display: block; }
   .brand-icon svg { width: 18px; height: 18px; fill: none; stroke: #1a0e05; stroke-width: 1.5; }
   .nav-links { display: flex; align-items: center; gap: 4px; }
   .nav-link {
@@ -354,7 +355,8 @@
     gap: 12px;
     margin-bottom: 32px;
     overflow-x: auto;
-    padding: 4px 4px 12px;
+    overflow-y: visible;
+    padding: 14px 4px 12px; /* extra top padding so X button isn't clipped */
     scrollbar-width: thin;
     scrollbar-color: var(--surface-2) transparent;
   }
