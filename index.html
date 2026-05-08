@@ -10,6 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 <style>
   :root {
     --bg: #090806;
@@ -1018,6 +1019,54 @@
     .auth-modal { padding: 28px 20px; border-radius: 18px; }
     .auth-modal h2 { font-size: 22px; }
   }
+
+  /* ── HINT BUTTON & AREA ───────────────────────────────── */
+  .hint-btn { color: var(--ink-2); border-color: var(--border-strong); font-size: 13px; padding: 8px 14px; }
+  .hint-btn:disabled { opacity: 0.35; cursor: default; }
+  .hint-area {
+    margin-top: 10px; padding: 12px 16px;
+    background: var(--surface-2); border: 1px solid var(--border-strong);
+    border-radius: 12px; font-size: 13px; color: var(--ink-2);
+    animation: fadeIn 0.2s ease-out;
+  }
+  .hint-area strong { color: var(--accent); }
+
+  /* ── PRACTICE / ARCHIVE BADGE ─────────────────────────── */
+  .complete-mode-badge {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; padding: 4px 12px; border-radius: 999px;
+    margin-bottom: 12px; border: 1px solid;
+  }
+  .complete-mode-badge.practice { background: rgba(100,180,255,0.1); color: #7ec8ff; border-color: rgba(100,180,255,0.25); }
+  .complete-mode-badge.archive  { background: rgba(180,140,255,0.1); color: #c4a8ff; border-color: rgba(180,140,255,0.25); }
+
+  /* ── ARCHIVE POPUP LIST ───────────────────────────────── */
+  .archive-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; font-size: 13px; gap: 10px;
+  }
+  .archive-row .arch-date { color: var(--ink-2); font-weight: 500; min-width: 90px; }
+  .archive-row .arch-score { color: var(--accent); font-weight: 700; font-size: 14px; }
+  .archive-row .arch-play-btn { font-size: 12px; padding: 5px 12px; border-radius: 8px;
+    background: var(--accent); color: #000; font-weight: 700; border: none; cursor: pointer; }
+  .archive-row .arch-done { font-size: 12px; color: #4caf50; font-weight: 600; }
+
+  /* ── TUTORIAL DOTS ────────────────────────────────────── */
+  .tut-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border-strong); cursor: pointer; transition: background 0.2s;
+  }
+  .tut-dot.active { background: var(--accent); }
+
+  /* ── ARCHIVE/PRACTICE EYEBROW ─────────────────────────── */
+  .eyebrow .mode-tag {
+    display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 999px;
+    margin-right: 6px; vertical-align: middle;
+  }
+  .eyebrow .mode-tag.practice { background: rgba(100,180,255,0.15); color: #7ec8ff; }
+  .eyebrow .mode-tag.archive  { background: rgba(180,140,255,0.15); color: #c4a8ff; }
 </style>
 </head>
 <body>
@@ -1034,6 +1083,8 @@
       <span class="streak-badge" id="streak-badge" title="Current streak">🔥 0</span>
       <div class="nav-links">
         <button class="nav-link active" id="nav-play">Play</button>
+        <button class="nav-link" id="nav-practice">⚡ Practice</button>
+        <button class="nav-link" id="nav-archive">📅 Archive</button>
         <button class="nav-link" id="nav-leaderboard">🏆 Leaderboard</button>
         <button class="nav-link" id="nav-settings" style="display:none;">⚙ Settings</button>
         <button class="nav-link" id="nav-howto">How to play</button>
@@ -1281,8 +1332,8 @@
 
   <div class="hero reveal">
     <div class="eyebrow">
-      <span class="dot"></span>
-      <span>Daily <span id="daily-date">—</span> · Puzzle <span id="puzzle-num">—</span> · <span id="difficulty-label">Medium</span></span>
+      <span class="dot" id="mode-dot"></span>
+      <span id="eyebrow-text">Daily <span id="daily-date">—</span> · Puzzle <span id="puzzle-num">—</span> · <span id="difficulty-label">Medium</span></span>
     </div>
     <h1>Two players, <em>one chain</em>.</h1>
     <p>Connect them through teammates who shared a team for at least one season.</p>
@@ -1329,9 +1380,12 @@
     <button class="btn primary" id="check-btn" disabled>Check chain</button>
     <button class="btn" id="undo-btn">Undo</button>
     <button class="btn" id="reset-btn">Reset</button>
+    <button class="btn hint-btn" id="hint-btn" title="Reveal a valid bridge player (-50 pts each, max 3)">💡 Hint</button>
   </div>
+  <div class="hint-area" id="hint-area" style="display:none;"></div>
 
   <div class="complete" id="complete">
+    <div class="complete-mode-badge" id="complete-mode-badge" style="display:none;"></div>
     <h3>Chain complete</h3>
     <div class="sub">Nicely done. Here's how you scored.</div>
     <div class="score-grid">
@@ -1340,8 +1394,11 @@
       <div class="score-cell" data-tooltip="1000 ÷ steps^1.4, rounded down.&#10;Fewer bridge players = much higher efficiency."><div class="k">Efficiency</div><div class="v" id="r-eff">—</div></div>
       <div class="score-cell total" data-tooltip="Efficiency + (Rarity × 25).&#10;Rarity is heavily weighted — one deep bench player can double your score."><div class="k">Final score</div><div class="v" id="r-total">—</div></div>
     </div>
+    <div id="hint-penalty-note" style="display:none;font-size:12px;color:var(--ink-3);text-align:center;margin-top:-4px;"></div>
     <div class="controls" style="margin-top: 20px;">
       <button class="btn primary" id="share-btn">Copy share</button>
+      <button class="btn" id="share-img-btn">📷 Save image</button>
+      <button class="btn practice-new-btn" id="practice-new-btn" style="display:none;">New puzzle</button>
     </div>
   </div>
 
@@ -1421,6 +1478,75 @@
     <button class="btn primary" id="stats-close" style="margin-top:20px;width:100%">Close</button>
   </div>
 </div>
+
+<!-- Archive popup -->
+<div class="help-popup" id="archive-popup">
+  <div class="inner" style="max-width:480px;width:100%;">
+    <h3>Archive</h3>
+    <div class="lead" style="margin-bottom:12px;">Play past daily puzzles. Archive scores don't count toward your streak or leaderboard.</div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;">
+      <button class="diff-tab active" id="arch-tab-easy" onclick="setArchiveDiff('easy')">Easy</button>
+      <button class="diff-tab" id="arch-tab-medium" onclick="setArchiveDiff('medium')">Medium</button>
+      <button class="diff-tab" id="arch-tab-hard" onclick="setArchiveDiff('hard')">Hard</button>
+    </div>
+    <div id="archive-list" style="display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;"></div>
+    <button class="btn primary" id="archive-close" style="margin-top:16px;width:100%">Close</button>
+  </div>
+</div>
+
+<!-- Tutorial overlay (first-time) -->
+<div id="tutorial-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.88);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:var(--bg-2);border:1px solid var(--border-strong);border-radius:24px;padding:36px 32px;max-width:400px;width:100%;position:relative;">
+    <div id="tut-steps">
+      <!-- Step 1 -->
+      <div class="tut-step" id="tut-1">
+        <div style="font-size:40px;text-align:center;margin-bottom:12px;">🏀</div>
+        <h3 style="font-family:'Fraunces',serif;font-size:24px;text-align:center;margin:0 0 10px;">Welcome to NBA Lineage</h3>
+        <p style="color:var(--ink-2);text-align:center;line-height:1.6;margin:0 0 24px;">Connect two NBA players through a chain of teammates — like Six Degrees of Kevin Bacon, but for basketball.</p>
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px;font-size:14px;font-weight:600;">
+          <span style="background:var(--surface-2);border:1px solid var(--border-strong);padding:8px 14px;border-radius:10px;">LeBron James</span>
+          <span style="color:var(--accent);">→</span>
+          <span style="color:var(--ink-3);">???</span>
+          <span style="color:var(--accent);">→</span>
+          <span style="background:var(--surface-2);border:1px solid var(--border-strong);padding:8px 14px;border-radius:10px;">Stephen Curry</span>
+        </div>
+      </div>
+      <!-- Step 2 -->
+      <div class="tut-step" id="tut-2" style="display:none;">
+        <div style="font-size:40px;text-align:center;margin-bottom:12px;">🤝</div>
+        <h3 style="font-family:'Fraunces',serif;font-size:24px;text-align:center;margin:0 0 10px;">The only rule</h3>
+        <p style="color:var(--ink-2);text-align:center;line-height:1.6;margin:0 0 20px;">Each link must be two players who were on the <strong style="color:var(--ink);">same team in the same season</strong>. No exceptions.</p>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:13px;color:var(--ink-2);line-height:1.8;text-align:center;">
+          LeBron + Kyrie <span style="color:#4caf50;">✓</span> — both Cavaliers 2014–17<br>
+          LeBron + Curry <span style="color:#e05252;">✗</span> — never teammates
+        </div>
+      </div>
+      <!-- Step 3 -->
+      <div class="tut-step" id="tut-3" style="display:none;">
+        <div style="font-size:40px;text-align:center;margin-bottom:12px;">📊</div>
+        <h3 style="font-family:'Fraunces',serif;font-size:24px;text-align:center;margin:0 0 10px;">Score big</h3>
+        <p style="color:var(--ink-2);text-align:center;line-height:1.6;margin:0 0 16px;">Use fewer bridge players for higher <strong style="color:var(--ink);">efficiency</strong>. Use obscure, short-career players for higher <strong style="color:var(--ink);">rarity</strong>.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;">Fewer hops</div><div style="font-size:20px;font-weight:700;color:var(--accent);">Efficiency</div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;">Obscure players</div><div style="font-size:20px;font-weight:700;color:var(--accent);">Rarity</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- Progress dots -->
+    <div style="display:flex;justify-content:center;gap:8px;margin-bottom:20px;" id="tut-dots">
+      <span class="tut-dot active" data-step="1"></span>
+      <span class="tut-dot" data-step="2"></span>
+      <span class="tut-dot" data-step="3"></span>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn" id="tut-skip" style="flex:1;">Skip</button>
+      <button class="btn primary" id="tut-next" style="flex:2;">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden canvas for share image generation -->
+<canvas id="share-canvas" style="display:none;"></canvas>
 
 <script>
 /* =========================================================================
@@ -1502,6 +1628,10 @@ const state = {
   difficulty: 'medium',
   resultsList: [],
   activeIdx: -1,
+  mode: 'daily',        // 'daily' | 'practice' | 'archive'
+  archiveDayIndex: null, // used when mode === 'archive'
+  hintsUsed: 0,
+  hintPenalty: 0,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -1728,9 +1858,10 @@ function shareTeamSeason(p1, p2) {
   }
   return overlap;
 }
-function pickDailyPair() {
+function pickDailyPair(dayIdx) {
   const pool = POOLS[state.difficulty];
-  const start = state.puzzleNum % pool.length;
+  const idx = dayIdx !== undefined ? dayIdx : state.puzzleNum;
+  const start = idx % pool.length;
   for (let off = 0; off < pool.length; off++) {
     const p = pool[(start + off) % pool.length];
     if (state.data.players[p.a] && state.data.players[p.b]) return p;
@@ -1969,38 +2100,79 @@ function finishGame() {
   const steps = bridges.length + 1;
   const rarity = bridges.reduce((s, p) => s + (p.rarity || 0), 0);
   const eff = Math.max(0, Math.round(1000 / Math.pow(steps, 1.4)));
-  const total = eff + rarity * 25;
+  const baseTotal = eff + rarity * 25;
+  const total = Math.max(0, baseTotal - state.hintPenalty);
 
   els.rSteps.textContent = steps;
   els.rRarity.textContent = rarity;
   els.rEff.textContent = eff;
   els.rTotal.textContent = total;
+
+  // Show hint penalty note if hints were used
+  const penaltyNote = $('hint-penalty-note');
+  if (state.hintsUsed > 0 && penaltyNote) {
+    penaltyNote.style.display = 'block';
+    penaltyNote.textContent = `−${state.hintPenalty} pts from ${state.hintsUsed} hint${state.hintsUsed > 1 ? 's' : ''} used`;
+  }
+
+  // Mode badge
+  const badge = $('complete-mode-badge');
+  if (badge) {
+    if (state.mode === 'practice') {
+      badge.textContent = '⚡ Practice — score not saved';
+      badge.className = 'complete-mode-badge practice';
+      badge.style.display = 'inline-block';
+    } else if (state.mode === 'archive') {
+      const archDate = new Date(Date.UTC(2024,0,1) + state.archiveDayIndex * 86400000);
+      badge.textContent = `📅 Archive — ${archDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+      badge.className = 'complete-mode-badge archive';
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Practice-only "New puzzle" button
+  const practiceNewBtn = $('practice-new-btn');
+  if (practiceNewBtn) practiceNewBtn.style.display = state.mode === 'practice' ? 'inline-flex' : 'none';
+
   els.complete.classList.add("show");
   setStatus("Chain locked. Well played.", "ok");
 
-  // Save to localStorage
-  {
-    const key = `lineage:${state.difficulty}:${state.puzzleNum}`;
-    const prev = JSON.parse(localStorage.getItem(key) || "null");
-    if (!prev || total > prev.total) {
-      localStorage.setItem(key, JSON.stringify({
-        total, steps, rarity,
-        chain: [state.startPlayer.first_name + " " + state.startPlayer.last_name,
-                ...bridges.map(p => p.name),
-                state.endPlayer.first_name + " " + state.endPlayer.last_name],
-        connections: state.connections,
-      }));
-    }
-    updateStreakBadge();
-    markCompletedTabs();
-    handlePuzzleComplete(state.difficulty, total);
+  // Fire confetti 🎉
+  if (typeof confetti === 'function') {
+    confetti({ particleCount: 120, spread: 80, origin: { y: 0.7 },
+      colors: ['#e8920a', '#f0a830', '#ffd066', '#fff5d6', '#ffffff'] });
   }
 
-  // Lock input so completed puzzle can't be edited
+  // Only save for daily and archive modes (not practice)
+  if (state.mode !== 'practice') {
+    const puzzleKey = state.mode === 'archive' ? state.archiveDayIndex : state.puzzleNum;
+    const lsKey = `lineage:${state.difficulty}:${puzzleKey}`;
+    const chainArr = [state.startPlayer.first_name + " " + state.startPlayer.last_name,
+                      ...bridges.map(p => p.name),
+                      state.endPlayer.first_name + " " + state.endPlayer.last_name];
+    const record = { total, steps, rarity, eff, hintsUsed: state.hintsUsed,
+                     chain: chainArr, connections: state.connections };
+    const prev = JSON.parse(localStorage.getItem(lsKey) || "null");
+    if (!prev || total > prev.total) {
+      localStorage.setItem(lsKey, JSON.stringify(record));
+      // Save to Firestore stats
+      saveStatsToFirestore(state.difficulty, puzzleKey, record);
+    }
+    if (state.mode === 'daily') {
+      updateStreakBadge();
+      markCompletedTabs();
+      handlePuzzleComplete(state.difficulty, total);
+    }
+  }
+
+  // Lock input
   els.search.disabled = true;
   els.checkBtn.disabled = true;
   els.undoBtn.disabled = true;
-
+  $('hint-btn').disabled = true;
+  $('hint-area').style.display = 'none';
 }
 
 // ---------- CONTROLS ----------
@@ -2025,8 +2197,11 @@ els.resetBtn.addEventListener("click", () => {
   state.complete = false;
   state.connections = [];
   state.brokenLink = -1;
+  resetHints();
   els.complete.classList.remove("show");
   els.search.disabled = false;
+  els.checkBtn.disabled = false;
+  els.undoBtn.disabled = false;
   els.search.value = "";
   renderChainRow();
   setStatus("Reset. Add players to build your chain, then click Check chain.");
@@ -2038,17 +2213,273 @@ els.shareBtn.addEventListener("click", () => {
   const start = `${state.startPlayer.first_name} ${state.startPlayer.last_name}`;
   const end = `${state.endPlayer.first_name} ${state.endPlayer.last_name}`;
   const path = [start, ...bridges.map(p => p.name), end].join(" → ");
+  const modeTag = state.mode === 'practice' ? ' [Practice]' : state.mode === 'archive' ? ' [Archive]' : '';
   const txt = [
-    `NBA Lineage #${state.puzzleNum}`,
+    `NBA Lineage #${state.puzzleNum}${modeTag}`,
     `${start} → ${end}`,
     `Steps: ${bridges.length + 1} · Score: ${els.rTotal.textContent}`,
     path,
+    'nba-lineage.netlify.app',
   ].join("\n");
   navigator.clipboard.writeText(txt).then(() => {
     els.shareBtn.textContent = "Copied ✓";
     setTimeout(() => { els.shareBtn.textContent = "Copy share"; }, 1500);
   });
 });
+
+// ── Share image (canvas) ──────────────────────────────────────────────────────
+$('share-img-btn')?.addEventListener('click', () => {
+  const bridges = state.chain.filter(p => p.role !== "start" && p.role !== "end");
+  const chainNames = [
+    `${state.startPlayer.first_name} ${state.startPlayer.last_name}`,
+    ...bridges.map(p => p.name),
+    `${state.endPlayer.first_name} ${state.endPlayer.last_name}`,
+  ];
+  const canvas = $('share-canvas');
+  const W = 480, ROW = 44, PAD = 28;
+  const H = PAD + 64 + chainNames.length * ROW + 24 + 52 + PAD;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#0e0c09';
+  ctx.fillRect(0, 0, W, H);
+
+  // Top accent line
+  ctx.fillStyle = '#e8920a';
+  ctx.fillRect(0, 0, W, 3);
+
+  // Title
+  ctx.fillStyle = '#f2ede6';
+  ctx.font = 'bold 20px "Space Grotesk", sans-serif';
+  ctx.fillText('NBA Lineage', PAD, PAD + 22);
+
+  // Mode / puzzle info
+  const modeStr = state.mode === 'practice' ? '⚡ Practice' :
+                  state.mode === 'archive'  ? `📅 Archive #${state.archiveDayIndex}` :
+                  `#${state.puzzleNum} · ${state.difficulty.charAt(0).toUpperCase()+state.difficulty.slice(1)}`;
+  ctx.fillStyle = '#a89e8e';
+  ctx.font = '14px "Space Grotesk", sans-serif';
+  ctx.fillText(modeStr, PAD, PAD + 46);
+
+  // Chain rows
+  let y = PAD + 72;
+  chainNames.forEach((name, i) => {
+    const isEnd = i === 0 || i === chainNames.length - 1;
+    ctx.fillStyle = isEnd ? '#1c1810' : '#151209';
+    roundRect(ctx, PAD, y - 22, W - PAD * 2, 34, 8);
+    ctx.fillStyle = isEnd ? '#e8920a' : '#f2ede6';
+    ctx.font = `${isEnd ? 'bold' : 'normal'} 15px "Space Grotesk", sans-serif`;
+    ctx.fillText(name, PAD + 12, y - 2);
+    if (i < chainNames.length - 1) {
+      ctx.fillStyle = '#6b6155';
+      ctx.font = '13px sans-serif';
+      ctx.fillText('↓', W / 2 - 5, y + 18);
+    }
+    y += ROW;
+  });
+
+  // Score bar
+  const scoreY = y + 10;
+  ctx.fillStyle = '#1c1810';
+  roundRect(ctx, PAD, scoreY, W - PAD * 2, 38, 8);
+  ctx.fillStyle = '#e8920a';
+  ctx.font = 'bold 16px "Space Grotesk", sans-serif';
+  ctx.fillText(`Score: ${els.rTotal.textContent}`, PAD + 12, scoreY + 24);
+  ctx.fillStyle = '#6b6155';
+  ctx.font = '13px "Space Grotesk", sans-serif';
+  ctx.fillText(`${bridges.length + 1} steps · nba-lineage.netlify.app`, PAD + 110, scoreY + 24);
+
+  // Download
+  canvas.style.display = 'block';
+  const link = document.createElement('a');
+  link.download = `nba-lineage-${state.puzzleNum}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  canvas.style.display = 'none';
+});
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
+// ── Hint button ───────────────────────────────────────────────────────────────
+$('hint-btn')?.addEventListener('click', () => {
+  if (state.complete || !state.data) return;
+  const MAX_HINTS = 3;
+  if (state.hintsUsed >= MAX_HINTS) return;
+
+  // The "target" is the last player in the chain (not end), we need someone who connects to endPlayer
+  const lastInChain = state.chain.length > 0 ? state.chain[state.chain.length - 1]._ref : state.startPlayer;
+  const endP = state.endPlayer;
+
+  // Find players who share a season with both lastInChain AND endPlayer, and aren't already used
+  const candidates = [];
+  const allPlayers = Object.values(state.data.players);
+  for (const p of allPlayers) {
+    if (state.used.has(p.id)) continue;
+    const linksToCurrent = shareTeamSeason(lastInChain, p).length > 0;
+    const linksToEnd = shareTeamSeason(p, endP).length > 0;
+    if (linksToCurrent && linksToEnd) {
+      const seasons = new Set(p.team_seasons.map(t => t.season)).size;
+      const rarity = Math.max(1, Math.round(20 - Math.min(seasons, 20)));
+      candidates.push({ p, rarity });
+    }
+  }
+  candidates.sort((a, b) => b.rarity - a.rarity);
+
+  const hintArea = $('hint-area');
+  if (!candidates.length) {
+    hintArea.innerHTML = `<strong>No single-hop hint found.</strong> Try adding another bridge first.`;
+    hintArea.style.display = 'block';
+    return;
+  }
+
+  state.hintsUsed++;
+  state.hintPenalty += 50;
+  const pick = candidates[0];
+  const fullName = `${pick.p.first_name} ${pick.p.last_name}`;
+  hintArea.innerHTML = `💡 <strong>${fullName}</strong> connects to ${endP.last_name}. <span style="color:var(--ink-3);font-size:12px;">−50 pts (${state.hintsUsed}/${MAX_HINTS} hints used)</span>`;
+  hintArea.style.display = 'block';
+
+  const remaining = MAX_HINTS - state.hintsUsed;
+  const hintBtn = $('hint-btn');
+  hintBtn.textContent = remaining > 0 ? `💡 Hint (${remaining} left)` : '💡 No hints left';
+  if (remaining === 0) hintBtn.disabled = true;
+});
+
+// ── Practice mode ─────────────────────────────────────────────────────────────
+function startPractice(diff) {
+  if (!state.data) return;
+  state.mode = 'practice';
+  state.archiveDayIndex = null;
+  state.difficulty = diff || state.difficulty;
+  state.chain = [];
+  state.connections = [];
+  state.brokenLink = -1;
+  state.complete = false;
+  resetHints();
+
+  // Pick a random pair from any difficulty pool (combined for variety)
+  const allPairs = [...POOL_EASY, ...POOL_MEDIUM, ...POOL_HARD];
+  let pair;
+  for (let attempts = 0; attempts < 50; attempts++) {
+    const candidate = allPairs[Math.floor(Math.random() * allPairs.length)];
+    if (state.data.players[candidate.a] && state.data.players[candidate.b]) { pair = candidate; break; }
+  }
+  if (!pair) { pair = pickDailyPair(); }
+
+  state.startPlayer = state.data.players[pair.a];
+  state.endPlayer = state.data.players[pair.b];
+  state.used = new Set([state.startPlayer.id, state.endPlayer.id]);
+
+  els.complete.classList.remove("show");
+  els.search.disabled = false;
+  els.checkBtn.disabled = false;
+  els.undoBtn.disabled = false;
+  $('hint-btn').disabled = false;
+
+  updateEyebrow();
+  renderChainRow();
+  setStatus(`Practice: Connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
+  els.search.focus();
+  showView('game');
+}
+
+$('nav-practice')?.addEventListener('click', () => {
+  if (!state.data) return;
+  startPractice(state.difficulty);
+});
+
+$('practice-new-btn')?.addEventListener('click', () => startPractice(state.difficulty));
+
+// ── Archive ───────────────────────────────────────────────────────────────────
+let archiveDiff = 'easy';
+function setArchiveDiff(diff) {
+  archiveDiff = diff;
+  ['easy','medium','hard'].forEach(d => {
+    $(`arch-tab-${d}`)?.classList.toggle('active', d === diff);
+  });
+  renderArchiveList();
+}
+
+function renderArchiveList() {
+  const list = $('archive-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const today = dayIndex();
+  const DAYS = 30;
+  for (let i = today - 1; i >= Math.max(0, today - DAYS); i--) {
+    const lsKey = `lineage:${archiveDiff}:${i}`;
+    const saved = JSON.parse(localStorage.getItem(lsKey) || 'null');
+    const date = new Date(Date.UTC(2024,0,1) + i * 86400000);
+    const dateStr = date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+
+    const row = document.createElement('div');
+    row.className = 'archive-row';
+    row.innerHTML = `
+      <span class="arch-date">${dateStr}</span>
+      ${saved
+        ? `<span class="arch-score">${saved.total} pts</span><span class="arch-done">✓ Played</span>`
+        : `<button class="arch-play-btn" data-day="${i}">Play</button>`
+      }`;
+    list.appendChild(row);
+  }
+  // Wire play buttons
+  list.querySelectorAll('.arch-play-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      startArchivePuzzle(+btn.dataset.day, archiveDiff);
+      $('archive-popup').classList.remove('show');
+    });
+  });
+}
+
+function startArchivePuzzle(dayIdx, diff) {
+  if (!state.data) return;
+  state.mode = 'archive';
+  state.archiveDayIndex = dayIdx;
+  state.difficulty = diff;
+  state.chain = [];
+  state.connections = [];
+  state.brokenLink = -1;
+  state.complete = false;
+  resetHints();
+
+  const pair = pickDailyPair(dayIdx);
+  state.startPlayer = state.data.players[pair.a];
+  state.endPlayer = state.data.players[pair.b];
+  state.used = new Set([state.startPlayer.id, state.endPlayer.id]);
+
+  els.complete.classList.remove("show");
+  els.search.disabled = false;
+  els.checkBtn.disabled = false;
+  els.undoBtn.disabled = false;
+  $('hint-btn').disabled = false;
+
+  updateEyebrow();
+  renderChainRow();
+  setStatus(`Archive: Connect ${state.startPlayer.last_name} to ${state.endPlayer.last_name}, then click Check chain.`);
+  els.search.focus();
+  showView('game');
+}
+
+$('nav-archive')?.addEventListener('click', () => {
+  setArchiveDiff(archiveDiff);
+  $('archive-popup').classList.add('show');
+});
+$('archive-close')?.addEventListener('click', () => $('archive-popup').classList.remove('show'));
+$('archive-popup')?.addEventListener('click', e => { if (e.target === $('archive-popup')) $('archive-popup').classList.remove('show'); });
 
 els.helpBtn.addEventListener("click", () => els.helpPopup.classList.add("show"));
 els.helpClose.addEventListener("click", () => els.helpPopup.classList.remove("show"));
@@ -2061,12 +2492,33 @@ $("howto-close")?.addEventListener("click", () => $("howto-popup").classList.rem
 $("howto-popup")?.addEventListener("click", (e) => { if (e.target === $("howto-popup")) $("howto-popup").classList.remove("show"); });
 $("nav-scoring")?.addEventListener("click", () => els.helpPopup.classList.add("show"));
 
-$("nav-stats")?.addEventListener("click", () => {
-  const records = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k?.startsWith("lineage:")) {
-      try { records.push({ puzzle: +k.split(":")[1], ...JSON.parse(localStorage.getItem(k)) }); } catch {}
+$("nav-stats")?.addEventListener("click", async () => {
+  // Update the subtitle
+  const user = typeof fbAuth !== 'undefined' ? fbAuth.currentUser : null;
+  const leadEl = els.statsPopup.querySelector('.lead');
+  if (leadEl) leadEl.textContent = user ? 'Your puzzle history, synced across devices.' : 'Sign in to sync stats across devices.';
+
+  // Collect records — prefer Firestore when logged in, fallback to localStorage
+  let records = [];
+  if (user) {
+    try {
+      const doc = await fbDb.collection('users').doc(user.uid).get();
+      const solved = doc.exists ? (doc.data().solvedPuzzles || {}) : {};
+      for (const [k, v] of Object.entries(solved)) {
+        const parts = k.split('_');
+        records.push({ diff: parts[0], puzzle: +parts[1], ...v });
+      }
+    } catch(e) { /* fallback to localStorage */ }
+  }
+  if (!records.length) {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k?.startsWith("lineage:")) {
+        try {
+          const parts = k.split(":");
+          records.push({ diff: parts[1], puzzle: +parts[2], ...JSON.parse(localStorage.getItem(k)) });
+        } catch {}
+      }
     }
   }
   records.sort((a, b) => b.puzzle - a.puzzle);
@@ -2074,7 +2526,7 @@ $("nav-stats")?.addEventListener("click", () => {
   const played = records.length;
   const best = played ? Math.max(...records.map(r => r.total)) : 0;
   const avg = played ? (records.reduce((s, r) => s + r.steps, 0) / played).toFixed(1) : "—";
-  const streak = getStreak();
+  const streak = getStreak(state.difficulty);
 
   els.stPlayed.textContent = played;
   els.stBest.textContent = best || "—";
@@ -2085,13 +2537,14 @@ $("nav-stats")?.addEventListener("click", () => {
   if (!played) {
     els.stBody.innerHTML = `<tr><td colspan="4" style="color:var(--ink-3);text-align:center;padding:20px">No completed puzzles yet.</td></tr>`;
   } else {
-    records.slice(0, 15).forEach(r => {
+    records.slice(0, 20).forEach(r => {
       const chainHtml = r.chain
         ? r.chain.map((n, i) => i === 0 ? n : `<span>→</span>${n}`).join('')
         : '';
+      const diffBadge = r.diff ? `<span style="font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;">${r.diff}</span> ` : '';
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>#${r.puzzle}</td>
+        <td>${diffBadge}#${r.puzzle}</td>
         <td>${r.total}<div class="chain-line">${chainHtml}</div></td>
         <td>${r.steps}</td>
         <td>${r.rarity}</td>`;
@@ -2117,6 +2570,30 @@ function markCompletedTabs() {
   });
 }
 
+function resetHints() {
+  state.hintsUsed = 0;
+  state.hintPenalty = 0;
+  $('hint-btn').disabled = false;
+  $('hint-btn').textContent = '💡 Hint';
+  $('hint-area').style.display = 'none';
+  const penaltyNote = $('hint-penalty-note');
+  if (penaltyNote) penaltyNote.style.display = 'none';
+}
+
+function updateEyebrow() {
+  const txt = $('eyebrow-text');
+  if (!txt) return;
+  if (state.mode === 'practice') {
+    txt.innerHTML = `<span class="mode-tag practice">Practice</span><span id="difficulty-label">${state.difficulty.charAt(0).toUpperCase()+state.difficulty.slice(1)}</span>`;
+  } else if (state.mode === 'archive') {
+    const archDate = new Date(Date.UTC(2024,0,1) + state.archiveDayIndex * 86400000);
+    const dateStr = archDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    txt.innerHTML = `<span class="mode-tag archive">Archive</span>${dateStr} · Puzzle #${state.archiveDayIndex} · <span id="difficulty-label">${state.difficulty.charAt(0).toUpperCase()+state.difficulty.slice(1)}</span>`;
+  } else {
+    txt.innerHTML = `Daily <span id="daily-date">${todayDate()}</span> · Puzzle <span id="puzzle-num">#${state.puzzleNum}</span> · <span id="difficulty-label">${state.difficulty.charAt(0).toUpperCase()+state.difficulty.slice(1)}</span>`;
+  }
+}
+
 function switchDifficulty(diff) {
   if (!state.data || state.difficulty === diff) return;
   state.difficulty = diff;
@@ -2124,8 +2601,11 @@ function switchDifficulty(diff) {
   state.connections = [];
   state.brokenLink = -1;
   state.complete = false;
+  state.mode = 'daily';
+  state.archiveDayIndex = null;
   els.complete.classList.remove("show");
   els.search.value = "";
+  resetHints();
 
   const pair = pickDailyPair();
   state.startPlayer = state.data.players[pair.a];
@@ -2140,9 +2620,7 @@ function switchDifficulty(diff) {
 
   updateStreakBadge();
   renderChainRow();
-  $("daily-date").textContent = todayDate();
-  $("puzzle-num").textContent = "#" + state.puzzleNum;
-  $("difficulty-label").textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
+  updateEyebrow();
 
   // If already solved today, restore completed state and lock editing
   const saved = localStorage.getItem(`lineage:${diff}:${state.puzzleNum}`);
@@ -2227,12 +2705,11 @@ $("how-link").addEventListener("click", (e) => {
 
 async function boot() {
   state.difficulty = 'easy';
-  els.date.textContent = todayDate();
-  els.num.textContent = "#" + state.puzzleNum;
-  $("difficulty-label").textContent = "Easy";
+  state.mode = 'daily';
   $("nav-easy")?.classList.add("active");
   $("nav-medium")?.classList.remove("active");
   updateStreakBadge();
+  updateEyebrow();
 
   try {
     state.data = await loadData();
@@ -2258,6 +2735,11 @@ async function boot() {
     }
   } catch (e) {
     setStatus("Failed to load: " + e.message, "bad");
+  }
+
+  // Show tutorial on first ever visit
+  if (!localStorage.getItem('lineage:visited')) {
+    showTutorial();
   }
 }
 
@@ -2293,6 +2775,77 @@ function weekLabel() {
 }
 
 const MULTIPLIERS = { easy: 1, medium: 1.5, hard: 2 };
+
+// ── Firestore stats ───────────────────────────────────────────────────────────
+async function saveStatsToFirestore(diff, puzzleKey, record) {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  try {
+    const key = `${diff}_${puzzleKey}`;
+    await fbDb.collection('users').doc(user.uid).set(
+      { solvedPuzzles: { [key]: record } }, { merge: true }
+    );
+  } catch(e) {}
+}
+
+async function syncStatsFromFirestore(uid) {
+  try {
+    const doc = await fbDb.collection('users').doc(uid).get();
+    if (!doc.exists) return;
+    const solved = doc.data().solvedPuzzles || {};
+    for (const [k, v] of Object.entries(solved)) {
+      // key format: diff_puzzleNum (e.g. easy_523)
+      const us = k.indexOf('_');
+      if (us < 0) continue;
+      const diff = k.slice(0, us);
+      const num  = k.slice(us + 1);
+      const lsKey = `lineage:${diff}:${num}`;
+      const local = JSON.parse(localStorage.getItem(lsKey) || 'null');
+      if (!local || v.total > local.total) {
+        localStorage.setItem(lsKey, JSON.stringify(v));
+      }
+    }
+    updateStreakBadge();
+    markCompletedTabs();
+  } catch(e) {}
+}
+
+// ── Tutorial ──────────────────────────────────────────────────────────────────
+let tutStep = 1;
+function showTutorial() {
+  tutStep = 1;
+  $('tut-1').style.display = 'block';
+  $('tut-2').style.display = 'none';
+  $('tut-3').style.display = 'none';
+  document.querySelectorAll('.tut-dot').forEach(d => d.classList.toggle('active', +d.dataset.step === 1));
+  const ov = $('tutorial-overlay');
+  ov.style.display = 'flex';
+}
+function closeTutorial() {
+  $('tutorial-overlay').style.display = 'none';
+  localStorage.setItem('lineage:visited', '1');
+}
+$('tut-skip')?.addEventListener('click', closeTutorial);
+$('tut-next')?.addEventListener('click', () => {
+  if (tutStep < 3) {
+    $(`tut-${tutStep}`).style.display = 'none';
+    tutStep++;
+    $(`tut-${tutStep}`).style.display = 'block';
+    document.querySelectorAll('.tut-dot').forEach(d => d.classList.toggle('active', +d.dataset.step === tutStep));
+    if (tutStep === 3) $('tut-next').textContent = "Let's play!";
+  } else {
+    closeTutorial();
+  }
+});
+document.querySelectorAll('.tut-dot').forEach(dot => {
+  dot.addEventListener('click', () => {
+    $(`tut-${tutStep}`).style.display = 'none';
+    tutStep = +dot.dataset.step;
+    $(`tut-${tutStep}`).style.display = 'block';
+    document.querySelectorAll('.tut-dot').forEach(d => d.classList.toggle('active', d === dot));
+    $('tut-next').textContent = tutStep === 3 ? "Let's play!" : 'Next →';
+  });
+});
 
 // ── Username uniqueness ───────────────────────────────────────────────────────
 // usernames collection: doc ID = lowercase name, value = { uid }
@@ -2534,6 +3087,8 @@ fbAuth.onAuthStateChanged(async user => {
   if (user) {
     const doc = await loadUserDoc(user.uid);
     updateNavAvatar(user, doc.photoDataURL || null);
+    // Sync Firestore stats → localStorage so streak/tabs reflect all devices
+    syncStatsFromFirestore(user.uid);
     // If leaderboard or settings is open, refresh it
     if ($('leaderboard-view').classList.contains('active')) loadLeaderboardView();
     if ($('settings-view').classList.contains('active')) loadSettingsView();
@@ -2577,7 +3132,15 @@ $('google-signin-btn')?.addEventListener('click', async () => {
   if (pendingScore) { await saveScoreToFirestore(pendingScore.diff, pendingScore.rawScore); pendingScore = null; }
 });
 $('auth-skip')?.addEventListener('click', () => { $('auth-overlay').classList.remove('show'); pendingScore = null; });
-$('nav-play')?.addEventListener('click', () => showView('game'));
+$('nav-play')?.addEventListener('click', () => {
+  showView('game');
+  if (state.mode !== 'daily' && state.data) {
+    // Return to today's daily puzzle
+    state.mode = 'daily';
+    state.archiveDayIndex = null;
+    switchDifficulty(state.difficulty);
+  }
+});
 $('nav-signin')?.addEventListener('click', () => {
   // Default to sign-up mode when opened from nav
   emailAuthMode = 'create';
