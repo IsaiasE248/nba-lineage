@@ -976,14 +976,75 @@
   @keyframes shimmer { to { background-position: -200% 0; } }
 
   /* ── MOBILE ─────────────────────────────────────────── */
+  /* ── MOBILE MENU (hamburger sheet) ──────────────────────── */
+  .nav-hamburger {
+    display: none; /* desktop: hidden */
+    align-items: center; justify-content: center;
+    width: 38px; height: 38px;
+    background: var(--surface); border: 1px solid var(--border-strong);
+    border-radius: 10px; cursor: pointer; flex-shrink: 0;
+    color: var(--ink); transition: background 0.15s;
+  }
+  .nav-hamburger:hover { background: var(--surface-2); }
+  .nav-hamburger svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; }
+
+  .mobile-menu-backdrop {
+    display: none;
+    position: fixed; inset: 0; z-index: 98;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .mobile-menu-backdrop.open { display: block; }
+
+  .mobile-menu {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 99;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 20px 20px 0 0;
+    padding: 8px 0 calc(env(safe-area-inset-bottom, 0px) + 16px);
+    box-shadow: 0 -16px 48px rgba(0,0,0,0.6);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .mobile-menu.open { display: block; transform: translateY(0); }
+  .mobile-menu-handle {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: var(--surface-3); margin: 0 auto 12px;
+  }
+  .mobile-menu-item {
+    display: flex; align-items: center;
+    width: 100%; padding: 14px 20px;
+    background: none; border: none; color: var(--ink);
+    font-family: inherit; font-size: 16px; font-weight: 500;
+    cursor: pointer; text-align: left; gap: 12px;
+    transition: background 0.1s;
+  }
+  .mobile-menu-item:hover, .mobile-menu-item:active { background: var(--surface-2); }
+  .mobile-menu-item.active { color: var(--accent); }
+  .mobile-menu-item .mmi-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+  .mobile-menu-item .mmi-label { flex: 1; }
+  .mobile-menu-divider { height: 1px; background: var(--border); margin: 6px 20px; }
+  .mobile-menu-signin {
+    margin: 10px 16px 0;
+    padding: 14px; background: var(--accent); color: #000;
+    border: none; border-radius: 12px; font-family: inherit;
+    font-size: 15px; font-weight: 700; cursor: pointer; width: calc(100% - 32px);
+    transition: opacity 0.15s;
+  }
+  .mobile-menu-signin:hover { opacity: 0.9; }
+
   @media (max-width: 600px) {
     /* Navbar */
-    .navbar { top: 10px; width: calc(100% - 16px); }
-    .nav-inner { padding: 8px 10px; gap: 6px; }
-    .brand { font-size: 16px; gap: 7px; }
-    .brand span { display: none; } /* hide "Lineage" text, keep icon */
-    .streak-badge { padding: 4px 8px; font-size: 11px; gap: 3px; }
-    .nav-link { padding: 6px 9px; font-size: 12px; }
+    .navbar { top: 10px; width: calc(100% - 16px); border-radius: 16px; }
+    .nav-inner { padding: 10px 12px; gap: 0; justify-content: space-between; }
+    .brand { font-size: 17px; gap: 8px; }
+    .streak-badge { padding: 5px 10px; font-size: 12px; gap: 4px; }
+    /* Hide desktop nav links; show hamburger */
+    .nav-links { display: none; }
+    #nav-signin { display: none !important; }
+    .nav-hamburger { display: flex; }
 
     /* Main layout */
     .wrap { padding: 80px 14px 60px; }
@@ -1128,9 +1189,28 @@
         <div id="nav-avatar" title="Settings" style="width:30px;height:30px;border-radius:50%;border:2px solid var(--accent);cursor:pointer;overflow:hidden;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;"></div>
       </div>
       <button class="nav-link" id="nav-signin" style="display:none;background:var(--accent);color:#000;font-weight:700;">Sign in</button>
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu">
+        <svg viewBox="0 0 18 18"><line x1="2" y1="5" x2="16" y2="5"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="13" x2="16" y2="13"/></svg>
+      </button>
     </div>
   </div>
 </nav>
+
+<!-- Mobile slide-up menu -->
+<div class="mobile-menu-backdrop" id="mobile-menu-backdrop"></div>
+<div class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-handle"></div>
+  <button class="mobile-menu-item active" id="mnav-play"><span class="mmi-icon">🏀</span><span class="mmi-label">Play</span></button>
+  <button class="mobile-menu-item" id="mnav-practice"><span class="mmi-icon">⚡</span><span class="mmi-label">Practice</span></button>
+  <button class="mobile-menu-item" id="mnav-archive"><span class="mmi-icon">📅</span><span class="mmi-label">Archive</span></button>
+  <button class="mobile-menu-item" id="mnav-leaderboard"><span class="mmi-icon">🏆</span><span class="mmi-label">Leaderboard</span></button>
+  <div class="mobile-menu-divider"></div>
+  <button class="mobile-menu-item" id="mnav-howto"><span class="mmi-icon">❓</span><span class="mmi-label">How to play</span></button>
+  <button class="mobile-menu-item" id="mnav-scoring"><span class="mmi-icon">📊</span><span class="mmi-label">Scoring</span></button>
+  <button class="mobile-menu-item" id="mnav-stats"><span class="mmi-icon">📈</span><span class="mmi-label">Stats</span></button>
+  <button class="mobile-menu-item" id="mnav-settings" style="display:none;"><span class="mmi-icon">⚙️</span><span class="mmi-label">Settings</span></button>
+  <button class="mobile-menu-signin" id="mnav-signin" style="display:none;">Sign in</button>
+</div>
 
 <!-- Profile modal (leaderboard click) -->
 <div id="profile-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;">
@@ -2829,6 +2909,64 @@ $("nav-howto")?.addEventListener("click", () => $("howto-popup").classList.add("
 $("howto-close")?.addEventListener("click", () => $("howto-popup").classList.remove("show"));
 $("howto-popup")?.addEventListener("click", (e) => { if (e.target === $("howto-popup")) $("howto-popup").classList.remove("show"); });
 $("nav-scoring")?.addEventListener("click", () => els.helpPopup.classList.add("show"));
+
+// ── MOBILE HAMBURGER MENU ──────────────────────────────────
+(function() {
+  const hamburger = $("nav-hamburger");
+  const menu      = $("mobile-menu");
+  const backdrop  = $("mobile-menu-backdrop");
+  if (!hamburger || !menu) return;
+
+  function openMenu() {
+    menu.style.display = 'block';
+    backdrop.classList.add('open');
+    requestAnimationFrame(() => menu.classList.add('open'));
+  }
+  function closeMenu() {
+    menu.classList.remove('open');
+    backdrop.classList.remove('open');
+    setTimeout(() => { if (!menu.classList.contains('open')) menu.style.display = 'none'; }, 300);
+  }
+
+  hamburger.addEventListener('click', openMenu);
+  backdrop.addEventListener('click', closeMenu);
+
+  // Mirror each desktop nav button into the mobile menu
+  const pairs = [
+    ['nav-play',        'mnav-play'],
+    ['nav-practice',    'mnav-practice'],
+    ['nav-archive',     'mnav-archive'],
+    ['nav-leaderboard', 'mnav-leaderboard'],
+    ['nav-howto',       'mnav-howto'],
+    ['nav-scoring',     'mnav-scoring'],
+    ['nav-stats',       'mnav-stats'],
+    ['nav-settings',    'mnav-settings'],
+    ['nav-signin',      'mnav-signin'],
+  ];
+  pairs.forEach(([desktopId, mobileId]) => {
+    const desktop = $(desktopId);
+    const mobile  = $(mobileId);
+    if (!desktop || !mobile) return;
+    // Forward click from mobile item → desktop button (which already has handlers)
+    mobile.addEventListener('click', () => { closeMenu(); desktop.click(); });
+    // Sync visibility: if desktop item is hidden, hide mobile too
+    const syncVisibility = () => {
+      const hidden = desktop.style.display === 'none';
+      mobile.style.display = hidden ? 'none' : '';
+    };
+    syncVisibility();
+    new MutationObserver(syncVisibility).observe(desktop, { attributes: true, attributeFilter: ['style'] });
+  });
+
+  // Sync active state into mobile menu
+  function syncActive() {
+    pairs.forEach(([desktopId, mobileId]) => {
+      const d = $(desktopId), m = $(mobileId);
+      if (d && m) m.classList.toggle('active', d.classList.contains('active'));
+    });
+  }
+  new MutationObserver(syncActive).observe(document.body, { subtree: true, attributeFilter: ['class'] });
+})();
 
 $("nav-stats")?.addEventListener("click", async () => {
   // Update the subtitle
