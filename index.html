@@ -2436,19 +2436,41 @@ $('share-img-btn')?.addEventListener('click', async () => {
   function fillRR(x,y,w,h,r,fill)   { rr(x,y,w,h,r); ctx.fillStyle=fill;   ctx.fill(); }
   function strokeRR(x,y,w,h,r,s,lw) { rr(x,y,w,h,r); ctx.strokeStyle=s; ctx.lineWidth=lw||1; ctx.stroke(); }
 
-  // ── Load photos ──────────────────────────────────────────────────
-  const photos = await Promise.all(allPlayers.map(({ player }) =>
-    new Promise(resolve => {
-      const url = photoUrl(player, '260x190');
-      if (!url) return resolve(null);
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      const t = setTimeout(() => resolve(null), 5000);
-      img.onload  = () => { clearTimeout(t); resolve(img); };
-      img.onerror = () => { clearTimeout(t); resolve(null); };
-      img.src = url;
-    })
-  ));
+  // ── Load photos (fetch → blob URL avoids canvas CORS taint) ─────
+  async function fetchImgForCanvas(url) {
+    if (!url) return null;
+    try {
+      const resp = await fetch(url, { mode: 'cors', credentials: 'omit' });
+      if (!resp.ok) throw new Error(resp.status);
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      return await new Promise(resolve => {
+        const img = new Image();
+        img.onload  = () => resolve(img);
+        img.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(null); };
+        img.src = blobUrl;
+      });
+    } catch {
+      // Fallback: crossOrigin anonymous (works if CDN has CORS headers)
+      return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        const t = setTimeout(() => resolve(null), 5000);
+        img.onload  = () => { clearTimeout(t); resolve(img); };
+        img.onerror = () => { clearTimeout(t); resolve(null); };
+        img.src = url;
+      });
+    }
+  }
+
+  const blobUrls = []; // track for cleanup after export
+  const photos = await Promise.all(allPlayers.map(async ({ player }) => {
+    const url = photoUrl(player, '260x190');
+    if (!url) return null;
+    const img = await fetchImgForCanvas(url);
+    if (img?.src?.startsWith('blob:')) blobUrls.push(img.src);
+    return img;
+  }));
 
   // ── Background ───────────────────────────────────────────────────
   const bg = ctx.createLinearGradient(0, 0, 0, LH);
@@ -2570,26 +2592,16 @@ $('share-img-btn')?.addEventListener('click', async () => {
       ctx.setLineDash([]);
 
       if (conn) {
-        // Team pill
+        const seasonStr = `${conn.season}–${String(conn.season+1).slice(2)}`;
+        const pillTxt   = `${conn.teamName}  ·  ${seasonStr}`;
         ctx.font = '600 11px "Space Grotesk",system-ui,sans-serif';
-        const teamTxt = conn.teamName;
-        const seasonTxt = `${conn.season}–${String(conn.season+1).slice(2)}`;
-        const combined = `${teamTxt}  ·  ${seasonTxt}`;
-        const tw = ctx.measureText(combined).width + 24;
+        const tw   = ctx.measureText(pillTxt).width + 24;
         const pillX = LW/2 - tw/2;
         fillRR(pillX, midCY-11, tw, 22, 5, 'rgba(255,240,200,0.05)');
-        ctx.strokeStyle = 'rgba(255,240,200,0.08)'; ctx.lineWidth = 1;
-        strokeRR(pillX, midCY-11, tw, 22, 5, 'rgba(255,240,200,0.08)', 1);
-        ctx.fillStyle = '#e8920a';
+        strokeRR(pillX, midCY-11, tw, 22, 5, 'rgba(255,240,200,0.09)', 1);
+        ctx.fillStyle = '#a89e8e';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.font = '600 11px "Space Grotesk",system-ui,sans-serif';
-        ctx.fillText(teamTxt, LW/2 - ctx.measureText(`  ·  ${seasonTxt}`).width/2 - 2, midCY);
-        ctx.fillStyle = '#5a5145';
-        ctx.fillText(`  ·  ${seasonTxt}`, LW/2 + ctx.measureText(teamTxt).width/2 - 1, midCY);
-        // Simpler: just one fillText with the combined string, color the whole thing
-        // Let's redo: just draw combined string in muted color, season in accent
-        ctx.fillStyle = '#a89e8e'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(combined, LW/2, midCY);
+        ctx.fillText(pillTxt, LW/2, midCY);
       }
 
       ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
@@ -2644,6 +2656,7 @@ $('share-img-btn')?.addEventListener('click', async () => {
   link.href = canvas.toDataURL('image/png');
   link.click();
   canvas.style.display = 'none';
+  blobUrls.forEach(u => URL.revokeObjectURL(u));
 });
 
 function roundRect(ctx, x, y, w, h, r) {
