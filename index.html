@@ -1738,11 +1738,8 @@ function initials(first, last) {
   return ((first || "").trim().charAt(0) + (last || "").trim().charAt(0)).toUpperCase();
 }
 function photoUrl(player, size) {
-  if (player.wiki_photo) {
-    // Scale Wikipedia thumbnail to the right size (URLs contain /Npx- width token)
-    const px = size === "1040x760" ? 600 : 280;
-    return player.wiki_photo.replace(/\/\d+px-/, `/${px}px-`);
-  }
+  // wiki_photo URLs are pre-cached Wikimedia thumbnails — use as-is (only that exact size works)
+  if (player.wiki_photo) return player.wiki_photo;
   if (!player.nba_id) return null;
   return `https://cdn.nba.com/headshots/nba/latest/${size}/${player.nba_id}.png`;
 }
