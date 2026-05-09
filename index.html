@@ -1738,6 +1738,8 @@ function initials(first, last) {
   return ((first || "").trim().charAt(0) + (last || "").trim().charAt(0)).toUpperCase();
 }
 function photoUrl(player, size) {
+  // ESPN headshots are proper cropped headshots (600x436), highest quality
+  if (player.espn_id) return `https://a.espncdn.com/i/headshots/nba/players/full/${player.espn_id}.png`;
   // wiki_photo URLs are pre-cached Wikimedia thumbnails — use as-is (only that exact size works)
   if (player.wiki_photo) return player.wiki_photo;
   if (!player.nba_id) return null;
