@@ -2471,35 +2471,30 @@ function renderHintArea() {
   const lastYear   = Math.max(...allSeasons);
   const spanStr    = firstYear === lastYear ? `${firstYear}` : `${firstYear}–${lastYear}`;
 
-  // Build "TeamName" or "TeamName (second stint)" from the overlap seasons
+  // Build "TeamName" or "TeamName (second stint)" — always one team only
   function overlapLabel(overlapArr) {
     const ORDINALS = ['first','second','third','fourth','fifth'];
-    const teamGroups = {};
-    for (const { season, team_id } of (overlapArr || [])) {
-      if (!teamGroups[team_id]) teamGroups[team_id] = new Set();
-      teamGroups[team_id].add(season);
+    // Use only the most recent overlap to avoid giving away multiple teams
+    const ref = (overlapArr || []).reduce((a, b) => b.season > a.season ? b : a, overlapArr?.[0]);
+    if (!ref) return 'a team';
+    const { team_id: tid, season: refSeason } = ref;
+    const name = state.data.teams[tid]?.full_name || 'a team';
+    // Group the hint player's full time on this team into consecutive stints
+    const allYrs = p.team_seasons
+      .filter(t => String(t.team_id) === String(tid))
+      .map(t => t.season).sort((a, b) => a - b);
+    if (!allYrs.length) return name;
+    const stints = [];
+    let cur = [allYrs[0]];
+    for (let i = 1; i < allYrs.length; i++) {
+      if (allYrs[i] === allYrs[i - 1] + 1) cur.push(allYrs[i]);
+      else { stints.push(cur); cur = [allYrs[i]]; }
     }
-    return Object.entries(teamGroups).map(([tid, overlapSet]) => {
-      const name = state.data.teams[tid]?.full_name || 'a team';
-      // Group the hint player's full time on this team into consecutive stints
-      const allYrs = p.team_seasons
-        .filter(t => String(t.team_id) === String(tid))
-        .map(t => t.season).sort((a, b) => a - b);
-      if (!allYrs.length) return name;
-      const stints = [];
-      let cur = [allYrs[0]];
-      for (let i = 1; i < allYrs.length; i++) {
-        if (allYrs[i] === allYrs[i - 1] + 1) cur.push(allYrs[i]);
-        else { stints.push(cur); cur = [allYrs[i]]; }
-      }
-      stints.push(cur);
-      // Only label the stint if there are multiple
-      if (stints.length === 1) return name;
-      const matched = stints
-        .map((stint, i) => stint.some(s => overlapSet.has(s)) ? ORDINALS[i] || `${i+1}th` : null)
-        .filter(Boolean);
-      return matched.length ? `${name} (${matched.join(' and ')} stint)` : name;
-    }).join(' and ');
+    stints.push(cur);
+    if (stints.length === 1) return name;
+    const idx = stints.findIndex(stint => stint.includes(refSeason));
+    const label = idx >= 0 ? ORDINALS[idx] || `${idx + 1}th` : null;
+    return label ? `${name} (${label} stint)` : name;
   }
 
   if (!isDirect) {
