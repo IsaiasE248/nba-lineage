@@ -997,11 +997,22 @@
     .diff-tabs { gap: 6px; margin-bottom: 24px; }
     .diff-tab { padding: 10px 0; font-size: 13px; }
 
-    /* Player cards — shrink so 2 fit side-by-side on small screens */
-    .player-card { width: 148px; }
+    /* Chain row — vertical layout on mobile */
+    .chain-row {
+      flex-direction: column;
+      align-items: center;
+      overflow-x: visible;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
 
-    /* Chain row */
-    .chain-row { gap: 8px; margin-bottom: 20px; }
+    /* Arrows point downward */
+    .chain-arrow { transform: rotate(90deg); }
+
+    /* Player cards — wider to fill the screen */
+    .player-card { width: min(74vw, 220px); }
+    .placeholder-card { width: min(74vw, 220px); }
+    .conn-pill { width: min(74vw, 220px); min-width: unset; }
 
     /* Search */
     .search-wrap { gap: 8px; }
@@ -1983,8 +1994,15 @@ function renderChainRow() {
   els.checkBtn.disabled = bridges.length < 1 || state.complete;
 
   requestAnimationFrame(() => {
-    els.chainRow.classList.toggle("overflow", els.chainRow.scrollWidth > els.chainRow.clientWidth);
-    if (bridges.length > 0) els.chainRow.scrollLeft = els.chainRow.scrollWidth;
+    if (window.innerWidth <= 600) {
+      // vertical layout — scroll newest card into view
+      if (bridges.length > 0) {
+        els.chainRow.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    } else {
+      els.chainRow.classList.toggle("overflow", els.chainRow.scrollWidth > els.chainRow.clientWidth);
+      if (bridges.length > 0) els.chainRow.scrollLeft = els.chainRow.scrollWidth;
+    }
   });
 }
 
