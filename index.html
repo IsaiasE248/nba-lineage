@@ -2391,72 +2391,256 @@ els.shareBtn.addEventListener("click", () => {
 });
 
 // ── Share image (canvas) ──────────────────────────────────────────────────────
-$('share-img-btn')?.addEventListener('click', () => {
+$('share-img-btn')?.addEventListener('click', async () => {
+  await document.fonts.ready;
+
   const bridges = state.chain.filter(p => p.role !== "start" && p.role !== "end");
-  const chainNames = [
-    `${state.startPlayer.first_name} ${state.startPlayer.last_name}`,
-    ...bridges.map(p => p.name),
-    `${state.endPlayer.first_name} ${state.endPlayer.last_name}`,
+  const allPlayers = [
+    { player: state.startPlayer, role: 'start' },
+    ...bridges.map(p => ({ player: p._ref || p, role: 'bridge', rarity: p.rarity })),
+    { player: state.endPlayer, role: 'end' },
   ];
+  const N = allPlayers.length;
+
+  // ── Layout (logical px, drawn at 2× for retina) ──────────────────
+  const SCALE   = 2;
+  const LW      = 560;
+  const PX      = 24;   // horizontal padding
+  const CARD_H  = 74;   // player card height
+  const CONN_H  = 42;   // connection row height
+  const HEAD_H  = 68;   // header height
+  const SCORE_H = 72;   // score bar height
+  const FOOT_H  = 32;
+  const PY      = 24;
+  const LH = PY + HEAD_H + N * CARD_H + (N - 1) * CONN_H + 18 + SCORE_H + 14 + FOOT_H + PY;
+
   const canvas = $('share-canvas');
-  const W = 480, ROW = 44, PAD = 28;
-  const H = PAD + 64 + chainNames.length * ROW + 24 + 52 + PAD;
-  canvas.width = W; canvas.height = H;
+  canvas.width  = LW * SCALE;
+  canvas.height = LH * SCALE;
   const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE);
 
-  // Background
-  ctx.fillStyle = '#0e0c09';
-  ctx.fillRect(0, 0, W, H);
+  // ── Helpers ──────────────────────────────────────────────────────
+  function rr(x, y, w, h, r) { // roundRect path only
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+    ctx.lineTo(x+w,y+h-r);
+    ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    ctx.lineTo(x+r,y+h);
+    ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+    ctx.lineTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.closePath();
+  }
+  function fillRR(x,y,w,h,r,fill)   { rr(x,y,w,h,r); ctx.fillStyle=fill;   ctx.fill(); }
+  function strokeRR(x,y,w,h,r,s,lw) { rr(x,y,w,h,r); ctx.strokeStyle=s; ctx.lineWidth=lw||1; ctx.stroke(); }
 
-  // Top accent line
-  ctx.fillStyle = '#e8920a';
-  ctx.fillRect(0, 0, W, 3);
+  // ── Load photos ──────────────────────────────────────────────────
+  const photos = await Promise.all(allPlayers.map(({ player }) =>
+    new Promise(resolve => {
+      const url = photoUrl(player, '260x190');
+      if (!url) return resolve(null);
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const t = setTimeout(() => resolve(null), 5000);
+      img.onload  = () => { clearTimeout(t); resolve(img); };
+      img.onerror = () => { clearTimeout(t); resolve(null); };
+      img.src = url;
+    })
+  ));
 
-  // Title
+  // ── Background ───────────────────────────────────────────────────
+  const bg = ctx.createLinearGradient(0, 0, 0, LH);
+  bg.addColorStop(0, '#111009'); bg.addColorStop(1, '#1a1510');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, LW, LH);
+
+  // Orange radial glow top-right
+  const glow = ctx.createRadialGradient(LW, 0, 10, LW, 0, LW);
+  glow.addColorStop(0, 'rgba(232,146,10,0.16)');
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, LW, LH);
+
+  // Top accent bar
+  const accentG = ctx.createLinearGradient(0,0,LW,0);
+  accentG.addColorStop(0,'#c97a08'); accentG.addColorStop(0.5,'#f0a830'); accentG.addColorStop(1,'#c97a08');
+  ctx.fillStyle = accentG; ctx.fillRect(0, 0, LW, 4);
+
+  // ── HEADER ───────────────────────────────────────────────────────
+  let y = PY;
+
   ctx.fillStyle = '#f2ede6';
-  ctx.font = 'bold 20px "Space Grotesk", sans-serif';
-  ctx.fillText('NBA Lineage', PAD, PAD + 22);
+  ctx.font = 'bold 18px "Space Grotesk",system-ui,sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.fillText('HoopLineage', PX, y + 18);
 
-  // Mode / puzzle info
-  const modeStr = state.mode === 'practice' ? '⚡ Practice' :
-                  state.mode === 'archive'  ? `📅 Archive #${state.archiveDayIndex}` :
-                  `#${state.puzzleNum} · ${state.difficulty.charAt(0).toUpperCase()+state.difficulty.slice(1)}`;
-  ctx.fillStyle = '#a89e8e';
-  ctx.font = '14px "Space Grotesk", sans-serif';
-  ctx.fillText(modeStr, PAD, PAD + 46);
+  // Mode/diff badge
+  const modeStr = state.mode === 'practice' ? 'Practice'
+                : state.mode === 'archive'  ? `Archive #${state.archiveDayIndex}`
+                : `Puzzle #${state.puzzleNum}`;
+  const diffStr  = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
+  const badgeTxt = `${modeStr}  ·  ${diffStr}`;
+  ctx.font = '600 11px "Space Grotesk",system-ui,sans-serif';
+  const btw = ctx.measureText(badgeTxt).width + 22;
+  const btx = LW - PX - btw;
+  fillRR(btx, y+6, btw, 24, 5, 'rgba(232,146,10,0.16)');
+  ctx.fillStyle = '#e8920a'; ctx.textAlign = 'center';
+  ctx.fillText(badgeTxt, btx + btw / 2, y + 18);
+  ctx.textAlign = 'left';
 
-  // Chain rows
-  let y = PAD + 72;
-  chainNames.forEach((name, i) => {
-    const isEnd = i === 0 || i === chainNames.length - 1;
-    ctx.fillStyle = isEnd ? '#1c1810' : '#151209';
-    roundRect(ctx, PAD, y - 22, W - PAD * 2, 34, 8);
-    ctx.fillStyle = isEnd ? '#e8920a' : '#f2ede6';
-    ctx.font = `${isEnd ? 'bold' : 'normal'} 15px "Space Grotesk", sans-serif`;
-    ctx.fillText(name, PAD + 12, y - 2);
-    if (i < chainNames.length - 1) {
-      ctx.fillStyle = '#6b6155';
-      ctx.font = '13px sans-serif';
-      ctx.fillText('↓', W / 2 - 5, y + 18);
+  y += 46;
+  ctx.strokeStyle = 'rgba(255,240,200,0.07)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PX, y); ctx.lineTo(LW-PX, y); ctx.stroke();
+  y += 16;
+
+  // ── PLAYER CARDS ─────────────────────────────────────────────────
+  const CW = LW - PX * 2;
+  const PR = 23; // photo radius
+
+  allPlayers.forEach(({ player, role }, i) => {
+    const isEndpt = role === 'start' || role === 'end';
+
+    // Card background
+    fillRR(PX, y, CW, CARD_H - 4, 12, isEndpt ? '#1e1a12' : '#13110d');
+    if (isEndpt) strokeRR(PX, y, CW, CARD_H-4, 12, 'rgba(232,146,10,0.28)', 1);
+
+    // Circular photo
+    const pX = PX + 13 + PR;
+    const pY = y + (CARD_H - 4) / 2;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(pX, pY, PR, 0, Math.PI*2); ctx.clip();
+    if (photos[i]) {
+      const iw = photos[i].naturalWidth, ih = photos[i].naturalHeight;
+      const sq = Math.min(iw, ih);
+      const sx = (iw - sq) / 2, sy = 0; // crop: center-x, top-y
+      ctx.drawImage(photos[i], sx, sy, sq, sq * 0.85, pX-PR, pY-PR, PR*2, PR*2);
+    } else {
+      const pal = ['#e8920a','#4ade80','#60a5fa','#f472b6','#a78bfa'];
+      const c = pal[i % pal.length];
+      ctx.fillStyle = c + '30'; ctx.fillRect(pX-PR, pY-PR, PR*2, PR*2);
+      ctx.fillStyle = c;
+      ctx.font = `bold ${Math.round(PR*0.72)}px "Space Grotesk",sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText((player.first_name?.[0]||'')+(player.last_name?.[0]||''), pX, pY);
     }
-    y += ROW;
+    ctx.restore();
+    // Photo ring
+    ctx.strokeStyle = isEndpt ? 'rgba(232,146,10,0.55)' : 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(pX, pY, PR, 0, Math.PI*2); ctx.stroke();
+
+    // Name + position
+    const tx = PX + 13 + PR*2 + 11;
+    const midY = y + (CARD_H-4)/2;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = isEndpt ? '#f2ede6' : '#ccc6bc';
+    ctx.font = `bold 15px "Space Grotesk",system-ui,sans-serif`;
+    ctx.fillText(`${player.first_name} ${player.last_name}`, tx, midY - 1);
+    if (player.position) {
+      ctx.fillStyle = '#5a5145';
+      ctx.font = `11px "Space Grotesk",system-ui,sans-serif`;
+      ctx.fillText(player.position, tx, midY + 14);
+    }
+
+    // START / END badge
+    if (isEndpt) {
+      const lbl = role.toUpperCase();
+      ctx.font = 'bold 9px "Space Grotesk",sans-serif';
+      const lw2 = ctx.measureText(lbl).width;
+      const bx2 = PX + CW - lw2 - 26;
+      fillRR(bx2, midY-11, lw2+16, 20, 4, role==='start' ? 'rgba(232,146,10,0.2)' : 'rgba(242,237,230,0.1)');
+      ctx.fillStyle = role==='start' ? '#e8920a' : '#8c8278';
+      ctx.textAlign = 'left';
+      ctx.fillText(lbl, bx2+8, midY+3);
+    }
+
+    y += CARD_H;
+
+    // ── Connection row ────────────────────────────────────────────
+    if (i < N - 1) {
+      const conn = state.connections[i];
+      const midCY = y + CONN_H / 2;
+
+      // Vertical dotted line
+      ctx.strokeStyle = 'rgba(255,240,200,0.1)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(LW/2, y+4); ctx.lineTo(LW/2, y+CONN_H-4); ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (conn) {
+        // Team pill
+        ctx.font = '600 11px "Space Grotesk",system-ui,sans-serif';
+        const teamTxt = conn.teamName;
+        const seasonTxt = `${conn.season}–${String(conn.season+1).slice(2)}`;
+        const combined = `${teamTxt}  ·  ${seasonTxt}`;
+        const tw = ctx.measureText(combined).width + 24;
+        const pillX = LW/2 - tw/2;
+        fillRR(pillX, midCY-11, tw, 22, 5, 'rgba(255,240,200,0.05)');
+        ctx.strokeStyle = 'rgba(255,240,200,0.08)'; ctx.lineWidth = 1;
+        strokeRR(pillX, midCY-11, tw, 22, 5, 'rgba(255,240,200,0.08)', 1);
+        ctx.fillStyle = '#e8920a';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = '600 11px "Space Grotesk",system-ui,sans-serif';
+        ctx.fillText(teamTxt, LW/2 - ctx.measureText(`  ·  ${seasonTxt}`).width/2 - 2, midCY);
+        ctx.fillStyle = '#5a5145';
+        ctx.fillText(`  ·  ${seasonTxt}`, LW/2 + ctx.measureText(teamTxt).width/2 - 1, midCY);
+        // Simpler: just one fillText with the combined string, color the whole thing
+        // Let's redo: just draw combined string in muted color, season in accent
+        ctx.fillStyle = '#a89e8e'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(combined, LW/2, midCY);
+      }
+
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      y += CONN_H;
+    }
   });
 
-  // Score bar
-  const scoreY = y + 10;
-  ctx.fillStyle = '#1c1810';
-  roundRect(ctx, PAD, scoreY, W - PAD * 2, 38, 8);
-  ctx.fillStyle = '#e8920a';
-  ctx.font = 'bold 16px "Space Grotesk", sans-serif';
-  ctx.fillText(`Score: ${els.rTotal.textContent}`, PAD + 12, scoreY + 24);
-  ctx.fillStyle = '#6b6155';
-  ctx.font = '13px "Space Grotesk", sans-serif';
-  ctx.fillText(`${bridges.length + 1} steps · hooplineage.com`, PAD + 110, scoreY + 24);
+  // ── SCORE BAR ────────────────────────────────────────────────────
+  y += 18;
+  fillRR(PX, y, CW, SCORE_H, 12, 'rgba(255,240,200,0.04)');
+  strokeRR(PX, y, CW, SCORE_H, 12, 'rgba(255,240,200,0.07)', 1);
 
-  // Download
+  const totalScore  = els.rTotal.textContent;
+  const numSteps    = bridges.length + 1;
+  const rarityScore = bridges.reduce((s, p) => s + (p.rarity || 0), 0);
+  const effScore    = els.rEff?.textContent || '—';
+
+  const cells = [
+    { lbl: 'SCORE',      val: totalScore,          accent: true },
+    { lbl: 'STEPS',      val: String(numSteps)                  },
+    { lbl: 'RARITY',     val: String(rarityScore)               },
+    { lbl: 'EFFICIENCY', val: String(effScore)                  },
+  ];
+  const cellW = CW / cells.length;
+  cells.forEach((cell, i) => {
+    const cx = PX + i * cellW + cellW / 2;
+    // Divider
+    if (i > 0) {
+      ctx.strokeStyle = 'rgba(255,240,200,0.06)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(PX+i*cellW, y+12); ctx.lineTo(PX+i*cellW, y+SCORE_H-12); ctx.stroke();
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = cell.accent ? '#e8920a' : '#f2ede6';
+    ctx.font = `bold 22px "Space Grotesk",system-ui,sans-serif`;
+    ctx.fillText(cell.val, cx, y + 40);
+    ctx.fillStyle = '#4a4438';
+    ctx.font = `bold 9px "Space Grotesk",system-ui,sans-serif`;
+    ctx.fillText(cell.lbl, cx, y + SCORE_H - 12);
+  });
+
+  // ── FOOTER ───────────────────────────────────────────────────────
+  y += SCORE_H + 14;
+  ctx.fillStyle = '#3d3628';
+  ctx.font = '12px "Space Grotesk",system-ui,sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('hooplineage.com', LW/2, y + FOOT_H/2);
+
+  // ── Download ─────────────────────────────────────────────────────
   canvas.style.display = 'block';
   const link = document.createElement('a');
-  link.download = `nba-lineage-${state.puzzleNum}.png`;
+  link.download = `hooplineage-${state.mode === 'daily' ? `puzzle-${state.puzzleNum}` : state.mode}.png`;
   link.href = canvas.toDataURL('image/png');
   link.click();
   canvas.style.display = 'none';
