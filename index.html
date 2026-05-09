@@ -1420,7 +1420,7 @@
   </div>
 
   <footer>
-    Strict same-team-same-season ·
+    Data: balldontlie.io · Strict same-team-same-season ·
     <a href="#" id="how-link">How to play</a>
   </footer>
 </div>
@@ -1738,13 +1738,6 @@ function initials(first, last) {
   return ((first || "").trim().charAt(0) + (last || "").trim().charAt(0)).toUpperCase();
 }
 function photoUrl(player, size) {
-  // wiki_photo overrides NBA CDN (used for players with grey NBA placeholders)
-  if (player.wiki_photo) {
-    // Wikipedia thumbnail URLs embed a pixel width (e.g. /330px-).
-    // Scale up for the full card view so it looks sharp.
-    const px = size === "1040x760" ? 600 : 280;
-    return player.wiki_photo.replace(/\/\d+px-/, `/${px}px-`);
-  }
   if (!player.nba_id) return null;
   return `https://cdn.nba.com/headshots/nba/latest/${size}/${player.nba_id}.png`;
 }
