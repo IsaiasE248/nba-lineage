@@ -2790,12 +2790,20 @@ function renderHintArea() {
     return label ? `${name} (${label} stint)` : name;
   }
 
+  const numTeams    = new Set(p.team_seasons.map(t => t.team_id)).size;
+  const isOneTeamer = numTeams === 1;
+  const posStr      = p.position ? ` (${p.position})` : '';
+
   if (!isDirect) {
     // Stepping-stone path
     if (state.hintStep === 1) {
-      clue = `No direct path yet. Look for someone who played with <strong>${lastInChain.last_name}</strong> on the <strong>${overlapLabel(toLast)}</strong> — they connect to many other players.`;
+      if (isOneTeamer) {
+        clue = `No direct path yet. Look for a one-franchise player${posStr} who played with <strong>${lastInChain.last_name}</strong> — they connect to many others.`;
+      } else {
+        clue = `No direct path yet. Look for someone who played with <strong>${lastInChain.last_name}</strong> on the <strong>${overlapLabel(toLast)}</strong> — they connect to many other players.`;
+      }
     } else if (state.hintStep === 2) {
-      clue = `Still no direct bridge. This player was active <strong>${spanStr}</strong> and played for <strong>${new Set(p.team_seasons.map(t => t.team_id)).size} teams</strong> — add them to open more options.`;
+      clue = `Still no direct bridge. This player was active <strong>${spanStr}</strong> and played for <strong>${numTeams} team${numTeams > 1 ? 's' : ''}</strong> — add them to open more options.`;
     } else {
       const ini = `${p.first_name[0]}. ${p.last_name[0]}.`;
       clue = `Try <strong>${ini}</strong> — ${lastTeamName} ${bestToLast.season} with ${lastInChain.last_name}. They'll open up a path to ${state.endPlayer.last_name}.`;
@@ -2804,7 +2812,12 @@ function renderHintArea() {
     // Direct-bridge path
     const endTeamName = state.data.teams[bestToEnd.team_id]?.full_name || 'a team';
     if (state.hintStep === 1) {
-      clue = `They played with <strong>${lastInChain.last_name}</strong> on the <strong>${overlapLabel(toLast)}</strong>.`;
+      if (isOneTeamer) {
+        // Naming the team gives it away for one-team players — use era + position instead
+        clue = `They played with <strong>${lastInChain.last_name}</strong> — a one-franchise player${posStr}, active <strong>${spanStr}</strong>.`;
+      } else {
+        clue = `They played with <strong>${lastInChain.last_name}</strong> on the <strong>${overlapLabel(toLast)}</strong>.`;
+      }
     } else if (state.hintStep === 2) {
       clue = `They were active <strong>${spanStr}</strong> and also played with <strong>${state.endPlayer.last_name}</strong> on the <strong>${endTeamName}</strong>.`;
     } else {
