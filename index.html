@@ -2792,34 +2792,32 @@ function renderHintArea() {
 
   const numTeams    = new Set(p.team_seasons.map(t => t.team_id)).size;
   const isOneTeamer = numTeams === 1;
-  const posStr      = p.position ? ` (${p.position})` : '';
+  const posLabel    = p.position || 'Player';
+  const teamLabel   = isOneTeamer ? 'one franchise their entire career' : `${numTeams} different franchises`;
 
   if (!isDirect) {
     // Stepping-stone path
     if (state.hintStep === 1) {
-      if (isOneTeamer) {
-        clue = `No direct path yet. Look for a one-franchise player${posStr} who played with <strong>${lastInChain.last_name}</strong> — they connect to many others.`;
-      } else {
-        clue = `No direct path yet. Look for someone who played with <strong>${lastInChain.last_name}</strong> on the <strong>${overlapLabel(toLast)}</strong> — they connect to many other players.`;
-      }
+      clue = `No direct bridge yet — but there's a stepping stone. They're a <strong>${posLabel}</strong> who played for <strong>${teamLabel}</strong>, active <strong>${spanStr}</strong>.`;
     } else if (state.hintStep === 2) {
-      clue = `Still no direct bridge. This player was active <strong>${spanStr}</strong> and played for <strong>${numTeams} team${numTeams > 1 ? 's' : ''}</strong> — add them to open more options.`;
+      clue = `They played with <strong>${lastInChain.last_name}</strong> and connect toward <strong>${state.endPlayer.last_name}</strong>. Active <strong>${spanStr}</strong> across <strong>${numTeams}</strong> team${numTeams > 1 ? 's' : ''}.`;
     } else {
       const ini = `${p.first_name[0]}. ${p.last_name[0]}.`;
-      clue = `Try <strong>${ini}</strong> — ${lastTeamName} ${bestToLast.season} with ${lastInChain.last_name}. They'll open up a path to ${state.endPlayer.last_name}.`;
+      clue = `Try <strong>${ini}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}. They'll open a path to ${state.endPlayer.last_name}.`;
     }
   } else {
     // Direct-bridge path
     const endTeamName = state.data.teams[bestToEnd.team_id]?.full_name || 'a team';
     if (state.hintStep === 1) {
-      if (isOneTeamer) {
-        // Naming the team gives it away for one-team players — use era + position instead
-        clue = `They played with <strong>${lastInChain.last_name}</strong> — a one-franchise player${posStr}, active <strong>${spanStr}</strong>.`;
-      } else {
-        clue = `They played with <strong>${lastInChain.last_name}</strong> on the <strong>${overlapLabel(toLast)}</strong>.`;
-      }
+      // Never reveal the team or the connection at stage 1 — just career shape
+      clue = `This <strong>${posLabel}</strong> played for <strong>${teamLabel}</strong>, active <strong>${spanStr}</strong>.`;
     } else if (state.hintStep === 2) {
-      clue = `They were active <strong>${spanStr}</strong> and also played with <strong>${state.endPlayer.last_name}</strong> on the <strong>${endTeamName}</strong>.`;
+      // Reveal the connection but still no team name
+      if (isOneTeamer) {
+        clue = `They played with <strong>${lastInChain.last_name}</strong> and with <strong>${state.endPlayer.last_name}</strong> — all on the same franchise.`;
+      } else {
+        clue = `They played with <strong>${lastInChain.last_name}</strong>, and later played with <strong>${state.endPlayer.last_name}</strong>.`;
+      }
     } else {
       const ini = `${p.first_name[0]}. ${p.last_name[0]}.`;
       clue = `Their name is <strong>${ini}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}, <strong>${endTeamName} ${bestToEnd.season}</strong> with ${state.endPlayer.last_name}.`;
