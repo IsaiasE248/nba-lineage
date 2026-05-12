@@ -2196,19 +2196,10 @@ function pickPlayer(player) {
   state.used.add(player.id);
 
   // If the added player is the one we hinted at, or chain moved on, refresh hint target
-  if (state.hintTarget && state.hintTarget.p.id === player.id) {
+  if (state.hintTarget) {
     state.hintTarget = null;
     state.hintStep = 0;
-    const hintArea = $('hint-area');
-    if (hintArea) hintArea.style.display = 'none';
-    const hintBtn = $('hint-btn');
-    if (hintBtn && !hintBtn.disabled) hintBtn.textContent = '💡 Hint';
-  } else if (state.hintTarget) {
-    // Chain moved — old hint target may no longer be reachable from new last player; reset
-    state.hintTarget = null;
-    state.hintStep = 0;
-    const hintArea = $('hint-area');
-    if (hintArea) hintArea.style.display = 'none';
+    clearHintArea();
     const hintBtn = $('hint-btn');
     if (hintBtn && !hintBtn.disabled) hintBtn.textContent = '💡 Hint';
   }
@@ -2792,7 +2783,18 @@ function renderHintArea() {
 
   const numTeams    = new Set(p.team_seasons.map(t => t.team_id)).size;
   const isOneTeamer = numTeams === 1;
-  const posLabel    = p.position || 'Player';
+
+  function formatPosition(pos) {
+    const map = {
+      'PG': 'point guard', 'SG': 'shooting guard', 'SF': 'small forward',
+      'PF': 'power forward', 'C': 'center',
+      'G': 'guard', 'F': 'forward',
+      'G-F': 'guard / forward', 'F-G': 'forward / guard',
+      'F-C': 'forward / center', 'C-F': 'center / forward',
+    };
+    return map[pos] || pos?.toLowerCase() || 'player';
+  }
+  const posLabel = formatPosition(p.position);
   const teamLabel   = isOneTeamer ? 'one franchise their entire career' : `${numTeams} different franchises`;
 
   if (!isDirect) {
@@ -2824,9 +2826,21 @@ function renderHintArea() {
     }
   }
 
-  const totalPenalty = HINT_PENALTIES.slice(0, state.hintStep).reduce((a, b) => a + b, 0);
-  hintArea.innerHTML = `💡 ${clue} <span style="color:var(--ink-3);font-size:12px;display:block;margin-top:4px;">−${totalPenalty} pts · Stage ${state.hintStep}/3</span>`;
+  const stepPenalty = HINT_PENALTIES[state.hintStep - 1];
+  const entry = document.createElement('div');
+  entry.style.cssText = state.hintStep > 1
+    ? 'margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,240,200,0.06);'
+    : '';
+  entry.innerHTML = `💡 ${clue} <span style="color:var(--ink-3);font-size:12px;display:block;margin-top:4px;">Stage ${state.hintStep}/3 · −${stepPenalty} pts</span>`;
+  hintArea.appendChild(entry);
   hintArea.style.display = 'block';
+}
+
+function clearHintArea() {
+  const hintArea = $('hint-area');
+  if (!hintArea) return;
+  hintArea.innerHTML = '';
+  hintArea.style.display = 'none';
 }
 
 $('hint-btn')?.addEventListener('click', () => {
@@ -3262,7 +3276,7 @@ function resetHints() {
   const hintBtn = $('hint-btn');
   if (hintBtn) { hintBtn.disabled = false; hintBtn.textContent = '💡 Hint'; }
   const hintArea = $('hint-area');
-  if (hintArea) hintArea.style.display = 'none';
+  clearHintArea();
   const penaltyNote = $('hint-penalty-note');
   if (penaltyNote) penaltyNote.style.display = 'none';
 }
