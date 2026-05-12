@@ -2676,7 +2676,7 @@ function roundRect(ctx, x, y, w, h, r) {
 
 // ── Hint button ───────────────────────────────────────────────────────────────
 // Stage 1 (-25 pts): team clue only — "Someone who played with X on the [Team]"
-// Stage 2 (-50 pts): initials — "Their name is [F]. [Last]"
+// Stage 2 (-50 pts): initials — "Their initials are [F]. [Last]"
 // Stage 3 (-75 pts): full reveal — "[Full Name] — [Team], [season]"
 // Total max penalty: 150 pts. Each stage must be unlocked in order.
 
@@ -2803,7 +2803,7 @@ function renderHintArea() {
       clue = `They played with <strong>${lastInChain.last_name}</strong> and connect toward <strong>${state.endPlayer.last_name}</strong>. Active <strong>${spanStr}</strong> across <strong>${numTeams}</strong> team${numTeams > 1 ? 's' : ''}.`;
     } else {
       const ini = `${p.first_name[0]}. ${p.last_name[0]}.`;
-      clue = `Try <strong>${ini}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}. They'll open a path to ${state.endPlayer.last_name}.`;
+      clue = `Their initials are <strong>${ini}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}. They'll open a path to ${state.endPlayer.last_name}.`;
     }
   } else {
     // Direct-bridge path
@@ -2820,7 +2820,7 @@ function renderHintArea() {
       }
     } else {
       const ini = `${p.first_name[0]}. ${p.last_name[0]}.`;
-      clue = `Their name is <strong>${ini}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}, <strong>${endTeamName} ${bestToEnd.season}</strong> with ${state.endPlayer.last_name}.`;
+      clue = `Their initials are <strong>${ini}</strong> — <strong>${lastTeamName} ${bestToLast.season}</strong> with ${lastInChain.last_name}, <strong>${endTeamName} ${bestToEnd.season}</strong> with ${state.endPlayer.last_name}.`;
     }
   }
 
