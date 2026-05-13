@@ -2789,6 +2789,7 @@ els.resetBtn.addEventListener("click", () => {
   state.connections = [];
   state.brokenLink = -1;
   resetHints();
+  restoreHintState();
   els.complete.classList.remove("show");
   els.search.disabled = false;
   els.checkBtn.disabled = false;
@@ -3314,6 +3315,8 @@ $('hint-btn')?.addEventListener('click', () => {
     renderHintArea();
   }
 
+  saveHintState();
+
   // Update button label
   const hintBtn = $('hint-btn');
   if (state.hintStep >= 3) {
@@ -3542,6 +3545,7 @@ function startArchivePuzzle(dayIdx, diff) {
   state.startPlayer = state.data.players[pair.a];
   state.endPlayer = state.data.players[pair.b];
   state.used = new Set([state.startPlayer.id, state.endPlayer.id]);
+  restoreHintState();
 
   els.complete.classList.remove("show");
   els.search.disabled = false;
@@ -3744,10 +3748,40 @@ function resetHints() {
   state.hintStep = 0;
   const hintBtn = $('hint-btn');
   if (hintBtn) { hintBtn.disabled = false; hintBtn.textContent = '💡 Hint'; }
-  const hintArea = $('hint-area');
   clearHintArea();
   const penaltyNote = $('hint-penalty-note');
   if (penaltyNote) penaltyNote.style.display = 'none';
+}
+
+function hintLsKey() {
+  if (state.mode === 'practice') return null;
+  const puzzleKey = state.mode === 'archive' ? state.archiveDayIndex : state.puzzleNum;
+  return `lineage:hints:${state.difficulty}:${puzzleKey}`;
+}
+
+function saveHintState() {
+  const key = hintLsKey();
+  if (!key) return;
+  localStorage.setItem(key, JSON.stringify({ hintsUsed: state.hintsUsed, hintPenalty: state.hintPenalty }));
+}
+
+function restoreHintState() {
+  const key = hintLsKey();
+  if (!key) return;
+  const saved = JSON.parse(localStorage.getItem(key) || 'null');
+  if (!saved || !saved.hintsUsed) return;
+  state.hintsUsed = saved.hintsUsed;
+  state.hintPenalty = saved.hintPenalty;
+  const penaltyNote = $('hint-penalty-note');
+  if (penaltyNote) {
+    penaltyNote.style.display = 'block';
+    penaltyNote.textContent = `−${state.hintPenalty} pts from ${state.hintsUsed} hint${state.hintsUsed > 1 ? 's' : ''} used`;
+  }
+  const hintBtn = $('hint-btn');
+  if (hintBtn && state.hintPenalty >= 150) {
+    hintBtn.textContent = '💡 Fully revealed';
+    hintBtn.disabled = true;
+  }
 }
 
 function updateEyebrow() {
@@ -3797,6 +3831,7 @@ function switchDifficulty(diff) {
   state.startPlayer = state.data.players[pair.a];
   state.endPlayer = state.data.players[pair.b];
   state.used = new Set([state.startPlayer.id, state.endPlayer.id]);
+  restoreHintState();
 
   // Update active nav + tab buttons
   ["easy","medium","hard"].forEach(d => {
