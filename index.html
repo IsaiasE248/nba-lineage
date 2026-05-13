@@ -1513,9 +1513,10 @@
 
         <div id="settings-email-change-wrap">
           <label style="font-size:13px;color:var(--ink-3);display:block;margin-bottom:6px;">Change email</label>
-          <input class="settings-input" id="settings-new-email" type="email" placeholder="New email address" autocomplete="off">
+          <input class="settings-input" id="settings-new-email" type="email" placeholder="New email address" autocomplete="off" style="margin-bottom:8px;">
+          <input class="settings-input" id="settings-email-current-pw" type="password" placeholder="Current password to confirm" autocomplete="current-password">
           <div class="settings-msg" id="settings-email-msg" style="margin-top:8px;"></div>
-          <button class="settings-save-btn" id="settings-email-btn" style="margin-top:10px;">Update email</button>
+          <button class="settings-save-btn" id="settings-email-btn" style="margin-top:10px;">Send verification email</button>
         </div>
 
         <div id="settings-pw-wrap">
@@ -4514,19 +4515,30 @@ $('settings-change-pw-btn')?.addEventListener('click', async () => {
 $('settings-email-btn')?.addEventListener('click', async () => {
   const user = fbAuth.currentUser;
   const newEmail = $('settings-new-email').value.trim();
+  const currentPw = $('settings-email-current-pw').value;
   const msg = $('settings-email-msg');
   if (!newEmail) { msg.textContent = 'Enter a new email address.'; msg.className = 'settings-msg error'; return; }
+  if (!currentPw) { msg.textContent = 'Enter your current password to confirm.'; msg.className = 'settings-msg error'; return; }
+  if (newEmail === user.email) { msg.textContent = 'That is already your current email.'; msg.className = 'settings-msg error'; return; }
+  msg.textContent = 'Sending…'; msg.className = 'settings-msg';
   try {
-    await user.updateEmail(newEmail);
-    await user.sendEmailVerification();
-    msg.textContent = '✓ Email updated. Check your inbox to verify the new address.'; msg.className = 'settings-msg ok';
-    $('settings-email').textContent = newEmail;
+    // Re-authenticate first so Firebase allows the sensitive operation
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPw);
+    await user.reauthenticateWithCredential(credential);
+    // Send verification link to the new address — email only changes after user clicks it
+    await user.verifyBeforeUpdateEmail(newEmail);
+    msg.textContent = '✓ Verification email sent to ' + newEmail + '. Click the link in that email to complete the change.';
+    msg.className = 'settings-msg ok';
     $('settings-new-email').value = '';
+    $('settings-email-current-pw').value = '';
   } catch(e) {
     const msgs = {
-      'auth/requires-recent-login': 'Sign out and sign back in before changing your email.',
-      'auth/email-already-in-use': 'That email is already in use.',
+      'auth/wrong-password': 'Current password is incorrect.',
+      'auth/invalid-credential': 'Current password is incorrect.',
+      'auth/email-already-in-use': 'That email is already in use by another account.',
       'auth/invalid-email': 'Invalid email address.',
+      'auth/too-many-requests': 'Too many attempts. Try again later.',
+      'auth/requires-recent-login': 'Session expired. Sign out and sign back in, then try again.',
     };
     msg.textContent = msgs[e.code] || e.message; msg.className = 'settings-msg error';
   }
