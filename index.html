@@ -1901,6 +1901,7 @@
     <button class="btn hint-btn" id="hint-btn" title="Reveal a valid bridge player (-50 pts each, max 3)">💡 Hint</button>
   </div>
   <div class="hint-area" id="hint-area" style="display:none;"></div>
+  <div id="hint-used-badge" style="display:none;font-size:12px;color:var(--ink-3);margin-top:6px;">💡 <span id="hint-used-text"></span></div>
 
   <div class="complete" id="complete">
     <div class="complete-mode-badge" id="complete-mode-badge" style="display:none;"></div>
@@ -3741,6 +3742,18 @@ function markCompletedTabs() {
   });
 }
 
+function updateHintBadge() {
+  const badge = $('hint-used-badge');
+  const text = $('hint-used-text');
+  if (!badge || !text) return;
+  if (state.hintsUsed > 0) {
+    text.textContent = `${state.hintsUsed} hint${state.hintsUsed > 1 ? 's' : ''} used · −${state.hintPenalty} pts`;
+    badge.style.display = 'block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
 function resetHints() {
   state.hintsUsed = 0;
   state.hintPenalty = 0;
@@ -3751,6 +3764,7 @@ function resetHints() {
   clearHintArea();
   const penaltyNote = $('hint-penalty-note');
   if (penaltyNote) penaltyNote.style.display = 'none';
+  updateHintBadge();
 }
 
 function hintLsKey() {
@@ -3763,6 +3777,7 @@ function saveHintState() {
   const key = hintLsKey();
   if (!key) return;
   localStorage.setItem(key, JSON.stringify({ hintsUsed: state.hintsUsed, hintPenalty: state.hintPenalty }));
+  updateHintBadge();
 }
 
 function restoreHintState() {
@@ -3782,6 +3797,7 @@ function restoreHintState() {
     hintBtn.textContent = '💡 Fully revealed';
     hintBtn.disabled = true;
   }
+  updateHintBadge();
 }
 
 function updateEyebrow() {
