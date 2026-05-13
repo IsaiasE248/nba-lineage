@@ -4459,9 +4459,9 @@ async function sendVerificationCode(user) {
   const code = String(Math.floor(100000 + Math.random() * 900000));
   const expiresAt = Date.now() + 10 * 60 * 1000; // 10 min
   await fbDb.collection('emailVerificationCodes').doc(user.uid).set({ code, email: user.email, expiresAt, lastSentAt: Date.now() });
-  const res = await fetch('https://api.resend.com/emails', {
+  const res = await fetch('/.netlify/functions/send-email', {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: 'HoopLineage <noreply@hooplineage.com>',
       to: user.email,
@@ -4490,9 +4490,9 @@ async function sendEmailChangeCode(user, newEmail) {
   const code = String(Math.floor(100000 + Math.random() * 900000));
   const expiresAt = Date.now() + 10 * 60 * 1000;
   await fbDb.collection('emailChangeCodes').doc(user.uid).set({ code, newEmail, expiresAt, lastSentAt: Date.now() });
-  const res = await fetch('https://api.resend.com/emails', {
+  const res = await fetch('/.netlify/functions/send-email', {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: 'HoopLineage <noreply@hooplineage.com>',
       to: newEmail,
