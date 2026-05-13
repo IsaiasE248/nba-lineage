@@ -1422,6 +1422,8 @@
     <input class="auth-input" id="auth-name" type="text" placeholder="Display name" style="display:none;" autocomplete="name">
     <div class="auth-error" id="auth-error"></div>
     <button class="auth-submit-btn" id="auth-email-submit">Create account</button>
+    <button id="auth-forgot-btn" style="display:none;background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px;">Forgot password?</button>
+    <div class="auth-error" id="auth-forgot-msg" style="display:none;"></div>
     <button class="auth-toggle" id="auth-mode-toggle">Already have an account? Sign in</button>
 
     <button class="auth-skip" id="auth-skip">Maybe later</button>
@@ -1526,6 +1528,8 @@
           <input class="settings-input" id="settings-confirm-pw" type="password" placeholder="Confirm new password" autocomplete="new-password">
           <div class="settings-msg" id="settings-pw-msg" style="margin-top:8px;"></div>
           <button class="settings-save-btn" id="settings-change-pw-btn" style="margin-top:10px;">Change password</button>
+          <button id="settings-forgot-pw-btn" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;padding:6px 0 0;text-decoration:underline;text-underline-offset:3px;display:block;">Forgot password? Send reset email</button>
+          <div class="settings-msg" id="settings-forgot-pw-msg" style="margin-top:6px;"></div>
         </div>
 
         <button class="settings-signout-btn" id="settings-signout-btn">Sign out</button>
@@ -4251,7 +4255,10 @@ function setAuthMode(mode) {
   $('auth-name').style.display = isCreate ? 'block' : 'none';
   $('auth-email-submit').textContent = isCreate ? 'Create account' : 'Sign in';
   $('auth-mode-toggle').textContent = isCreate ? 'Already have an account? Sign in' : 'No account? Create one';
+  $('auth-forgot-btn').style.display = isCreate ? 'none' : 'block';
   $('auth-error').textContent = '';
+  $('auth-forgot-msg').style.display = 'none';
+  $('auth-forgot-msg').textContent = '';
 }
 
 // Email sign in / create account
@@ -4259,6 +4266,31 @@ let emailAuthMode = 'create'; // default to create since most openers are new us
 setAuthMode('create');
 $('auth-mode-toggle')?.addEventListener('click', () => {
   setAuthMode(emailAuthMode === 'signin' ? 'create' : 'signin');
+});
+
+$('auth-forgot-btn')?.addEventListener('click', async () => {
+  const email = $('auth-email').value.trim();
+  const msg = $('auth-forgot-msg');
+  msg.style.display = 'block';
+  if (!email) {
+    msg.textContent = 'Enter your email address above first.';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+  msg.textContent = 'Sending…'; msg.style.color = 'var(--ink-2)';
+  try {
+    await fbAuth.sendPasswordResetEmail(email);
+    msg.textContent = '✓ Password reset email sent. Check your inbox.';
+    msg.style.color = 'var(--green)';
+  } catch(e) {
+    const errs = {
+      'auth/user-not-found': 'No account found with that email.',
+      'auth/invalid-email': 'Invalid email address.',
+      'auth/too-many-requests': 'Too many attempts. Try again later.',
+    };
+    msg.textContent = errs[e.code] || e.message;
+    msg.style.color = 'var(--red)';
+  }
 });
 $('auth-email-submit')?.addEventListener('click', async () => {
   const email = $('auth-email').value.trim();
@@ -4541,6 +4573,20 @@ $('settings-email-btn')?.addEventListener('click', async () => {
       'auth/requires-recent-login': 'Session expired. Sign out and sign back in, then try again.',
     };
     msg.textContent = msgs[e.code] || e.message; msg.className = 'settings-msg error';
+  }
+});
+
+$('settings-forgot-pw-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const msg = $('settings-forgot-pw-msg');
+  msg.textContent = 'Sending…'; msg.className = 'settings-msg';
+  try {
+    await fbAuth.sendPasswordResetEmail(user.email);
+    msg.textContent = '✓ Reset email sent to ' + user.email + '. Check your inbox.';
+    msg.className = 'settings-msg ok';
+  } catch(e) {
+    msg.textContent = e.message; msg.className = 'settings-msg error';
   }
 });
 
