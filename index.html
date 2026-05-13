@@ -4189,6 +4189,9 @@ function showView(name, pushState = true) {
 
 // Handle browser back/forward
 window.addEventListener('popstate', e => {
+  // Always dismiss archive popup on any navigation
+  $('archive-popup')?.classList.remove('show');
+
   const name = e.state?.view || viewFromPath(location.pathname);
   const diff = diffFromPath(location.pathname);
   if (name === 'game' && diff && diff !== state.difficulty) {
