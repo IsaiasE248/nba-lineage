@@ -1161,6 +1161,131 @@
   }
   .eyebrow .mode-tag.practice { background: rgba(100,180,255,0.15); color: #7ec8ff; }
   .eyebrow .mode-tag.archive  { background: rgba(180,140,255,0.15); color: #c4a8ff; }
+
+  /* ── FRIENDS VIEW ─────────────────────────────────────── */
+  #friends-view {
+    display: none; min-height: 100vh;
+    padding-top: 100px; padding-bottom: 60px;
+    animation: fadeIn 0.25s ease-out;
+  }
+  #friends-view.active { display: block; }
+  .friends-inner { max-width: 680px; margin: 0 auto; padding: 0 24px; }
+  .friend-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface); border: 1px solid var(--border-strong);
+    border-radius: var(--radius); margin-bottom: 8px;
+    transition: background 0.15s;
+  }
+  .friend-card:hover { background: var(--surface-2); }
+  .friend-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--surface-3); border: 1.5px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px; color: var(--accent);
+    flex-shrink: 0; overflow: hidden;
+  }
+  .friend-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .friend-info { flex: 1; min-width: 0; }
+  .friend-name { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .friend-meta { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .friend-pts { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .friend-remove-btn {
+    background: none; border: 1px solid var(--border-strong);
+    color: var(--ink-3); font-family: inherit; font-size: 12px;
+    padding: 5px 10px; border-radius: 6px; cursor: pointer;
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .friend-remove-btn:hover { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+  .friend-add-btn {
+    background: var(--accent); border: none; color: #000;
+    font-family: inherit; font-size: 12px; font-weight: 700;
+    padding: 7px 14px; border-radius: 8px; cursor: pointer;
+    transition: opacity 0.15s; flex-shrink: 0;
+  }
+  .friend-add-btn:hover { opacity: 0.85; }
+  .friend-add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── H2H VIEW ─────────────────────────────────────────── */
+  #h2h-view {
+    display: none; min-height: 100vh;
+    padding-top: 100px; padding-bottom: 60px;
+    animation: fadeIn 0.25s ease-out;
+  }
+  #h2h-view.active { display: block; }
+  .h2h-inner { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+  /* H2H live panel (inside game view during an active match) */
+  #h2h-panel {
+    background: var(--surface); border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg); padding: 14px 20px;
+    margin-bottom: 20px; display: none;
+  }
+  #h2h-panel.active { display: block; animation: fadeIn 0.3s ease-out; }
+  .h2h-panel-row { display: flex; align-items: center; gap: 10px; }
+  .h2h-panel-vs {
+    font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700;
+    color: var(--accent); flex-shrink: 0; padding: 0 6px;
+  }
+  .h2h-panel-player { flex: 1; min-width: 0; }
+  .h2h-panel-player.right { text-align: right; }
+  .h2h-panel-name { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .h2h-panel-score { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; line-height: 1; }
+  .h2h-panel-score.mine { color: var(--accent); }
+  .h2h-panel-score.theirs { color: var(--ink-2); }
+  .h2h-badge {
+    display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: 2px 7px; border-radius: 999px; margin-top: 3px;
+  }
+  .h2h-badge.done { background: var(--green-bg); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+  .h2h-badge.playing { background: var(--accent-glow); color: var(--accent-soft); border: 1px solid var(--accent-line); }
+  .h2h-badge.waiting { background: var(--surface-2); color: var(--ink-3); border: 1px solid var(--border); }
+
+  /* H2H result overlay */
+  .h2h-result-overlay {
+    position: fixed; inset: 0; z-index: 150;
+    background: rgba(0,0,0,0.82); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .h2h-result-overlay.show { display: flex; animation: fadeIn 0.3s ease-out; }
+  .h2h-result-modal {
+    background: var(--bg-2); border: 1px solid var(--border-strong);
+    border-radius: 24px; padding: 36px 32px; max-width: 440px; width: 100%;
+    text-align: center; animation: pop 0.3s ease-out;
+  }
+  .h2h-result-icon { font-size: 56px; margin-bottom: 12px; }
+  .h2h-result-title { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 700; margin-bottom: 6px; }
+  .h2h-result-sub { font-size: 14px; color: var(--ink-2); margin-bottom: 24px; line-height: 1.6; }
+  .h2h-score-compare {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px;
+    align-items: center; margin-bottom: 28px;
+  }
+  .hsc-player { padding: 14px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+  .hsc-player.winner { border-color: var(--accent-line); background: var(--accent-glow); }
+  .hsc-name { font-size: 11px; color: var(--ink-3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .hsc-score { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; }
+  .hsc-player.winner .hsc-score { color: var(--accent-soft); }
+  .hsc-vs { font-family: 'Fraunces', serif; font-size: 16px; color: var(--ink-3); text-align: center; }
+
+  /* Keyboard shortcut hint */
+  .kbd-hint {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; color: var(--ink-faint); margin-top: 6px;
+  }
+  .kbd { display: inline-block; padding: 1px 5px; background: var(--surface-2);
+    border: 1px solid var(--border-strong); border-radius: 4px; font-size: 10px;
+    color: var(--ink-3); font-family: 'SF Mono', Consolas, monospace; line-height: 1.5;
+  }
+
+  @media (max-width: 600px) {
+    #friends-view { padding-top: 76px; padding-bottom: 40px; }
+    .friends-inner { padding: 0 14px; }
+    #h2h-view { padding-top: 76px; padding-bottom: 40px; }
+    .h2h-inner { padding: 0 14px; }
+    .h2h-score-compare { gap: 6px; }
+    .hsc-score { font-size: 22px; }
+    #h2h-panel { padding: 12px 14px; }
+  }
 </style>
 </head>
 <body>
@@ -1180,6 +1305,8 @@
         <button class="nav-link" id="nav-practice">⚡ Practice</button>
         <button class="nav-link" id="nav-archive">📅 Archive</button>
         <button class="nav-link" id="nav-leaderboard">🏆 Leaderboard</button>
+        <button class="nav-link" id="nav-friends">👥 Friends</button>
+        <button class="nav-link" id="nav-h2h">⚔️ 1v1</button>
         <button class="nav-link" id="nav-settings" style="display:none;">⚙ Settings</button>
         <button class="nav-link" id="nav-howto">How to play</button>
         <button class="nav-link" id="nav-scoring">Scoring</button>
@@ -1204,6 +1331,8 @@
   <button class="mobile-menu-item" id="mnav-practice"><span class="mmi-icon">⚡</span><span class="mmi-label">Practice</span></button>
   <button class="mobile-menu-item" id="mnav-archive"><span class="mmi-icon">📅</span><span class="mmi-label">Archive</span></button>
   <button class="mobile-menu-item" id="mnav-leaderboard"><span class="mmi-icon">🏆</span><span class="mmi-label">Leaderboard</span></button>
+  <button class="mobile-menu-item" id="mnav-friends"><span class="mmi-icon">👥</span><span class="mmi-label">Friends</span></button>
+  <button class="mobile-menu-item" id="mnav-h2h"><span class="mmi-icon">⚔️</span><span class="mmi-label">1v1 Race</span></button>
   <div class="mobile-menu-divider"></div>
   <button class="mobile-menu-item" id="mnav-howto"><span class="mmi-icon">❓</span><span class="mmi-label">How to play</span></button>
   <button class="mobile-menu-item" id="mnav-scoring"><span class="mmi-icon">📊</span><span class="mmi-label">Scoring</span></button>
@@ -1435,8 +1564,138 @@
   </div>
 </div>
 
+<!-- Friends full-page view -->
+<div id="friends-view">
+  <div class="friends-inner">
+    <div class="lb-page-header">
+      <button class="lb-back-btn" id="friends-back">← Back</button>
+      <div style="text-align:center;">
+        <h1 class="lb-title">👥 Friends</h1>
+        <div class="lb-subtitle">Compare scores this week</div>
+      </div>
+      <div style="width:120px;"></div>
+    </div>
+
+    <div id="friends-signin-prompt" style="display:none;text-align:center;padding:60px 0;">
+      <p style="color:var(--ink-2);margin-bottom:20px;font-size:16px;">Sign in to add friends and compare weekly scores.</p>
+      <button class="settings-save-btn" id="friends-signin-btn" style="margin:0 auto;">Sign in / Create account</button>
+    </div>
+
+    <div id="friends-content" style="display:none;">
+      <div class="settings-card" style="margin-bottom:24px;">
+        <div class="settings-card-title">Add a friend</div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <input class="settings-input" id="friends-search-input" type="text" placeholder="Search by username…" autocomplete="off" style="flex:1;">
+          <button class="settings-save-btn" id="friends-search-btn" style="white-space:nowrap;">Search</button>
+        </div>
+        <div id="friends-search-result" style="margin-top:12px;min-height:20px;"></div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="settings-card-title" style="margin:0;">Your friends <span id="friends-count" style="font-weight:400;color:var(--ink-3);"></span></div>
+        <div style="font-size:12px;color:var(--ink-3);" id="friends-week-label"></div>
+      </div>
+      <div id="friends-list">
+        <p style="color:var(--ink-3);font-size:14px;padding:20px 0;">No friends added yet. Search by username above.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Head-to-Head full-page view -->
+<div id="h2h-view">
+  <div class="h2h-inner">
+    <div class="lb-page-header">
+      <button class="lb-back-btn" id="h2h-back">← Back</button>
+      <div style="text-align:center;">
+        <h1 class="lb-title">⚔️ 1v1 Race</h1>
+        <div class="lb-subtitle">Race a friend to solve the same puzzle</div>
+      </div>
+      <div style="width:120px;"></div>
+    </div>
+
+    <div id="h2h-signin-prompt" style="display:none;text-align:center;padding:60px 0;">
+      <p style="color:var(--ink-2);margin-bottom:20px;font-size:16px;">Sign in to challenge friends in real time.</p>
+      <button class="settings-save-btn" id="h2h-signin-btn" style="margin:0 auto;">Sign in / Create account</button>
+    </div>
+
+    <div id="h2h-lobby" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:560px;margin:0 auto;">
+        <!-- Create room -->
+        <div class="settings-card" style="text-align:center;">
+          <div style="font-size:40px;margin-bottom:12px;">🏟️</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:8px;">Create room</div>
+          <div style="font-size:13px;color:var(--ink-3);line-height:1.5;margin-bottom:16px;">Start a race and share the code with your opponent.</div>
+          <div style="display:flex;gap:6px;justify-content:center;margin-bottom:14px;">
+            <button class="diff-tab active" id="h2h-diff-easy" style="flex:1;font-size:12px;padding:8px 0;">Easy</button>
+            <button class="diff-tab" id="h2h-diff-medium" style="flex:1;font-size:12px;padding:8px 0;">Med</button>
+            <button class="diff-tab" id="h2h-diff-hard" style="flex:1;font-size:12px;padding:8px 0;">Hard</button>
+          </div>
+          <button class="settings-save-btn" id="h2h-create-btn" style="width:100%;">Create room</button>
+        </div>
+        <!-- Join room -->
+        <div class="settings-card" style="text-align:center;">
+          <div style="font-size:40px;margin-bottom:12px;">🎯</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:8px;">Join room</div>
+          <div style="font-size:13px;color:var(--ink-3);line-height:1.5;margin-bottom:16px;">Have a code from a friend? Enter it to jump in.</div>
+          <input class="settings-input" id="h2h-join-code" type="text" placeholder="XXXXXX" maxlength="6" autocomplete="off" style="text-align:center;letter-spacing:0.18em;font-size:22px;font-weight:700;text-transform:uppercase;margin-bottom:10px;">
+          <button class="settings-save-btn" id="h2h-join-btn" style="width:100%;">Join room</button>
+          <div id="h2h-join-error" style="font-size:13px;color:var(--red);margin-top:8px;min-height:18px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Waiting for opponent (host state) -->
+    <div id="h2h-waiting" style="display:none;text-align:center;padding:40px 0;">
+      <div style="font-size:52px;margin-bottom:16px;">⏳</div>
+      <h2 style="font-family:'Fraunces',serif;font-size:28px;margin-bottom:10px;">Waiting for opponent</h2>
+      <p style="color:var(--ink-2);font-size:15px;margin-bottom:24px;">Share this room code with your friend:</p>
+      <div id="h2h-room-code-display" style="font-family:'Fraunces',serif;font-size:56px;font-weight:700;letter-spacing:0.2em;color:var(--accent);margin-bottom:28px;"></div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn primary" id="h2h-copy-link-btn">📋 Copy invite link</button>
+        <button class="btn" id="h2h-cancel-wait-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- H2H result overlay -->
+<div class="h2h-result-overlay" id="h2h-result-overlay">
+  <div class="h2h-result-modal">
+    <div class="h2h-result-icon" id="h2h-result-icon">🏆</div>
+    <div class="h2h-result-title" id="h2h-result-title">You won!</div>
+    <div class="h2h-result-sub" id="h2h-result-sub"></div>
+    <div class="h2h-score-compare" id="h2h-score-compare"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn primary" id="h2h-result-rematch">Rematch</button>
+      <button class="btn" id="h2h-result-close">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="game-view">
 <div class="wrap">
+
+  <!-- H2H live progress panel — shown during an active 1v1 match -->
+  <div id="h2h-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);">⚔️ 1v1 Race · Live</span>
+      <button id="h2h-panel-exit" style="background:none;border:1px solid var(--border-strong);color:var(--ink-3);font-size:12px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.color='var(--red)';this.style.borderColor='var(--red)'" onmouseout="this.style.color='var(--ink-3)';this.style.borderColor='var(--border-strong)'">Exit race</button>
+    </div>
+    <div class="h2h-panel-row">
+      <div class="h2h-panel-player right">
+        <div class="h2h-panel-name">You</div>
+        <div class="h2h-panel-score mine" id="h2h-panel-my-score">—</div>
+        <div><span class="h2h-badge playing" id="h2h-panel-my-badge">Playing</span></div>
+      </div>
+      <div class="h2h-panel-vs">VS</div>
+      <div class="h2h-panel-player">
+        <div class="h2h-panel-name" id="h2h-panel-opp-name">Opponent</div>
+        <div class="h2h-panel-score theirs" id="h2h-panel-opp-score">—</div>
+        <div><span class="h2h-badge waiting" id="h2h-panel-opp-badge">Waiting</span></div>
+      </div>
+    </div>
+  </div>
 
   <div class="hero reveal">
     <div class="eyebrow">
@@ -1477,6 +1736,7 @@
       disabled
     />
     <div class="results" id="results"></div>
+    <div class="kbd-hint" id="search-kbd-hint">Press <kbd class="kbd">/</kbd> to focus</div>
   </div>
 
   <div class="status reveal reveal-delay-2" id="status">
@@ -2116,6 +2376,27 @@ document.addEventListener("click", (e) => {
   if (!els.results.contains(e.target) && e.target !== els.search) hideResults();
 });
 
+// ── Keyboard shortcut: press '/' to focus search ──────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.key !== '/') return;
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (state.complete) return;
+  if ($('game-view')?.classList.contains('hidden')) return;
+  e.preventDefault();
+  els.search.focus();
+  els.search.select();
+});
+// Hide the hint once the user uses the keyboard shortcut once
+els.search.addEventListener('focus', () => {
+  const hint = $('search-kbd-hint');
+  if (hint) hint.style.opacity = '0';
+});
+els.search.addEventListener('blur', () => {
+  const hint = $('search-kbd-hint');
+  if (hint) hint.style.opacity = '';
+});
+
 function doSearch(q) {
   const lower = q.toLowerCase();
   const startsWith = [];
@@ -2293,10 +2574,16 @@ function finishGame() {
   els.complete.classList.add("show");
   setStatus("Chain locked. Well played.", "ok");
 
-  // Fire confetti 🎉
+  // Fire confetti 🎉 — three-burst sequence for a bigger celebration
   if (typeof confetti === 'function') {
-    confetti({ particleCount: 120, spread: 80, origin: { y: 0.7 },
-      colors: ['#e8920a', '#f0a830', '#ffd066', '#fff5d6', '#ffffff'] });
+    const COLORS = ['#e8920a', '#f0a830', '#ffd066', '#fff5d6', '#ffffff'];
+    confetti({ particleCount: 90, spread: 65, origin: { x: 0.25, y: 0.75 }, colors: COLORS });
+    setTimeout(() => {
+      confetti({ particleCount: 90, spread: 65, origin: { x: 0.75, y: 0.75 }, colors: COLORS });
+    }, 250);
+    setTimeout(() => {
+      confetti({ particleCount: 60, spread: 110, startVelocity: 22, origin: { x: 0.5, y: 0.55 }, colors: COLORS });
+    }, 550);
   }
 
   // Only save for daily and archive modes (not practice)
@@ -3159,6 +3446,8 @@ $("nav-scoring")?.addEventListener("click", () => els.helpPopup.classList.add("s
     ['nav-practice',    'mnav-practice'],
     ['nav-archive',     'mnav-archive'],
     ['nav-leaderboard', 'mnav-leaderboard'],
+    ['nav-friends',     'mnav-friends'],
+    ['nav-h2h',         'mnav-h2h'],
     ['nav-howto',       'mnav-howto'],
     ['nav-scoring',     'mnav-scoring'],
     ['nav-stats',       'mnav-stats'],
@@ -3633,11 +3922,15 @@ function showView(name) {
   // hide all secondary views, show/hide game
   $('leaderboard-view').classList.toggle('active', name === 'leaderboard');
   $('settings-view').classList.toggle('active', name === 'settings');
+  $('friends-view').classList.toggle('active', name === 'friends');
+  $('h2h-view').classList.toggle('active', name === 'h2h');
   $('game-view').classList.toggle('hidden', name !== 'game');
   // nav active states
   $('nav-play')?.classList.toggle('active', name === 'game');
   $('nav-leaderboard')?.classList.toggle('active', name === 'leaderboard');
   $('nav-settings')?.classList.toggle('active', name === 'settings');
+  $('nav-friends')?.classList.toggle('active', name === 'friends');
+  $('nav-h2h')?.classList.toggle('active', name === 'h2h');
   window.scrollTo(0, 0);
 }
 
@@ -3811,9 +4104,11 @@ fbAuth.onAuthStateChanged(async user => {
     updateNavAvatar(user, doc.photoDataURL || null);
     // Sync Firestore stats → localStorage so streak/tabs reflect all devices
     syncStatsFromFirestore(user.uid);
-    // If leaderboard or settings is open, refresh it
+    // Refresh open views
     if ($('leaderboard-view').classList.contains('active')) loadLeaderboardView();
     if ($('settings-view').classList.contains('active')) loadSettingsView();
+    if ($('friends-view').classList.contains('active')) loadFriendsView();
+    if ($('h2h-view').classList.contains('active')) loadH2HView();
   } else {
     updateNavAvatar(null);
   }
@@ -3878,11 +4173,24 @@ $('nav-leaderboard')?.addEventListener('click', showLeaderboardView);
 $('nav-settings')?.addEventListener('click', showSettingsView);
 $('nav-avatar')?.addEventListener('click', showSettingsView);
 $('lb-back')?.addEventListener('click', () => showView('game'));
+
+$('nav-friends')?.addEventListener('click', () => { showView('friends'); loadFriendsView(); });
+$('nav-h2h')?.addEventListener('click', () => { showView('h2h'); loadH2HView(); });
+$('friends-back')?.addEventListener('click', () => showView('game'));
+$('h2h-back')?.addEventListener('click', () => { cancelH2HWaiting(); showView('game'); });
 $('lb-signin-btn')?.addEventListener('click', () => {
   setAuthMode('signin');
   $('auth-overlay').classList.add('show');
 });
 $('settings-signin-btn')?.addEventListener('click', () => {
+  $('auth-overlay').classList.add('show');
+});
+$('friends-signin-btn')?.addEventListener('click', () => {
+  setAuthMode('create');
+  $('auth-overlay').classList.add('show');
+});
+$('h2h-signin-btn')?.addEventListener('click', () => {
+  setAuthMode('create');
   $('auth-overlay').classList.add('show');
 });
 
@@ -4297,6 +4605,589 @@ const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// =============================================================================
+// FRIENDS LIST
+// =============================================================================
+
+async function loadFriendsView() {
+  const user = fbAuth.currentUser;
+  if (!user) {
+    $('friends-signin-prompt').style.display = 'block';
+    $('friends-content').style.display = 'none';
+    return;
+  }
+  $('friends-signin-prompt').style.display = 'none';
+  $('friends-content').style.display = 'block';
+  $('friends-week-label').textContent = weekLabel();
+  await renderFriendsList();
+}
+
+async function renderFriendsList() {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const listEl = $('friends-list');
+  listEl.innerHTML = '<p style="color:var(--ink-3);font-size:14px;padding:20px 0;">Loading…</p>';
+
+  try {
+    const doc = await loadUserDoc(user.uid);
+    const friendUids = doc.friends || [];
+    $('friends-count').textContent = `(${friendUids.length})`;
+
+    if (!friendUids.length) {
+      listEl.innerHTML = '<p style="color:var(--ink-3);font-size:14px;padding:20px 0;">No friends added yet. Search by username above.</p>';
+      return;
+    }
+
+    // Fetch each friend's profile + weekly leaderboard score in parallel
+    const weekId = getWeekId();
+    const friendData = await Promise.all(friendUids.map(async uid => {
+      const [profileDoc, lbDoc] = await Promise.all([
+        fbDb.collection('users').doc(uid).get().catch(() => null),
+        fbDb.collection('leaderboard').doc(`${weekId}_${uid}`).get().catch(() => null),
+      ]);
+      const profile = profileDoc?.exists ? profileDoc.data() : {};
+      const lb = lbDoc?.exists ? lbDoc.data() : null;
+      // Also get displayName from auth record via leaderboard fallback
+      return { uid, profile, lb, displayName: lb?.displayName || profile.displayName || uid.slice(0, 8) };
+    }));
+
+    // Sort by weekly total descending
+    friendData.sort((a, b) => (b.lb?.total || 0) - (a.lb?.total || 0));
+
+    listEl.innerHTML = '';
+    friendData.forEach(({ uid, profile, lb, displayName }) => {
+      const card = document.createElement('div');
+      card.className = 'friend-card';
+
+      const photoSrc = profile.photoDataURL || lb?.photoURL || '';
+      const avatarHtml = photoSrc
+        ? `<img src="${photoSrc}" alt="">`
+        : `<span>${(displayName || '?')[0].toUpperCase()}</span>`;
+
+      const weekPts = lb?.total || 0;
+      const streak  = '—'; // streaks are local only — can't pull them from Firestore
+
+      card.innerHTML = `
+        <div class="friend-avatar">${avatarHtml}</div>
+        <div class="friend-info">
+          <div class="friend-name">${displayName}</div>
+          <div class="friend-meta">
+            ${lb
+              ? `Easy: ${lb.easy || 0} · Med: ${lb.medium || 0} · Hard: ${lb.hard || 0}`
+              : 'No scores this week yet'}
+          </div>
+        </div>
+        <div class="friend-pts">${weekPts > 0 ? weekPts + ' pts' : '—'}</div>
+        <button class="friend-remove-btn" data-uid="${uid}" title="Unfollow">Remove</button>`;
+
+      card.querySelector('.friend-remove-btn').addEventListener('click', async () => {
+        await removeFriend(uid);
+        await renderFriendsList();
+      });
+
+      listEl.appendChild(card);
+    });
+  } catch(e) {
+    listEl.innerHTML = `<p style="color:var(--red);font-size:14px;">Failed to load friends. Try again.</p>`;
+  }
+}
+
+async function addFriend(uid) {
+  const user = fbAuth.currentUser;
+  if (!user || uid === user.uid) return;
+  await fbDb.collection('users').doc(user.uid).set(
+    { friends: firebase.firestore.FieldValue.arrayUnion(uid) }, { merge: true }
+  );
+}
+
+async function removeFriend(uid) {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  await fbDb.collection('users').doc(user.uid).set(
+    { friends: firebase.firestore.FieldValue.arrayRemove(uid) }, { merge: true }
+  );
+}
+
+// Friends search
+$('friends-search-btn')?.addEventListener('click', friendsSearch);
+$('friends-search-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') friendsSearch(); });
+
+async function friendsSearch() {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const query = $('friends-search-input').value.trim();
+  const resultEl = $('friends-search-result');
+  if (!query) { resultEl.innerHTML = ''; return; }
+
+  resultEl.innerHTML = '<span style="color:var(--ink-3);font-size:13px;">Searching…</span>';
+  try {
+    const snap = await fbDb.collection('usernames').doc(query.toLowerCase()).get();
+    if (!snap.exists) {
+      resultEl.innerHTML = '<span style="color:var(--ink-3);font-size:13px;">No player found with that username.</span>';
+      return;
+    }
+    const { uid } = snap.data();
+    if (uid === user.uid) {
+      resultEl.innerHTML = '<span style="color:var(--ink-3);font-size:13px;">That\'s you!</span>';
+      return;
+    }
+
+    // Check if already a friend
+    const myDoc = await loadUserDoc(user.uid);
+    const isAlready = (myDoc.friends || []).includes(uid);
+
+    // Load their profile
+    const profileDoc = await fbDb.collection('users').doc(uid).get();
+    const profile = profileDoc.exists ? profileDoc.data() : {};
+    const weekId = getWeekId();
+    const lbDoc = await fbDb.collection('leaderboard').doc(`${weekId}_${uid}`).get();
+    const lb = lbDoc.exists ? lbDoc.data() : null;
+    const displayName = lb?.displayName || profile.displayName || query;
+    const photoSrc = profile.photoDataURL || lb?.photoURL || '';
+    const weekPts = lb?.total || 0;
+
+    const avatarHtml = photoSrc
+      ? `<img src="${photoSrc}" alt="">`
+      : `<span>${(displayName || '?')[0].toUpperCase()}</span>`;
+
+    resultEl.innerHTML = '';
+    const card = document.createElement('div');
+    card.className = 'friend-card';
+    card.innerHTML = `
+      <div class="friend-avatar">${avatarHtml}</div>
+      <div class="friend-info">
+        <div class="friend-name">${displayName}</div>
+        <div class="friend-meta">${weekPts > 0 ? weekPts + ' pts this week' : 'No scores this week'}</div>
+      </div>
+      <button class="friend-add-btn" id="fsr-add-btn" ${isAlready ? 'disabled' : ''}>${isAlready ? 'Added ✓' : 'Add friend'}</button>`;
+
+    card.querySelector('#fsr-add-btn')?.addEventListener('click', async (e) => {
+      e.target.disabled = true;
+      e.target.textContent = 'Adding…';
+      await addFriend(uid);
+      e.target.textContent = 'Added ✓';
+      await renderFriendsList();
+    });
+
+    resultEl.appendChild(card);
+  } catch(e) {
+    resultEl.innerHTML = '<span style="color:var(--red);font-size:13px;">Search failed. Try again.</span>';
+  }
+}
+
+// =============================================================================
+// HEAD-TO-HEAD (1v1 RACE)
+// =============================================================================
+
+const h2hState = {
+  roomId: null,
+  roomRef: null,
+  unsubscribe: null,
+  role: null,       // 'host' | 'guest'
+  diff: 'easy',
+  active: false,
+};
+
+function genRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+// H2H difficulty selector in lobby
+function setH2HDiff(diff) {
+  h2hState.diff = diff;
+  ['easy','medium','hard'].forEach(d => {
+    $(`h2h-diff-${d}`)?.classList.toggle('active', d === diff);
+  });
+}
+$('h2h-diff-easy')?.addEventListener('click', () => setH2HDiff('easy'));
+$('h2h-diff-medium')?.addEventListener('click', () => setH2HDiff('medium'));
+$('h2h-diff-hard')?.addEventListener('click', () => setH2HDiff('hard'));
+
+function loadH2HView() {
+  const user = fbAuth.currentUser;
+  if (!user) {
+    $('h2h-signin-prompt').style.display = 'block';
+    $('h2h-lobby').style.display = 'none';
+    $('h2h-waiting').style.display = 'none';
+    return;
+  }
+  $('h2h-signin-prompt').style.display = 'none';
+  $('h2h-waiting').style.display = 'none';
+  $('h2h-lobby').style.display = 'block';
+  $('h2h-join-error').textContent = '';
+  $('h2h-join-code').value = '';
+}
+
+// ── Create room ───────────────────────────────────────────────────────────────
+$('h2h-create-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+
+  const diff = h2hState.diff;
+  if (!state.data) { alert('Game data not loaded. Please wait a moment and try again.'); return; }
+  // Pick the daily pair for the chosen difficulty (temporarily set difficulty)
+  const _prevDiff = state.difficulty;
+  state.difficulty = diff;
+  const pair = pickDailyPair();
+  state.difficulty = _prevDiff;
+
+  const btn = $('h2h-create-btn');
+  btn.disabled = true; btn.textContent = 'Creating…';
+
+  const code = genRoomCode();
+  const roomData = {
+    roomId: code,
+    diff,
+    puzzleNum: dayIndex(),
+    startPlayerId: pair.a,
+    endPlayerId: pair.b,
+    hostUid: user.uid,
+    hostName: user.displayName || 'Host',
+    hostPhotoURL: user.photoURL || '',
+    guestUid: null, guestName: null, guestPhotoURL: null,
+    status: 'waiting',   // 'waiting' | 'active' | 'finished'
+    hostChain: [], hostComplete: false, hostScore: 0, hostSteps: 0,
+    guestChain: [], guestComplete: false, guestScore: 0, guestSteps: 0,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  };
+
+  try {
+    await fbDb.collection('h2h_rooms').doc(code).set(roomData);
+    h2hState.roomId = code;
+    h2hState.role = 'host';
+    h2hState.diff = diff;
+    h2hState.roomRef = fbDb.collection('h2h_rooms').doc(code);
+
+    showH2HWaiting(code);
+    listenH2HRoom(code);
+    btn.disabled = false; btn.textContent = 'Create room';
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Create room';
+    alert('Failed to create room: ' + e.message);
+  }
+});
+
+function showH2HWaiting(code) {
+  $('h2h-lobby').style.display = 'none';
+  $('h2h-waiting').style.display = 'block';
+  $('h2h-room-code-display').textContent = code;
+}
+
+$('h2h-copy-link-btn')?.addEventListener('click', () => {
+  const url = `${location.origin}${location.pathname}?room=${h2hState.roomId}`;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = $('h2h-copy-link-btn');
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = '📋 Copy invite link'; }, 2000);
+  });
+});
+
+async function cancelH2HWaiting() {
+  if (h2hState.unsubscribe) { h2hState.unsubscribe(); h2hState.unsubscribe = null; }
+  if (h2hState.roomRef && h2hState.role === 'host') {
+    try { await h2hState.roomRef.delete(); } catch {}
+  }
+  h2hState.roomId = null; h2hState.roomRef = null; h2hState.role = null; h2hState.active = false;
+  $('h2h-waiting').style.display = 'none';
+  $('h2h-lobby').style.display = 'block';
+}
+$('h2h-cancel-wait-btn')?.addEventListener('click', cancelH2HWaiting);
+
+// ── Join room ─────────────────────────────────────────────────────────────────
+$('h2h-join-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const code = $('h2h-join-code').value.trim().toUpperCase();
+  const errEl = $('h2h-join-error');
+  errEl.textContent = '';
+  if (code.length !== 6) { errEl.textContent = 'Enter a 6-character room code.'; return; }
+
+  const btn = $('h2h-join-btn');
+  btn.disabled = true; btn.textContent = 'Joining…';
+
+  try {
+    const snap = await fbDb.collection('h2h_rooms').doc(code).get();
+    if (!snap.exists) { errEl.textContent = 'Room not found. Check the code and try again.'; btn.disabled = false; btn.textContent = 'Join room'; return; }
+    const data = snap.data();
+    if (data.status !== 'waiting') { errEl.textContent = 'This room is already in progress or finished.'; btn.disabled = false; btn.textContent = 'Join room'; return; }
+    if (data.hostUid === user.uid) { errEl.textContent = "You can't join your own room."; btn.disabled = false; btn.textContent = 'Join room'; return; }
+
+    // Join the room
+    await fbDb.collection('h2h_rooms').doc(code).update({
+      guestUid: user.uid,
+      guestName: user.displayName || 'Guest',
+      guestPhotoURL: user.photoURL || '',
+      status: 'active',
+    });
+
+    h2hState.roomId = code;
+    h2hState.role = 'guest';
+    h2hState.diff = data.diff;
+    h2hState.roomRef = fbDb.collection('h2h_rooms').doc(code);
+
+    btn.disabled = false; btn.textContent = 'Join room';
+    startH2HGame(data); // Start immediately as guest
+    listenH2HRoom(code);
+  } catch(e) {
+    errEl.textContent = 'Failed to join: ' + e.message;
+    btn.disabled = false; btn.textContent = 'Join room';
+  }
+});
+
+// ── Real-time room listener ───────────────────────────────────────────────────
+function listenH2HRoom(code) {
+  if (h2hState.unsubscribe) h2hState.unsubscribe();
+  h2hState.unsubscribe = fbDb.collection('h2h_rooms').doc(code).onSnapshot(snap => {
+    if (!snap.exists) return;
+    const data = snap.data();
+
+    // Host: guest just joined → start the game
+    if (h2hState.role === 'host' && data.status === 'active' && !h2hState.active) {
+      startH2HGame(data);
+    }
+
+    // Update the live panel
+    updateH2HPanel(data);
+
+    // Check for finish
+    if (data.status === 'finished' || (data.hostComplete && data.guestComplete)) {
+      if (data.status !== 'finished') {
+        h2hState.roomRef.update({ status: 'finished' }).catch(() => {});
+      }
+      showH2HResult(data);
+    }
+  });
+}
+
+function startH2HGame(roomData) {
+  h2hState.active = true;
+  showView('game');
+
+  // Set up the puzzle from the room
+  const diff = roomData.diff;
+  const startPlayer = state.data?.players[roomData.startPlayerId];
+  const endPlayer   = state.data?.players[roomData.endPlayerId];
+
+  if (!startPlayer || !endPlayer) return;
+
+  // Reset game state
+  state.mode = 'daily';
+  state.difficulty = diff;
+  state.archiveDayIndex = null;
+  state.chain = [];
+  state.connections = [];
+  state.brokenLink = -1;
+  state.complete = false;
+  state.startPlayer = startPlayer;
+  state.endPlayer = endPlayer;
+  state.used = new Set([startPlayer.id, endPlayer.id]);
+  resetHints();
+
+  els.complete.classList.remove('show');
+  els.search.disabled = false;
+  els.checkBtn.disabled = false;
+  els.undoBtn.disabled = false;
+  $('hint-btn').disabled = false;
+
+  updateEyebrow();
+  updateModeUI();
+  renderChainRow();
+  setStatus(`1v1 Race: Connect ${startPlayer.last_name} to ${endPlayer.last_name}. Your opponent is live!`, 'thinking');
+  els.search.focus();
+
+  // Show h2h panel
+  const me = fbAuth.currentUser;
+  const isHost = h2hState.role === 'host';
+  $('h2h-panel-opp-name').textContent = isHost
+    ? (roomData.guestName || 'Opponent')
+    : (roomData.hostName  || 'Opponent');
+  $('h2h-panel-my-score').textContent = '0';
+  $('h2h-panel-opp-score').textContent = '0';
+  setBadge($('h2h-panel-my-badge'),  'playing');
+  setBadge($('h2h-panel-opp-badge'), 'playing');
+  $('h2h-panel').classList.add('active');
+}
+
+function setBadge(el, state) {
+  if (!el) return;
+  el.className = 'h2h-badge ' + state;
+  el.textContent = state === 'done' ? 'Done' : state === 'playing' ? 'Playing' : 'Waiting';
+}
+
+function updateH2HPanel(data) {
+  const isHost = h2hState.role === 'host';
+  const mySteps    = isHost ? (data.hostSteps || 0)  : (data.guestSteps || 0);
+  const oppSteps   = isHost ? (data.guestSteps || 0) : (data.hostSteps  || 0);
+  const myScore    = isHost ? (data.hostScore || 0)  : (data.guestScore || 0);
+  const oppScore   = isHost ? (data.guestScore || 0) : (data.hostScore  || 0);
+  const myDone     = isHost ? data.hostComplete  : data.guestComplete;
+  const oppDone    = isHost ? data.guestComplete : data.hostComplete;
+
+  $('h2h-panel-my-score').textContent  = myScore  > 0 ? myScore  : (mySteps  > 0 ? mySteps  + ' steps' : '—');
+  $('h2h-panel-opp-score').textContent = oppScore > 0 ? oppScore : (oppSteps > 0 ? oppSteps + ' steps' : '—');
+
+  setBadge($('h2h-panel-my-badge'),  myDone  ? 'done' : 'playing');
+  setBadge($('h2h-panel-opp-badge'), oppDone ? 'done' : (data.status === 'active' ? 'playing' : 'waiting'));
+}
+
+// Push my progress to Firestore when I add a bridge player
+function pushH2HProgress() {
+  if (!h2hState.active || !h2hState.roomRef) return;
+  const isHost = h2hState.role === 'host';
+  const bridges = state.chain.filter(p => p.role !== 'start' && p.role !== 'end');
+  const update = isHost
+    ? { hostSteps: bridges.length, hostChain: bridges.map(p => p.name) }
+    : { guestSteps: bridges.length, guestChain: bridges.map(p => p.name) };
+  h2hState.roomRef.update(update).catch(() => {});
+}
+
+// Push completion to Firestore
+function pushH2HComplete(score) {
+  if (!h2hState.active || !h2hState.roomRef) return;
+  const isHost = h2hState.role === 'host';
+  const bridges = state.chain.filter(p => p.role !== 'start' && p.role !== 'end');
+  const update = isHost
+    ? { hostComplete: true, hostScore: score, hostSteps: bridges.length }
+    : { guestComplete: true, guestScore: score, guestSteps: bridges.length };
+  h2hState.roomRef.update(update).catch(() => {});
+}
+
+// Show result modal
+function showH2HResult(data) {
+  // Prevent duplicate fires
+  if ($('h2h-result-overlay').classList.contains('show')) return;
+  if (h2hState.unsubscribe) { h2hState.unsubscribe(); h2hState.unsubscribe = null; }
+
+  const user = fbAuth.currentUser;
+  const isHost = h2hState.role === 'host';
+  const myScore  = isHost ? (data.hostScore  || 0) : (data.guestScore || 0);
+  const oppScore = isHost ? (data.guestScore || 0) : (data.hostScore  || 0);
+  const myName   = user?.displayName || 'You';
+  const oppName  = isHost ? (data.guestName || 'Opponent') : (data.hostName || 'Opponent');
+
+  let icon, title, sub;
+  if (myScore > 0 && oppScore > 0) {
+    if (myScore > oppScore)       { icon = '🏆'; title = 'You won!'; sub = `You scored ${myScore} pts vs ${oppScore} pts. Well played!`; }
+    else if (oppScore > myScore)  { icon = '😤'; title = `${oppName} wins`; sub = `${oppScore} pts vs your ${myScore} pts. Rematch?`; }
+    else                          { icon = '🤝'; title = "It's a tie!"; sub = `Both scored ${myScore} pts. Impressive.`; }
+  } else if (myScore > 0 && !data.guestComplete && !data.hostComplete) {
+    icon = '⏳'; title = 'You finished!'; sub = 'Waiting for your opponent to finish…';
+  } else {
+    icon = '🏁'; title = 'Race over'; sub = `Final: You ${myScore} pts · ${oppName} ${oppScore} pts`;
+  }
+
+  $('h2h-result-icon').textContent = icon;
+  $('h2h-result-title').textContent = title;
+  $('h2h-result-sub').textContent = sub;
+
+  const myWon  = myScore > oppScore;
+  const oppWon = oppScore > myScore;
+  $('h2h-score-compare').innerHTML = `
+    <div class="hsc-player ${myWon ? 'winner' : ''}">
+      <div class="hsc-name">You</div>
+      <div class="hsc-score">${myScore || '—'}</div>
+    </div>
+    <div class="hsc-vs">VS</div>
+    <div class="hsc-player ${oppWon ? 'winner' : ''}">
+      <div class="hsc-name">${oppName}</div>
+      <div class="hsc-score">${oppScore || '—'}</div>
+    </div>`;
+
+  $('h2h-result-overlay').classList.add('show');
+  $('h2h-panel').classList.remove('active');
+}
+
+$('h2h-result-close')?.addEventListener('click', () => {
+  $('h2h-result-overlay').classList.remove('show');
+  endH2HSession();
+});
+
+$('h2h-result-rematch')?.addEventListener('click', () => {
+  $('h2h-result-overlay').classList.remove('show');
+  endH2HSession();
+  showView('h2h');
+  loadH2HView();
+});
+
+$('h2h-panel-exit')?.addEventListener('click', () => {
+  if (!confirm('Exit the 1v1 race? Your opponent will see you left.')) return;
+  $('h2h-panel').classList.remove('active');
+  endH2HSession();
+});
+
+function endH2HSession() {
+  if (h2hState.unsubscribe) { h2hState.unsubscribe(); h2hState.unsubscribe = null; }
+  h2hState.active = false;
+  h2hState.roomId = null;
+  h2hState.roomRef = null;
+  h2hState.role = null;
+  $('h2h-panel').classList.remove('active');
+}
+
+// Check for ?room= URL param on load — auto-prompt join
+(function checkRoomParam() {
+  const params = new URLSearchParams(location.search);
+  const roomCode = params.get('room');
+  if (!roomCode) return;
+  // Remove the param from the URL without reload
+  history.replaceState({}, '', location.pathname);
+  // Wait for auth to settle, then show join UI
+  fbAuth.onAuthStateChanged(user => {
+    if (user) {
+      showView('h2h');
+      loadH2HView();
+      const codeInput = $('h2h-join-code');
+      if (codeInput) {
+        codeInput.value = roomCode.toUpperCase();
+        codeInput.dispatchEvent(new Event('input'));
+      }
+    } else {
+      // Store it for after sign-in
+      sessionStorage.setItem('h2h_room_pending', roomCode.toUpperCase());
+    }
+  }, { once: true });
+})();
+
+// After sign-in, handle pending room join
+const _origAuthChange = fbAuth.onAuthStateChanged;
+fbAuth.onAuthStateChanged(user => {
+  if (user) {
+    const pending = sessionStorage.getItem('h2h_room_pending');
+    if (pending) {
+      sessionStorage.removeItem('h2h_room_pending');
+      showView('h2h');
+      loadH2HView();
+      setTimeout(() => {
+        const codeInput = $('h2h-join-code');
+        if (codeInput) codeInput.value = pending;
+      }, 150);
+    }
+  }
+});
+
+// Hook into existing game events to push H2H progress
+// We use MutationObservers on the chain row and complete panel — no wrapping needed
+const h2hCompleteObserver = new MutationObserver(() => {
+  if (!h2hState.active) return;
+  if (els.complete.classList.contains('show') && !state.chain.isH2HPushed) {
+    state.chain.isH2HPushed = true;
+    const score = parseInt(els.rTotal.textContent, 10) || 0;
+    pushH2HComplete(score);
+  }
+});
+h2hCompleteObserver.observe(els.complete, { attributes: true, attributeFilter: ['class'] });
+
+// Watch chain changes to push progress (every time a card is added/removed)
+const h2hChainObserver = new MutationObserver(() => {
+  if (h2hState.active && !state.complete) {
+    pushH2HProgress();
+  }
+});
+h2hChainObserver.observe(els.chainRow, { childList: true });
 </script>
 </body>
 </html>
