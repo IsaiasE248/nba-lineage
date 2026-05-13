@@ -4292,6 +4292,8 @@ function setAuthMode(mode) {
 // ── Email verification via 6-digit code ───────────────────────────────────────
 
 const RESEND_KEY = 're_awWudX5Q_B2CP8bbqRwc3d6s17rFPJwUg';
+let verifyCodeMode = 'verify'; // 'verify' | 'changeEmail'
+let pendingNewEmail = null;
 
 async function sendVerificationCode(user) {
   const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -4315,6 +4317,28 @@ async function sendVerificationCode(user) {
   if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Failed to send code.'); }
 }
 
+async function sendEmailChangeCode(user, newEmail) {
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = Date.now() + 10 * 60 * 1000;
+  await fbDb.collection('emailChangeCodes').doc(user.uid).set({ code, newEmail, expiresAt });
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: 'HoopLineage <noreply@hooplineage.com>',
+      to: newEmail,
+      subject: 'Confirm your new HoopLineage email',
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:36px 28px;background:#0e0c09;color:#f2ede6;border-radius:16px;">
+        <p style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#e8920a;margin:0 0 20px;">HoopLineage</p>
+        <p style="margin:0 0 6px;font-size:15px;">Enter this code to confirm your new email address:</p>
+        <div style="font-size:44px;font-weight:700;letter-spacing:14px;color:#e8920a;margin:20px 0;font-family:monospace;">${code}</div>
+        <p style="color:#a89e8e;font-size:13px;margin:20px 0 0;">Expires in 10 minutes. If you didn't request this, ignore the email — your account is safe.</p>
+      </div>`
+    })
+  });
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Failed to send code.'); }
+}
+
 async function verifyEmailCode(user, inputCode) {
   const snap = await fbDb.collection('emailVerificationCodes').doc(user.uid).get();
   if (!snap.exists) throw new Error('No code found. Request a new one.');
@@ -4325,8 +4349,11 @@ async function verifyEmailCode(user, inputCode) {
   await snap.ref.delete();
 }
 
-function showVerifyCodeOverlay(user) {
-  $('verify-code-subtitle').textContent = `We sent a 6-digit code to ${user.email}.`;
+function showVerifyCodeOverlay(user, mode = 'verify', newEmail = null) {
+  verifyCodeMode = mode;
+  pendingNewEmail = newEmail;
+  const dest = mode === 'changeEmail' ? newEmail : user.email;
+  $('verify-code-subtitle').textContent = `We sent a 6-digit code to ${dest}.`;
   $('verify-code-msg').textContent = '';
   $('verify-code-msg').style.color = '';
   $('verify-code-resend-msg').textContent = '';
@@ -4375,11 +4402,26 @@ $('verify-code-btn')?.addEventListener('click', async () => {
   msg.textContent = 'Verifying…'; msg.style.color = 'var(--ink-2)';
   $('verify-code-btn').disabled = true;
   try {
-    await verifyEmailCode(user, code);
-    msg.textContent = '✓ Email verified!'; msg.style.color = 'var(--green)';
+    if (verifyCodeMode === 'changeEmail') {
+      // Verify code against emailChangeCodes collection
+      const snap = await fbDb.collection('emailChangeCodes').doc(user.uid).get();
+      if (!snap.exists) throw new Error('No code found. Request a new one.');
+      const { code: stored, newEmail: storedEmail, expiresAt } = snap.data();
+      if (Date.now() > expiresAt) { await snap.ref.delete(); throw new Error('Code expired. Request a new one.'); }
+      if (code.trim() !== stored) throw new Error('Incorrect code. Try again.');
+      await user.updateEmail(storedEmail);
+      await snap.ref.delete();
+      msg.textContent = '✓ Email updated to ' + storedEmail + '!'; msg.style.color = 'var(--green)';
+      $('settings-email').textContent = storedEmail;
+      $('settings-new-email').value = '';
+      $('settings-email-current-pw').value = '';
+    } else {
+      await verifyEmailCode(user, code);
+      msg.textContent = '✓ Email verified!'; msg.style.color = 'var(--green)';
+    }
     setTimeout(() => {
       $('verify-code-overlay').style.display = 'none';
-      loadSettingsView(); // refresh verify status if settings is open
+      loadSettingsView();
     }, 1200);
   } catch(e) {
     msg.textContent = e.message; msg.style.color = 'var(--red)';
@@ -4394,7 +4436,11 @@ $('verify-code-resend')?.addEventListener('click', async () => {
   const resendMsg = $('verify-code-resend-msg');
   resendMsg.textContent = 'Sending…'; resendMsg.style.color = 'var(--ink-2)';
   try {
-    await sendVerificationCode(user);
+    if (verifyCodeMode === 'changeEmail' && pendingNewEmail) {
+      await sendEmailChangeCode(user, pendingNewEmail);
+    } else {
+      await sendVerificationCode(user);
+    }
     resendMsg.textContent = '✓ New code sent!'; resendMsg.style.color = 'var(--green)';
     [...$('code-inputs').querySelectorAll('.code-input')].forEach(i => i.value = '');
     $('code-inputs').querySelectorAll('.code-input')[0].focus();
@@ -4692,17 +4738,15 @@ $('settings-email-btn')?.addEventListener('click', async () => {
   if (!newEmail) { msg.textContent = 'Enter a new email address.'; msg.className = 'settings-msg error'; return; }
   if (!currentPw) { msg.textContent = 'Enter your current password to confirm.'; msg.className = 'settings-msg error'; return; }
   if (newEmail === user.email) { msg.textContent = 'That is already your current email.'; msg.className = 'settings-msg error'; return; }
-  msg.textContent = 'Sending…'; msg.className = 'settings-msg';
+  msg.textContent = 'Sending code…'; msg.className = 'settings-msg';
   try {
-    // Re-authenticate first so Firebase allows the sensitive operation
+    // Re-authenticate first
     const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPw);
     await user.reauthenticateWithCredential(credential);
-    // Send verification link to the new address — email only changes after user clicks it
-    await user.verifyBeforeUpdateEmail(newEmail);
-    msg.textContent = '✓ Verification email sent to ' + newEmail + '. Click the link in that email to complete the change.';
-    msg.className = 'settings-msg ok';
-    $('settings-new-email').value = '';
-    $('settings-email-current-pw').value = '';
+    // Send 6-digit code to the new address
+    await sendEmailChangeCode(user, newEmail);
+    msg.textContent = '✓ Code sent to ' + newEmail + '.'; msg.className = 'settings-msg ok';
+    showVerifyCodeOverlay(user, 'changeEmail', newEmail);
   } catch(e) {
     const msgs = {
       'auth/wrong-password': 'Current password is incorrect.',
