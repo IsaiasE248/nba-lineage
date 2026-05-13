@@ -3830,9 +3830,10 @@ function updateModeUI() {
   }
 }
 
-function switchDifficulty(diff) {
+function switchDifficulty(diff, pushUrl = true) {
   if (!state.data || state.difficulty === diff) return;
   state.difficulty = diff;
+  if (pushUrl) history.pushState({ view: 'game' }, '', `/play/${diff}`);
   state.chain = [];
   state.connections = [];
   state.brokenLink = -1;
@@ -3942,12 +3943,13 @@ $("how-link").addEventListener("click", (e) => {
 });
 
 async function boot() {
-  state.difficulty = 'easy';
+  const urlDiff = diffFromPath(location.pathname);
+  state.difficulty = urlDiff || 'easy';
   state.mode = 'daily';
   // Sync all diff tab active states to match the starting difficulty
   ["easy","medium","hard"].forEach(d => {
-    $(`tab-${d}`)?.classList.toggle("active", d === "easy");
-    $(`nav-${d}`)?.classList.toggle("active", d === "easy");
+    $(`tab-${d}`)?.classList.toggle("active", d === state.difficulty);
+    $(`nav-${d}`)?.classList.toggle("active", d === state.difficulty);
   });
   updateStreakBadge();
   updateEyebrow();
@@ -3967,7 +3969,7 @@ async function boot() {
     renderChainRow();
     markCompletedTabs();
 
-    const saved = localStorage.getItem(`lineage:easy:${state.puzzleNum}`);
+    const saved = localStorage.getItem(`lineage:${state.difficulty}:${state.puzzleNum}`);
     if (saved) {
       restoreSolvedChain(saved);
     } else {
@@ -4149,18 +4151,23 @@ async function loadLeaderboard() {
 }
 
 // ── URL routing ───────────────────────────────────────────────────────────────
-const VIEW_PATHS = { game: '/play', leaderboard: '/leaderboard', friends: '/friends', h2h: '/1v1', settings: '/settings', admin: '/admin' };
-const PATH_VIEWS = { '/': 'game', '/play': 'game', '/leaderboard': 'leaderboard', '/friends': 'friends', '/1v1': 'h2h', '/settings': 'settings', '/admin': 'admin' };
+const VIEW_PATHS = { leaderboard: '/leaderboard', friends: '/friends', h2h: '/1v1', settings: '/settings', admin: '/admin' };
+const PATH_VIEWS = { '/': 'game', '/play': 'game', '/play/easy': 'game', '/play/medium': 'game', '/play/hard': 'game', '/leaderboard': 'leaderboard', '/friends': 'friends', '/1v1': 'h2h', '/settings': 'settings', '/admin': 'admin' };
 
 function viewFromPath(pathname) {
   return PATH_VIEWS[pathname.replace(/\/$/, '') || '/'] || 'game';
+}
+
+function diffFromPath(pathname) {
+  const m = pathname.match(/^\/play\/(easy|medium|hard)$/);
+  return m ? m[1] : null;
 }
 
 // View switching
 function showView(name, pushState = true) {
   // Update URL
   if (pushState) {
-    const path = VIEW_PATHS[name] || '/play';
+    const path = name === 'game' ? `/play/${state.difficulty || 'easy'}` : (VIEW_PATHS[name] || '/play/easy');
     if (location.pathname !== path) history.pushState({ view: name }, '', path);
   }
   // hide all secondary views, show/hide game
@@ -4183,8 +4190,15 @@ function showView(name, pushState = true) {
 // Handle browser back/forward
 window.addEventListener('popstate', e => {
   const name = e.state?.view || viewFromPath(location.pathname);
+  const diff = diffFromPath(location.pathname);
+  if (name === 'game' && diff && diff !== state.difficulty) {
+    // Difficulty changed via back/forward — switch without pushing a new entry
+    const prev = state.difficulty;
+    state.difficulty = null; // bypass same-diff guard
+    switchDifficulty(diff, false);
+    return;
+  }
   showView(name, false);
-  // Reload view data as needed
   if (name === 'leaderboard') loadLeaderboardView();
   else if (name === 'settings') loadSettingsView();
   else if (name === 'friends') loadFriendsView();
