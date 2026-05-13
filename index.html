@@ -103,13 +103,36 @@
   .brand-icon svg { width: 18px; height: 18px; fill: none; stroke: #1a0e05; stroke-width: 1.5; }
   .nav-links { display: flex; align-items: center; gap: 4px; }
   .nav-link {
-    padding: 8px 14px; font-size: 13px; font-weight: 500;
+    padding: 7px 11px; font-size: 13px; font-weight: 500;
     color: var(--ink-3); background: transparent;
     border: none; border-radius: var(--radius-sm); cursor: pointer;
-    transition: all 0.15s; font-family: inherit;
+    transition: all 0.15s; font-family: inherit; white-space: nowrap;
   }
   .nav-link:hover { color: var(--ink); background: var(--surface); }
   .nav-link.active { color: var(--ink); background: var(--surface-2); }
+
+  /* ── NAV MORE DROPDOWN ────────────────────────────────── */
+  .nav-more-wrap { position: relative; }
+  .nav-more-dropdown {
+    position: absolute; top: calc(100% + 10px); right: 0;
+    background: rgba(10, 9, 7, 0.97);
+    backdrop-filter: saturate(150%) blur(20px);
+    -webkit-backdrop-filter: saturate(150%) blur(20px);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius); padding: 5px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.55);
+    min-width: 148px; z-index: 200;
+    display: none;
+  }
+  .nav-more-dropdown.open { display: block; animation: fadeIn 0.15s ease-out; }
+  .nav-more-item {
+    display: flex; align-items: center; width: 100%;
+    padding: 9px 12px; background: none; border: none;
+    color: var(--ink-2); font-family: inherit; font-size: 13px; font-weight: 500;
+    cursor: pointer; border-radius: var(--radius-sm);
+    transition: background 0.1s, color 0.1s; text-align: left;
+  }
+  .nav-more-item:hover { background: var(--surface-2); color: var(--ink); }
 
   /* MAIN */
   .wrap { max-width: 1100px; margin: 0 auto; padding: 108px 24px 80px; }
@@ -1302,15 +1325,21 @@
       <span class="streak-badge" id="streak-badge" title="Current streak">🔥 0</span>
       <div class="nav-links">
         <button class="nav-link active" id="nav-play">Play</button>
-        <button class="nav-link" id="nav-practice">⚡ Practice</button>
-        <button class="nav-link" id="nav-archive">📅 Archive</button>
-        <button class="nav-link" id="nav-leaderboard">🏆 Leaderboard</button>
-        <button class="nav-link" id="nav-friends">👥 Friends</button>
-        <button class="nav-link" id="nav-h2h">⚔️ 1v1</button>
-        <button class="nav-link" id="nav-settings" style="display:none;">⚙ Settings</button>
-        <button class="nav-link" id="nav-howto">How to play</button>
-        <button class="nav-link" id="nav-scoring">Scoring</button>
-        <button class="nav-link" id="nav-stats">Stats</button>
+        <button class="nav-link" id="nav-practice">Practice</button>
+        <button class="nav-link" id="nav-archive">Archive</button>
+        <button class="nav-link" id="nav-leaderboard">Leaderboard</button>
+        <button class="nav-link" id="nav-friends">Friends</button>
+        <button class="nav-link" id="nav-h2h">1v1</button>
+        <button class="nav-link" id="nav-settings" style="display:none;">Settings</button>
+        <!-- Utility items tucked into a ··· overflow dropdown -->
+        <div class="nav-more-wrap">
+          <button class="nav-link" id="nav-more-btn" aria-haspopup="true" aria-expanded="false">···</button>
+          <div class="nav-more-dropdown" id="nav-more-dropdown">
+            <button class="nav-more-item" id="nav-howto">How to play</button>
+            <button class="nav-more-item" id="nav-scoring">Scoring</button>
+            <button class="nav-more-item" id="nav-stats">Stats</button>
+          </div>
+        </div>
       </div>
       <div id="nav-user" style="display:none;align-items:center;gap:8px;margin-left:6px;">
         <div id="nav-avatar" title="Settings" style="width:30px;height:30px;border-radius:50%;border:2px solid var(--accent);cursor:pointer;overflow:hidden;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;"></div>
@@ -3477,6 +3506,26 @@ $("nav-scoring")?.addEventListener("click", () => els.helpPopup.classList.add("s
     });
   }
   new MutationObserver(syncActive).observe(document.body, { subtree: true, attributeFilter: ['class'] });
+})();
+
+// ── "···" More dropdown ───────────────────────────────────────────────────────
+(function() {
+  const btn  = $('nav-more-btn');
+  const menu = $('nav-more-dropdown');
+  if (!btn || !menu) return;
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+  });
+  document.addEventListener('click', () => {
+    menu.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  });
+  menu.addEventListener('click', () => {
+    menu.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  });
 })();
 
 $("nav-stats")?.addEventListener("click", async () => {
