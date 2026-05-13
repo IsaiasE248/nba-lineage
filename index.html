@@ -4466,11 +4466,11 @@ async function sendVerificationCode(user) {
       from: 'HoopLineage <noreply@hooplineage.com>',
       to: user.email,
       subject: 'Your HoopLineage verification code',
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:36px 28px;background:#0e0c09;color:#f2ede6;border-radius:16px;">
-        <p style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#e8920a;margin:0 0 20px;">HoopLineage</p>
-        <p style="margin:0 0 6px;font-size:15px;">Your verification code is:</p>
-        <div style="font-size:44px;font-weight:700;letter-spacing:14px;color:#e8920a;margin:20px 0;font-family:monospace;">${code}</div>
-        <p style="color:#a89e8e;font-size:13px;margin:20px 0 0;">Expires in 10 minutes. If you didn't sign up for HoopLineage, ignore this email.</p>
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:48px 36px;background:#0e0c09;color:#f2ede6;border-radius:16px;text-align:center;">
+        <p style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#e8920a;margin:0 0 24px;">HoopLineage</p>
+        <p style="margin:0 0 8px;font-size:15px;">Your verification code is:</p>
+        <div style="font-size:48px;font-weight:700;letter-spacing:16px;color:#e8920a;margin:24px auto;font-family:monospace;display:inline-block;">${code}</div>
+        <p style="color:#a89e8e;font-size:13px;margin:24px 0 0;">Expires in 10 minutes. If you didn't sign up for HoopLineage, ignore this email.</p>
       </div>`
     })
   });
@@ -4497,11 +4497,11 @@ async function sendEmailChangeCode(user, newEmail) {
       from: 'HoopLineage <noreply@hooplineage.com>',
       to: newEmail,
       subject: 'Confirm your new HoopLineage email',
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:36px 28px;background:#0e0c09;color:#f2ede6;border-radius:16px;">
-        <p style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#e8920a;margin:0 0 20px;">HoopLineage</p>
-        <p style="margin:0 0 6px;font-size:15px;">Enter this code to confirm your new email address:</p>
-        <div style="font-size:44px;font-weight:700;letter-spacing:14px;color:#e8920a;margin:20px 0;font-family:monospace;">${code}</div>
-        <p style="color:#a89e8e;font-size:13px;margin:20px 0 0;">Expires in 10 minutes. If you didn't request this, ignore the email — your account is safe.</p>
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:48px 36px;background:#0e0c09;color:#f2ede6;border-radius:16px;text-align:center;">
+        <p style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#e8920a;margin:0 0 24px;">HoopLineage</p>
+        <p style="margin:0 0 8px;font-size:15px;">Enter this code to confirm your new email address:</p>
+        <div style="font-size:48px;font-weight:700;letter-spacing:16px;color:#e8920a;margin:24px auto;font-family:monospace;display:inline-block;">${code}</div>
+        <p style="color:#a89e8e;font-size:13px;margin:24px 0 0;">Expires in 10 minutes. If you didn't request this, ignore the email — your account is safe.</p>
       </div>`
     })
   });
