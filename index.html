@@ -4385,6 +4385,7 @@ fbAuth.onAuthStateChanged(async user => {
     if ($('nav-admin')) $('nav-admin').style.display = isAdmin ? '' : 'none';
 
     // Handle initial URL routing (once, after auth resolves)
+    const wasInitialLoad = !_initialRouteHandled;
     if (!_initialRouteHandled) {
       _initialRouteHandled = true;
       const initView = viewFromPath(location.pathname);
@@ -4399,11 +4400,13 @@ fbAuth.onAuthStateChanged(async user => {
       }
     }
 
-    // Refresh open views
-    if ($('leaderboard-view').classList.contains('active')) loadLeaderboardView();
-    if ($('settings-view').classList.contains('active')) loadSettingsView();
-    if ($('friends-view').classList.contains('active')) loadFriendsView();
-    if ($('h2h-view').classList.contains('active')) loadH2HView();
+    // Refresh open views on subsequent auth changes (not on initial page load)
+    if (!wasInitialLoad) {
+      if ($('leaderboard-view').classList.contains('active')) loadLeaderboardView();
+      if ($('settings-view').classList.contains('active')) loadSettingsView();
+      if ($('friends-view').classList.contains('active')) loadFriendsView();
+      if ($('h2h-view').classList.contains('active')) loadH2HView();
+    }
   } else {
     updateNavAvatar(null);
     if ($('nav-admin')) $('nav-admin').style.display = 'none';
