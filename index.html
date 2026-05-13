@@ -330,6 +330,13 @@
   }
   .settings-lock-note { font-size: 13px; color: var(--ink-3); }
 
+  /* CODE VERIFICATION OVERLAY */
+  #verify-code-overlay { display:none; position:fixed; inset:0; z-index:250; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px; }
+  .verify-code-modal { background:var(--bg-2); border:1px solid var(--border-strong); border-radius:20px; padding:36px 28px 28px; max-width:380px; width:100%; text-align:center; animation:pop 0.25s ease-out; }
+  .code-inputs { display:flex; gap:8px; justify-content:center; margin:24px 0 6px; }
+  .code-input { width:44px; height:54px; background:var(--surface-2); border:1.5px solid var(--border-strong); border-radius:10px; color:var(--ink); font-size:24px; font-weight:700; text-align:center; outline:none; transition:border-color 0.15s; font-family:'Space Grotesk',sans-serif; caret-color:transparent; }
+  .code-input:focus { border-color:var(--accent); background:var(--surface-3); }
+
   /* LEADERBOARD */
   .lb-table { width: 100%; border-collapse: collapse; font-size: 14px; }
   .lb-table th { text-align: left; padding: 8px 10px; color: var(--ink-3); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
@@ -1371,6 +1378,27 @@
 </div>
 
 <!-- Profile modal (leaderboard click) -->
+<!-- Email verification code overlay -->
+<div id="verify-code-overlay">
+  <div class="verify-code-modal">
+    <div style="font-size:40px;margin-bottom:12px;">📬</div>
+    <h2 style="font-family:'Fraunces',Georgia,serif;font-size:24px;font-weight:700;margin-bottom:8px;">Check your email</h2>
+    <p id="verify-code-subtitle" style="color:var(--ink-2);font-size:14px;line-height:1.5;margin:0;">We sent a 6-digit code to your email.</p>
+    <div class="code-inputs" id="code-inputs">
+      <input class="code-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+      <input class="code-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+      <input class="code-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+      <input class="code-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+      <input class="code-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+      <input class="code-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+    </div>
+    <div id="verify-code-msg" style="min-height:20px;font-size:14px;margin-bottom:16px;"></div>
+    <button class="auth-submit-btn" id="verify-code-btn" style="width:100%;margin-bottom:4px;">Verify</button>
+    <button id="verify-code-resend" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;margin-top:10px;text-decoration:underline;text-underline-offset:3px;display:block;width:100%;">Resend code</button>
+    <p id="verify-code-resend-msg" style="font-size:12px;color:var(--green);min-height:18px;margin-top:6px;"></p>
+  </div>
+</div>
+
 <div id="profile-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;">
   <div id="profile-modal" style="background:var(--bg-2);border:1px solid var(--border-strong);border-radius:20px;padding:32px 28px;max-width:360px;width:100%;position:relative;animation:pop 0.25s ease-out;max-height:90vh;overflow-y:auto;">
     <button id="profile-modal-close" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--ink-3);font-size:22px;cursor:pointer;line-height:1;">✕</button>
@@ -4261,6 +4289,121 @@ function setAuthMode(mode) {
   $('auth-forgot-msg').textContent = '';
 }
 
+// ── Email verification via 6-digit code ───────────────────────────────────────
+
+const RESEND_KEY = 're_awWudX5Q_B2CP8bbqRwc3d6s17rFPJwUg';
+
+async function sendVerificationCode(user) {
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 min
+  await fbDb.collection('emailVerificationCodes').doc(user.uid).set({ code, email: user.email, expiresAt });
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: 'HoopLineage <noreply@hooplineage.com>',
+      to: user.email,
+      subject: 'Your HoopLineage verification code',
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:36px 28px;background:#0e0c09;color:#f2ede6;border-radius:16px;">
+        <p style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#e8920a;margin:0 0 20px;">HoopLineage</p>
+        <p style="margin:0 0 6px;font-size:15px;">Your verification code is:</p>
+        <div style="font-size:44px;font-weight:700;letter-spacing:14px;color:#e8920a;margin:20px 0;font-family:monospace;">${code}</div>
+        <p style="color:#a89e8e;font-size:13px;margin:20px 0 0;">Expires in 10 minutes. If you didn't sign up for HoopLineage, ignore this email.</p>
+      </div>`
+    })
+  });
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Failed to send code.'); }
+}
+
+async function verifyEmailCode(user, inputCode) {
+  const snap = await fbDb.collection('emailVerificationCodes').doc(user.uid).get();
+  if (!snap.exists) throw new Error('No code found. Request a new one.');
+  const { code, expiresAt } = snap.data();
+  if (Date.now() > expiresAt) { await snap.ref.delete(); throw new Error('Code expired. Request a new one.'); }
+  if (inputCode.trim() !== code) throw new Error('Incorrect code. Try again.');
+  await fbDb.collection('users').doc(user.uid).set({ emailVerified: true }, { merge: true });
+  await snap.ref.delete();
+}
+
+function showVerifyCodeOverlay(user) {
+  $('verify-code-subtitle').textContent = `We sent a 6-digit code to ${user.email}.`;
+  $('verify-code-msg').textContent = '';
+  $('verify-code-msg').style.color = '';
+  $('verify-code-resend-msg').textContent = '';
+  [...$('code-inputs').querySelectorAll('.code-input')].forEach(i => i.value = '');
+  $('verify-code-overlay').style.display = 'flex';
+  setTimeout(() => $('code-inputs').querySelectorAll('.code-input')[0].focus(), 100);
+}
+
+function getCodeValue() {
+  return [...$('code-inputs').querySelectorAll('.code-input')].map(i => i.value).join('');
+}
+
+// Code input auto-advance & backspace
+$('code-inputs')?.addEventListener('keydown', e => {
+  const inputs = [...$('code-inputs').querySelectorAll('.code-input')];
+  const idx = inputs.indexOf(e.target);
+  if (e.key === 'Backspace' && !e.target.value && idx > 0) { inputs[idx - 1].focus(); inputs[idx - 1].value = ''; }
+  if (e.key === 'ArrowLeft' && idx > 0) inputs[idx - 1].focus();
+  if (e.key === 'ArrowRight' && idx < inputs.length - 1) inputs[idx + 1].focus();
+  if (e.key === 'Enter') $('verify-code-btn').click();
+});
+$('code-inputs')?.addEventListener('input', e => {
+  const inputs = [...$('code-inputs').querySelectorAll('.code-input')];
+  const idx = inputs.indexOf(e.target);
+  // Allow only digits
+  e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(-1);
+  if (e.target.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+  // Auto-submit when all filled
+  if (getCodeValue().length === 6) $('verify-code-btn').click();
+});
+$('code-inputs')?.addEventListener('paste', e => {
+  e.preventDefault();
+  const pasted = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+  const inputs = [...$('code-inputs').querySelectorAll('.code-input')];
+  pasted.split('').forEach((ch, i) => { if (inputs[i]) inputs[i].value = ch; });
+  if (pasted.length === 6) $('verify-code-btn').click();
+  else if (inputs[pasted.length]) inputs[pasted.length].focus();
+});
+
+$('verify-code-btn')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const code = getCodeValue();
+  const msg = $('verify-code-msg');
+  if (code.length < 6) { msg.textContent = 'Enter all 6 digits.'; msg.style.color = 'var(--red)'; return; }
+  msg.textContent = 'Verifying…'; msg.style.color = 'var(--ink-2)';
+  $('verify-code-btn').disabled = true;
+  try {
+    await verifyEmailCode(user, code);
+    msg.textContent = '✓ Email verified!'; msg.style.color = 'var(--green)';
+    setTimeout(() => {
+      $('verify-code-overlay').style.display = 'none';
+      loadSettingsView(); // refresh verify status if settings is open
+    }, 1200);
+  } catch(e) {
+    msg.textContent = e.message; msg.style.color = 'var(--red)';
+  } finally {
+    $('verify-code-btn').disabled = false;
+  }
+});
+
+$('verify-code-resend')?.addEventListener('click', async () => {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const resendMsg = $('verify-code-resend-msg');
+  resendMsg.textContent = 'Sending…'; resendMsg.style.color = 'var(--ink-2)';
+  try {
+    await sendVerificationCode(user);
+    resendMsg.textContent = '✓ New code sent!'; resendMsg.style.color = 'var(--green)';
+    [...$('code-inputs').querySelectorAll('.code-input')].forEach(i => i.value = '');
+    $('code-inputs').querySelectorAll('.code-input')[0].focus();
+    $('verify-code-msg').textContent = '';
+  } catch(e) {
+    resendMsg.textContent = e.message; resendMsg.style.color = 'var(--red)';
+  }
+});
+
 // Email sign in / create account
 let emailAuthMode = 'create'; // default to create since most openers are new users
 setAuthMode('create');
@@ -4315,10 +4458,9 @@ $('auth-email-submit')?.addEventListener('click', async () => {
         await cred.user.updateProfile({ displayName: name });
         await claimUsername(name, null, cred.user.uid);
       }
-      await cred.user.sendEmailVerification();
-      $('auth-error').style.color = 'var(--green)';
-      $('auth-error').textContent = '✓ Account created! Check your inbox (and spam folder) for a verification email.';
-      await new Promise(r => setTimeout(r, 2500));
+      await sendVerificationCode(cred.user);
+      $('auth-overlay').classList.remove('show');
+      showVerifyCodeOverlay(cred.user);
       $('auth-error').style.color = '';
     } else {
       await fbAuth.signInWithEmailAndPassword(email, password);
@@ -4355,10 +4497,11 @@ async function loadSettingsView() {
   $('settings-signin-prompt').style.display = 'none';
   $('settings-content').style.display = 'block';
 
-  // Account info
+  // Account info — load doc first so we can check Firestore emailVerified
+  const doc = await loadUserDoc(user.uid);
   $('settings-email').textContent = user.email || '—';
   const isGoogle = user.providerData?.some(p => p.providerId === 'google.com');
-  const verified = user.emailVerified || isGoogle;
+  const verified = user.emailVerified || doc.emailVerified || isGoogle;
   // Hide email/password change for Google users (managed by Google)
   if ($('settings-email-change-wrap')) $('settings-email-change-wrap').style.display = isGoogle ? 'none' : 'block';
   if ($('settings-pw-wrap')) $('settings-pw-wrap').style.display = isGoogle ? 'none' : 'block';
@@ -4372,9 +4515,6 @@ async function loadSettingsView() {
   $('settings-upload-label').style.opacity = verified ? '1' : '0.4';
   $('settings-upload-label').style.pointerEvents = verified ? 'auto' : 'none';
   $('settings-upload-hint').textContent = verified ? 'Square image recommended' : 'Verify your email to upload a photo';
-
-  // Load current profile data
-  const doc = await loadUserDoc(user.uid);
   $('settings-name-input').value = user.displayName || doc.displayName || '';
   $('settings-bio').value = doc.bio || '';
   renderXStatus(doc.twitterHandle || '');
@@ -4698,12 +4838,16 @@ $('settings-delete-cancel2-btn')?.addEventListener('click', () => {
 $('settings-resend-btn')?.addEventListener('click', async () => {
   const user = fbAuth.currentUser;
   if (!user) return;
+  $('settings-resend-btn').textContent = 'Sending…';
+  $('settings-resend-btn').disabled = true;
   try {
-    await user.sendEmailVerification();
-    $('settings-resend-btn').textContent = 'Sent!';
-    setTimeout(() => { $('settings-resend-btn').textContent = 'Resend email'; }, 4000);
+    await sendVerificationCode(user);
+    showVerifyCodeOverlay(user);
   } catch(e) {
     alert(e.message);
+  } finally {
+    $('settings-resend-btn').textContent = 'Enter code';
+    $('settings-resend-btn').disabled = false;
   }
 });
 
