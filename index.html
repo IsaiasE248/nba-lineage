@@ -1316,6 +1316,37 @@
     .hsc-score { font-size: 22px; }
     #h2h-panel { padding: 12px 14px; }
   }
+
+  /* ── ADMIN VIEW ─────────────────────────────────────────── */
+  #admin-view {
+    display: none; min-height: 100vh;
+    padding: 100px 24px 60px;
+    animation: fadeIn 0.25s ease-out;
+  }
+  #admin-view.active { display: block; }
+  .admin-inner { max-width: 960px; margin: 0 auto; }
+  .admin-inner h1 { font-family: 'Fraunces', Georgia, serif; font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .admin-tabs { display: flex; gap: 6px; margin: 20px 0 24px; flex-wrap: wrap; }
+  .admin-tab { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; color: var(--ink-2); font-size: 13px; font-weight: 600; padding: 6px 14px; cursor: pointer; transition: all 0.15s; }
+  .admin-tab.active, .admin-tab:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+  .admin-panel { display: none; }
+  .admin-panel.active { display: block; }
+  .admin-stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .admin-stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .admin-stat-val { font-size: 30px; font-weight: 800; font-family: 'Space Grotesk', sans-serif; color: var(--accent); }
+  .admin-stat-lbl { font-size: 12px; color: var(--ink-3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .admin-table th { text-align: left; color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .admin-table td { padding: 10px 10px; border-bottom: 1px solid var(--border-faint, var(--border)); vertical-align: middle; }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tr:hover td { background: var(--surface-2); }
+  .admin-flag-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; font-size: 12px; cursor: pointer; color: var(--ink-2); transition: all 0.15s; }
+  .admin-flag-btn:hover { background: oklch(55% 0.18 27); border-color: oklch(55% 0.18 27); color: #fff; }
+  .admin-flag-btn.flagged { background: oklch(55% 0.18 27); border-color: oklch(55% 0.18 27); color: #fff; }
+  .admin-loading { color: var(--ink-3); font-size: 14px; padding: 30px 0; }
+  @media (max-width: 600px) {
+    #admin-view { padding: 76px 14px 40px; }
+  }
 </style>
 </head>
 <body>
@@ -1338,6 +1369,7 @@
         <button class="nav-link" id="nav-friends">Friends</button>
         <button class="nav-link" id="nav-h2h">1v1</button>
         <button class="nav-link" id="nav-settings" style="display:none;">Settings</button>
+        <button class="nav-link" id="nav-admin" style="display:none;">Admin</button>
         <!-- Utility items tucked into a ··· overflow dropdown -->
         <div class="nav-more-wrap">
           <button class="nav-link" id="nav-more-btn" aria-haspopup="true" aria-expanded="false">···</button>
@@ -1374,6 +1406,7 @@
   <button class="mobile-menu-item" id="mnav-scoring"><span class="mmi-icon">📊</span><span class="mmi-label">Scoring</span></button>
   <button class="mobile-menu-item" id="mnav-stats"><span class="mmi-icon">📈</span><span class="mmi-label">Stats</span></button>
   <button class="mobile-menu-item" id="mnav-settings" style="display:none;"><span class="mmi-icon">⚙️</span><span class="mmi-label">Settings</span></button>
+  <button class="mobile-menu-item" id="mnav-admin" style="display:none;"><span class="mmi-icon">🛡️</span><span class="mmi-label">Admin</span></button>
   <button class="mobile-menu-signin" id="mnav-signin" style="display:none;">Sign in</button>
 </div>
 
@@ -1731,6 +1764,61 @@
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button class="btn primary" id="h2h-result-rematch">Rematch</button>
       <button class="btn" id="h2h-result-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin view -->
+<div id="admin-view">
+  <div class="admin-inner">
+    <h1>🛡️ Admin</h1>
+    <p style="color:var(--ink-3);font-size:14px;margin-bottom:4px;" id="admin-last-refresh"></p>
+    <div class="admin-stat-row" id="admin-stats-row">
+      <div class="admin-stat"><div class="admin-stat-val" id="admin-stat-users">—</div><div class="admin-stat-lbl">Total users</div></div>
+      <div class="admin-stat"><div class="admin-stat-val" id="admin-stat-active">—</div><div class="admin-stat-lbl">Active 7d</div></div>
+      <div class="admin-stat"><div class="admin-stat-val" id="admin-stat-rooms">—</div><div class="admin-stat-lbl">Live rooms</div></div>
+      <div class="admin-stat"><div class="admin-stat-val" id="admin-stat-week">—</div><div class="admin-stat-lbl">Scores this week</div></div>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-panel="users">Users</button>
+      <button class="admin-tab" data-panel="puzzles">Puzzles</button>
+      <button class="admin-tab" data-panel="rooms">H2H Rooms</button>
+    </div>
+
+    <!-- Users panel -->
+    <div class="admin-panel active" id="admin-panel-users">
+      <p style="color:var(--ink-3);font-size:13px;margin-bottom:14px;">Most recently active users (last 50)</p>
+      <div id="admin-users-loading" class="admin-loading">Loading…</div>
+      <table class="admin-table" id="admin-users-table" style="display:none;">
+        <thead><tr>
+          <th>User</th><th>Email</th><th>Puzzles solved</th><th>Week pts</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="admin-users-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Puzzles panel -->
+    <div class="admin-panel" id="admin-panel-puzzles">
+      <p style="color:var(--ink-3);font-size:13px;margin-bottom:14px;">Top puzzles by completions this week</p>
+      <div id="admin-puzzles-loading" class="admin-loading">Loading…</div>
+      <table class="admin-table" id="admin-puzzles-table" style="display:none;">
+        <thead><tr>
+          <th>Puzzle</th><th>Difficulty</th><th>Completions</th><th>Avg score</th>
+        </tr></thead>
+        <tbody id="admin-puzzles-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Rooms panel -->
+    <div class="admin-panel" id="admin-panel-rooms">
+      <p style="color:var(--ink-3);font-size:13px;margin-bottom:14px;">Active and recent H2H rooms</p>
+      <div id="admin-rooms-loading" class="admin-loading">Loading…</div>
+      <table class="admin-table" id="admin-rooms-table" style="display:none;">
+        <thead><tr>
+          <th>Room</th><th>Status</th><th>Host</th><th>Guest</th><th>Created</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="admin-rooms-body"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -3514,6 +3602,7 @@ $("nav-scoring")?.addEventListener("click", () => els.helpPopup.classList.add("s
     ['nav-scoring',     'mnav-scoring'],
     ['nav-stats',       'mnav-stats'],
     ['nav-settings',    'mnav-settings'],
+    ['nav-admin',       'mnav-admin'],
     ['nav-signin',      'mnav-signin'],
   ];
   pairs.forEach(([desktopId, mobileId]) => {
@@ -3999,13 +4088,27 @@ async function loadLeaderboard() {
     .slice(0, 20);
 }
 
+// ── URL routing ───────────────────────────────────────────────────────────────
+const VIEW_PATHS = { game: '/play', leaderboard: '/leaderboard', friends: '/friends', h2h: '/1v1', settings: '/settings', admin: '/admin' };
+const PATH_VIEWS = { '/': 'game', '/play': 'game', '/leaderboard': 'leaderboard', '/friends': 'friends', '/1v1': 'h2h', '/settings': 'settings', '/admin': 'admin' };
+
+function viewFromPath(pathname) {
+  return PATH_VIEWS[pathname.replace(/\/$/, '') || '/'] || 'game';
+}
+
 // View switching
-function showView(name) {
+function showView(name, pushState = true) {
+  // Update URL
+  if (pushState) {
+    const path = VIEW_PATHS[name] || '/play';
+    if (location.pathname !== path) history.pushState({ view: name }, '', path);
+  }
   // hide all secondary views, show/hide game
   $('leaderboard-view').classList.toggle('active', name === 'leaderboard');
   $('settings-view').classList.toggle('active', name === 'settings');
   $('friends-view').classList.toggle('active', name === 'friends');
   $('h2h-view').classList.toggle('active', name === 'h2h');
+  $('admin-view')?.classList.toggle('active', name === 'admin');
   $('game-view').classList.toggle('hidden', name !== 'game');
   // nav active states
   $('nav-play')?.classList.toggle('active', name === 'game');
@@ -4013,8 +4116,21 @@ function showView(name) {
   $('nav-settings')?.classList.toggle('active', name === 'settings');
   $('nav-friends')?.classList.toggle('active', name === 'friends');
   $('nav-h2h')?.classList.toggle('active', name === 'h2h');
+  $('nav-admin')?.classList.toggle('active', name === 'admin');
   window.scrollTo(0, 0);
 }
+
+// Handle browser back/forward
+window.addEventListener('popstate', e => {
+  const name = e.state?.view || viewFromPath(location.pathname);
+  showView(name, false);
+  // Reload view data as needed
+  if (name === 'leaderboard') loadLeaderboardView();
+  else if (name === 'settings') loadSettingsView();
+  else if (name === 'friends') loadFriendsView();
+  else if (name === 'h2h') loadH2HView();
+  else if (name === 'admin') loadAdminView();
+});
 
 function showLeaderboardView() {
   showView('leaderboard');
@@ -4180,12 +4296,32 @@ async function loadUserDoc(uid) {
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 
+let _initialRouteHandled = false;
 fbAuth.onAuthStateChanged(async user => {
   if (user) {
     const doc = await loadUserDoc(user.uid);
     updateNavAvatar(user, doc.photoDataURL || null);
-    // Sync Firestore stats → localStorage so streak/tabs reflect all devices
     syncStatsFromFirestore(user.uid);
+
+    // Show admin nav if user has isAdmin flag
+    const isAdmin = doc.isAdmin === true;
+    if ($('nav-admin')) $('nav-admin').style.display = isAdmin ? '' : 'none';
+
+    // Handle initial URL routing (once, after auth resolves)
+    if (!_initialRouteHandled) {
+      _initialRouteHandled = true;
+      const initView = viewFromPath(location.pathname);
+      if (initView !== 'game') {
+        showView(initView, false);
+        if (initView === 'leaderboard') loadLeaderboardView();
+        else if (initView === 'settings') loadSettingsView();
+        else if (initView === 'friends') loadFriendsView();
+        else if (initView === 'h2h') loadH2HView();
+        else if (initView === 'admin' && isAdmin) loadAdminView();
+        else if (initView === 'admin' && !isAdmin) showView('game', false);
+      }
+    }
+
     // Refresh open views
     if ($('leaderboard-view').classList.contains('active')) loadLeaderboardView();
     if ($('settings-view').classList.contains('active')) loadSettingsView();
@@ -4193,6 +4329,19 @@ fbAuth.onAuthStateChanged(async user => {
     if ($('h2h-view').classList.contains('active')) loadH2HView();
   } else {
     updateNavAvatar(null);
+    if ($('nav-admin')) $('nav-admin').style.display = 'none';
+
+    // Handle initial URL routing for logged-out users
+    if (!_initialRouteHandled) {
+      _initialRouteHandled = true;
+      const initView = viewFromPath(location.pathname);
+      if (initView !== 'game' && initView !== 'admin') {
+        showView(initView, false);
+        if (initView === 'leaderboard') loadLeaderboardView();
+        else if (initView === 'h2h') loadH2HView();
+        else if (initView === 'friends') loadFriendsView();
+      }
+    }
   }
 });
 
@@ -4258,6 +4407,7 @@ $('lb-back')?.addEventListener('click', () => showView('game'));
 
 $('nav-friends')?.addEventListener('click', () => { showView('friends'); loadFriendsView(); });
 $('nav-h2h')?.addEventListener('click', () => { showView('h2h'); loadH2HView(); });
+$('nav-admin')?.addEventListener('click', () => { showView('admin'); loadAdminView(); });
 $('friends-back')?.addEventListener('click', () => showView('game'));
 $('h2h-back')?.addEventListener('click', () => { cancelH2HWaiting(); showView('game'); });
 $('lb-signin-btn')?.addEventListener('click', () => {
@@ -4292,13 +4442,23 @@ function setAuthMode(mode) {
 // ── Email verification via 6-digit code ───────────────────────────────────────
 
 const RESEND_KEY = 're_awWudX5Q_B2CP8bbqRwc3d6s17rFPJwUg';
+const RESEND_COOLDOWN_MS = 60 * 1000; // 60 seconds between sends
 let verifyCodeMode = 'verify'; // 'verify' | 'changeEmail'
 let pendingNewEmail = null;
 
 async function sendVerificationCode(user) {
+  // Rate limit: check lastSentAt
+  const existing = await fbDb.collection('emailVerificationCodes').doc(user.uid).get();
+  if (existing.exists) {
+    const last = existing.data().lastSentAt;
+    if (last && Date.now() - last < RESEND_COOLDOWN_MS) {
+      const wait = Math.ceil((RESEND_COOLDOWN_MS - (Date.now() - last)) / 1000);
+      throw new Error(`Please wait ${wait}s before requesting another code.`);
+    }
+  }
   const code = String(Math.floor(100000 + Math.random() * 900000));
   const expiresAt = Date.now() + 10 * 60 * 1000; // 10 min
-  await fbDb.collection('emailVerificationCodes').doc(user.uid).set({ code, email: user.email, expiresAt });
+  await fbDb.collection('emailVerificationCodes').doc(user.uid).set({ code, email: user.email, expiresAt, lastSentAt: Date.now() });
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
@@ -4318,9 +4478,18 @@ async function sendVerificationCode(user) {
 }
 
 async function sendEmailChangeCode(user, newEmail) {
+  // Rate limit: check lastSentAt
+  const existing = await fbDb.collection('emailChangeCodes').doc(user.uid).get();
+  if (existing.exists) {
+    const last = existing.data().lastSentAt;
+    if (last && Date.now() - last < RESEND_COOLDOWN_MS) {
+      const wait = Math.ceil((RESEND_COOLDOWN_MS - (Date.now() - last)) / 1000);
+      throw new Error(`Please wait ${wait}s before requesting another code.`);
+    }
+  }
   const code = String(Math.floor(100000 + Math.random() * 900000));
   const expiresAt = Date.now() + 10 * 60 * 1000;
-  await fbDb.collection('emailChangeCodes').doc(user.uid).set({ code, newEmail, expiresAt });
+  await fbDb.collection('emailChangeCodes').doc(user.uid).set({ code, newEmail, expiresAt, lastSentAt: Date.now() });
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
@@ -5115,6 +5284,34 @@ function loadH2HView() {
   $('h2h-lobby').style.display = 'block';
   $('h2h-join-error').textContent = '';
   $('h2h-join-code').value = '';
+  // Clean up old rooms in the background
+  cleanupH2HRooms(user.uid);
+}
+
+async function cleanupH2HRooms(uid) {
+  try {
+    const now = Date.now();
+    const cutoff24h = new Date(now - 24 * 60 * 60 * 1000);
+    const cutoff2h  = new Date(now - 2  * 60 * 60 * 1000);
+    // Stale waiting rooms this user hosted (abandoned without cancelling)
+    const staleWaiting = await fbDb.collection('h2h_rooms')
+      .where('hostUid', '==', uid)
+      .where('status', '==', 'waiting')
+      .where('createdAt', '<', cutoff24h)
+      .get();
+    // Finished rooms this user hosted, older than 2 hours
+    const oldFinished = await fbDb.collection('h2h_rooms')
+      .where('hostUid', '==', uid)
+      .where('status', '==', 'finished')
+      .where('createdAt', '<', cutoff2h)
+      .get();
+    const batch = fbDb.batch();
+    staleWaiting.docs.forEach(d => batch.delete(d.ref));
+    oldFinished.docs.forEach(d => batch.delete(d.ref));
+    if (staleWaiting.size + oldFinished.size > 0) await batch.commit();
+  } catch(e) {
+    console.warn('H2H cleanup skipped:', e.message);
+  }
 }
 
 // ── Create room ───────────────────────────────────────────────────────────────
@@ -5173,7 +5370,7 @@ function showH2HWaiting(code) {
 }
 
 $('h2h-copy-link-btn')?.addEventListener('click', () => {
-  const url = `${location.origin}${location.pathname}?room=${h2hState.roomId}`;
+  const url = `${location.origin}/1v1?room=${h2hState.roomId}`;
   navigator.clipboard.writeText(url).then(() => {
     const btn = $('h2h-copy-link-btn');
     btn.textContent = 'Copied ✓';
@@ -5483,6 +5680,174 @@ const h2hChainObserver = new MutationObserver(() => {
   }
 });
 h2hChainObserver.observe(els.chainRow, { childList: true });
+
+// ── Admin dashboard ───────────────────────────────────────────────────────────
+
+// Admin tab switching
+document.querySelectorAll('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    $('admin-panel-' + tab.dataset.panel)?.classList.add('active');
+  });
+});
+
+async function loadAdminView() {
+  const user = fbAuth.currentUser;
+  if (!user) return;
+  const doc = await loadUserDoc(user.uid);
+  if (!doc.isAdmin) { showView('game'); return; }
+
+  const now = new Date();
+  $('admin-last-refresh').textContent = 'Last refreshed: ' + now.toLocaleTimeString();
+
+  // ── Stats row ──
+  try {
+    const [usersSnap, roomsSnap, weekSnap] = await Promise.all([
+      fbDb.collection('users').limit(1000).get(),
+      fbDb.collection('h2h_rooms').where('status', 'in', ['waiting', 'active']).get(),
+      fbDb.collection('leaderboard').where('weekId', '==', getWeekId()).get(),
+    ]);
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const activeCount = usersSnap.docs.filter(d => {
+      const ts = d.data().lastActiveAt;
+      return ts && (ts.toMillis ? ts.toMillis() : ts) > sevenDaysAgo;
+    }).length;
+    $('admin-stat-users').textContent = usersSnap.size;
+    $('admin-stat-active').textContent = activeCount;
+    $('admin-stat-rooms').textContent = roomsSnap.size;
+    $('admin-stat-week').textContent = weekSnap.size;
+  } catch(e) { console.warn('Admin stats error:', e); }
+
+  // ── Users panel ──
+  loadAdminUsers();
+  // ── Puzzles panel ──
+  loadAdminPuzzles();
+  // ── Rooms panel ──
+  loadAdminRooms();
+}
+
+async function loadAdminUsers() {
+  $('admin-users-loading').style.display = 'block';
+  $('admin-users-table').style.display = 'none';
+  try {
+    const snap = await fbDb.collection('users').limit(50).get();
+    const weekSnap = await fbDb.collection('leaderboard').where('weekId', '==', getWeekId()).get();
+    const weekMap = {};
+    weekSnap.docs.forEach(d => { weekMap[d.data().uid] = d.data().total || 0; });
+
+    const tbody = $('admin-users-body');
+    tbody.innerHTML = '';
+    snap.docs.forEach(d => {
+      const u = d.data();
+      const uid = d.id;
+      const solved = Object.keys(u.solvedPuzzles || {}).length;
+      const weekPts = weekMap[uid] || 0;
+      const flagged = u.flagged === true;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:600;">${u.displayName || uid.slice(0,8)}</td>
+        <td style="color:var(--ink-3);font-size:12px;">${u.email || '—'}</td>
+        <td>${solved}</td>
+        <td>${weekPts}</td>
+        <td>
+          <button class="admin-flag-btn ${flagged ? 'flagged' : ''}" data-uid="${uid}" data-flagged="${flagged}">
+            ${flagged ? '🚩 Flagged' : 'Flag'}
+          </button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    // Flag button handlers
+    tbody.querySelectorAll('.admin-flag-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const uid = btn.dataset.uid;
+        const currently = btn.dataset.flagged === 'true';
+        const newVal = !currently;
+        await fbDb.collection('users').doc(uid).set({ flagged: newVal }, { merge: true });
+        btn.dataset.flagged = String(newVal);
+        btn.classList.toggle('flagged', newVal);
+        btn.textContent = newVal ? '🚩 Flagged' : 'Flag';
+      });
+    });
+
+    $('admin-users-loading').style.display = 'none';
+    $('admin-users-table').style.display = 'table';
+  } catch(e) {
+    $('admin-users-loading').textContent = 'Failed to load users: ' + e.message;
+  }
+}
+
+async function loadAdminPuzzles() {
+  $('admin-puzzles-loading').style.display = 'block';
+  $('admin-puzzles-table').style.display = 'none';
+  try {
+    const weekSnap = await fbDb.collection('leaderboard').where('weekId', '==', getWeekId()).get();
+    // Aggregate puzzle completions from solvedPuzzles maps in leaderboard docs
+    const puzzleMap = {};
+    weekSnap.docs.forEach(d => {
+      const puzzles = d.data().puzzles || {};
+      Object.entries(puzzles).forEach(([key, pts]) => {
+        if (!puzzleMap[key]) puzzleMap[key] = { completions: 0, totalPts: 0 };
+        puzzleMap[key].completions++;
+        puzzleMap[key].totalPts += pts;
+      });
+    });
+    const sorted = Object.entries(puzzleMap).sort((a, b) => b[1].completions - a[1].completions).slice(0, 30);
+    const tbody = $('admin-puzzles-body');
+    tbody.innerHTML = '';
+    if (!sorted.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--ink-3)">No puzzle data this week yet.</td></tr>';
+    } else {
+      sorted.forEach(([key, data]) => {
+        const [diff, num] = key.split('_');
+        const avg = Math.round(data.totalPts / data.completions);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>#${num}</td><td style="text-transform:capitalize;">${diff}</td><td>${data.completions}</td><td>${avg}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    $('admin-puzzles-loading').style.display = 'none';
+    $('admin-puzzles-table').style.display = 'table';
+  } catch(e) {
+    $('admin-puzzles-loading').textContent = 'Failed to load puzzle data: ' + e.message;
+  }
+}
+
+async function loadAdminRooms() {
+  $('admin-rooms-loading').style.display = 'block';
+  $('admin-rooms-table').style.display = 'none';
+  try {
+    const snap = await fbDb.collection('h2h_rooms').orderBy('createdAt', 'desc').limit(40).get();
+    const tbody = $('admin-rooms-body');
+    tbody.innerHTML = '';
+    if (snap.empty) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--ink-3)">No rooms yet.</td></tr>';
+    } else {
+      snap.docs.forEach(d => {
+        const r = d.data();
+        const created = r.createdAt ? new Date(r.createdAt.toMillis ? r.createdAt.toMillis() : r.createdAt).toLocaleString() : '—';
+        const statusColor = r.status === 'active' ? 'var(--green)' : r.status === 'waiting' ? 'var(--accent)' : 'var(--ink-3)';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-family:monospace;font-weight:700;">${r.roomId}</td>
+          <td style="color:${statusColor};font-weight:600;text-transform:capitalize;">${r.status}</td>
+          <td>${r.hostName || '—'}</td>
+          <td>${r.guestName || '—'}</td>
+          <td style="color:var(--ink-3);font-size:12px;">${created}</td>
+          <td>
+            <button class="admin-flag-btn" data-roomid="${d.id}" style="color:var(--red);border-color:var(--red);" onclick="if(confirm('Delete room ${r.roomId}?')) fbDb.collection('h2h_rooms').doc('${d.id}').delete().then(()=>this.closest('tr').remove())">Delete</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    $('admin-rooms-loading').style.display = 'none';
+    $('admin-rooms-table').style.display = 'table';
+  } catch(e) {
+    $('admin-rooms-loading').textContent = 'Failed to load rooms: ' + e.message;
+  }
+}
 </script>
 </body>
 </html>
