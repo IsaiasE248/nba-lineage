@@ -1297,6 +1297,34 @@
   .h2h-badge.playing { background: var(--accent-glow); color: var(--accent-soft); border: 1px solid var(--accent-line); }
   .h2h-badge.waiting { background: var(--surface-2); color: var(--ink-3); border: 1px solid var(--border); }
 
+  /* H2H panel action buttons */
+  .h2h-panel-actions {
+    display: flex; gap: 8px; margin-top: 12px;
+  }
+  .h2h-panel-actions button {
+    flex: 1; font-family: inherit; font-size: 12px; font-weight: 600;
+    padding: 6px 10px; border-radius: 8px; cursor: pointer;
+    transition: all 0.15s; border: 1px solid var(--border-strong);
+    background: none; color: var(--ink-2);
+  }
+  .h2h-panel-actions button:hover:not(:disabled) { border-color: currentColor; }
+  .h2h-panel-actions button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .h2h-draw-btn:hover:not(:disabled) { color: var(--accent) !important; border-color: var(--accent) !important; }
+  .h2h-forfeit-btn:hover:not(:disabled) { color: var(--red) !important; border-color: var(--red) !important; }
+  /* Draw request notice */
+  #h2h-draw-notice {
+    display: none; margin-top: 10px; padding: 8px 12px;
+    background: var(--accent-glow); border: 1px solid var(--accent-line);
+    border-radius: 8px; font-size: 12px; color: var(--accent-soft);
+    text-align: center; line-height: 1.4;
+  }
+  #h2h-draw-notice button {
+    margin-left: 8px; font-family: inherit; font-size: 12px; font-weight: 700;
+    background: var(--accent); color: var(--bg); border: none;
+    padding: 3px 10px; border-radius: 6px; cursor: pointer; transition: opacity 0.15s;
+  }
+  #h2h-draw-notice button:hover { opacity: 0.85; }
+
   /* H2H result overlay */
   .h2h-result-overlay {
     position: fixed; inset: 0; z-index: 150;
@@ -1865,6 +1893,16 @@
         <div class="h2h-panel-score theirs" id="h2h-panel-opp-score">—</div>
         <div><span class="h2h-badge waiting" id="h2h-panel-opp-badge">Waiting</span></div>
       </div>
+    </div>
+    <!-- Opponent draw request notice -->
+    <div id="h2h-draw-notice">
+      Opponent wants to draw
+      <button id="h2h-accept-draw">Accept</button>
+    </div>
+    <!-- Draw / Forfeit buttons -->
+    <div class="h2h-panel-actions">
+      <button class="h2h-draw-btn" id="h2h-draw-btn">🤝 Draw</button>
+      <button class="h2h-forfeit-btn" id="h2h-forfeit-btn">🏳️ Forfeit</button>
     </div>
   </div>
 
@@ -5580,7 +5618,13 @@ function listenH2HRoom(code) {
     // Update the live panel
     updateH2HPanel(data);
 
-    // Check for finish
+    // Detect mutual draw agreement — promote to finished
+    if (data.hostWantsDraw && data.guestWantsDraw && data.status !== 'finished') {
+      h2hState.roomRef.update({ status: 'finished', drawAgreed: true }).catch(() => {});
+      return; // listener will re-fire with status:'finished'
+    }
+
+    // Check for finish (both complete, forfeit, or explicit status)
     if (data.status === 'finished' || (data.hostComplete && data.guestComplete)) {
       if (data.status !== 'finished') {
         h2hState.roomRef.update({ status: 'finished' }).catch(() => {});
@@ -5639,6 +5683,13 @@ function startH2HGame(roomData) {
   $('h2h-panel-opp-score').textContent = '0';
   setBadge($('h2h-panel-my-badge'),  'playing');
   setBadge($('h2h-panel-opp-badge'), 'playing');
+  // Reset draw/forfeit button states for fresh game
+  const drawBtn    = $('h2h-draw-btn');
+  const forfeitBtn = $('h2h-forfeit-btn');
+  const drawNotice = $('h2h-draw-notice');
+  if (drawBtn)    { drawBtn.disabled = false; drawBtn.textContent = '🤝 Draw'; }
+  if (forfeitBtn) { forfeitBtn.disabled = false; forfeitBtn.textContent = '🏳️ Forfeit'; }
+  if (drawNotice) drawNotice.style.display = 'none';
   $('h2h-panel').classList.add('active');
 }
 
@@ -5657,8 +5708,15 @@ function updateH2HPanel(data) {
   const myDone     = isHost ? data.hostComplete  : data.guestComplete;
   const oppDone    = isHost ? data.guestComplete : data.hostComplete;
 
-  $('h2h-panel-my-score').textContent  = myScore  > 0 ? myScore  : (mySteps  > 0 ? mySteps  + ' steps' : '—');
-  $('h2h-panel-opp-score').textContent = oppScore > 0 ? oppScore : (oppSteps > 0 ? oppSteps + ' steps' : '—');
+  $('h2h-panel-my-score').textContent  = myScore  > 0 ? myScore  : (mySteps  > 0 ? mySteps  + ' steps' : '0');
+  $('h2h-panel-opp-score').textContent = oppScore > 0 ? oppScore : (oppSteps > 0 ? oppSteps + ' steps' : '0');
+  // Show draw request notification if opponent requested one
+  const drawNotice = $('h2h-draw-notice');
+  if (drawNotice) {
+    const isHost = h2hState.role === 'host';
+    const oppWantsDraw = isHost ? data.guestWantsDraw : data.hostWantsDraw;
+    drawNotice.style.display = oppWantsDraw ? 'block' : 'none';
+  }
 
   setBadge($('h2h-panel-my-badge'),  myDone  ? 'done' : 'playing');
   setBadge($('h2h-panel-opp-badge'), oppDone ? 'done' : (data.status === 'active' ? 'playing' : 'waiting'));
@@ -5701,7 +5759,19 @@ function showH2HResult(data) {
   const oppName  = isHost ? (data.guestName || 'Opponent') : (data.hostName || 'Opponent');
 
   let icon, title, sub;
-  if (myScore > 0 && oppScore > 0) {
+  // Check special end conditions first
+  const iDraw    = isHost ? data.hostWantsDraw    : data.guestWantsDraw;
+  const oppDraw  = isHost ? data.guestWantsDraw   : data.hostWantsDraw;
+  const iForfeit = isHost ? data.hostForfeit      : data.guestForfeit;
+  const oppForfeit = isHost ? data.guestForfeit   : data.hostForfeit;
+
+  if (data.drawAgreed || (iDraw && oppDraw)) {
+    icon = '🤝'; title = "Draw agreed"; sub = "You both agreed to call it even. Good game!";
+  } else if (iForfeit) {
+    icon = '🏳️'; title = "You forfeited"; sub = `Better luck next time. ${oppName} wins this round.`;
+  } else if (oppForfeit) {
+    icon = '🏆'; title = "Opponent forfeited!"; sub = `${oppName} threw in the towel. You win!`;
+  } else if (myScore > 0 && oppScore > 0) {
     if (myScore > oppScore)       { icon = '🏆'; title = 'You won!'; sub = `You scored ${myScore} pts vs ${oppScore} pts. Well played!`; }
     else if (oppScore > myScore)  { icon = '😤'; title = `${oppName} wins`; sub = `${oppScore} pts vs your ${myScore} pts. Rematch?`; }
     else                          { icon = '🤝'; title = "It's a tie!"; sub = `Both scored ${myScore} pts. Impressive.`; }
@@ -5777,6 +5847,43 @@ $('h2h-panel-exit')?.addEventListener('click', () => {
   if (!confirm('Exit the 1v1 race? Your opponent will see you left.')) return;
   $('h2h-panel').classList.remove('active');
   endH2HSession();
+});
+
+$('h2h-draw-btn')?.addEventListener('click', async () => {
+  if (!h2hState.active || !h2hState.roomRef) return;
+  const isHost = h2hState.role === 'host';
+  const update = isHost ? { hostWantsDraw: true } : { guestWantsDraw: true };
+  const btn = $('h2h-draw-btn');
+  btn.disabled = true; btn.textContent = 'Draw requested…';
+  try { await h2hState.roomRef.update(update); } catch(e) {
+    btn.disabled = false; btn.textContent = '🤝 Draw';
+  }
+});
+
+$('h2h-accept-draw')?.addEventListener('click', async () => {
+  if (!h2hState.roomRef) return;
+  const isHost = h2hState.role === 'host';
+  // Accept by setting our own wantsDraw — listener detects both true and finishes
+  const update = isHost ? { hostWantsDraw: true } : { guestWantsDraw: true };
+  const btn = $('h2h-accept-draw');
+  if (btn) { btn.disabled = true; btn.textContent = 'Accepting…'; }
+  try { await h2hState.roomRef.update(update); } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Accept'; }
+  }
+});
+
+$('h2h-forfeit-btn')?.addEventListener('click', async () => {
+  if (!h2hState.active || !h2hState.roomRef) return;
+  if (!confirm('Forfeit the race? You will lose this round.')) return;
+  const isHost = h2hState.role === 'host';
+  const update = isHost
+    ? { hostForfeit: true, hostComplete: true, status: 'finished' }
+    : { guestForfeit: true, guestComplete: true, status: 'finished' };
+  const btn = $('h2h-forfeit-btn');
+  btn.disabled = true; btn.textContent = 'Forfeiting…';
+  try { await h2hState.roomRef.update(update); } catch(e) {
+    btn.disabled = false; btn.textContent = '🏳️ Forfeit';
+  }
 });
 
 function endH2HSession() {
