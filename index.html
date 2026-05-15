@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <title>HoopLineage</title>
 <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
@@ -564,6 +564,15 @@
     font-size: 11px;
     text-align: center;
     padding: 12px;
+    cursor: pointer;
+    background: none;
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(245,158,11,0.15);
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   /* CONNECTION PILLS — shown between valid linked cards after chain is verified */
@@ -750,7 +759,7 @@
     border: 1px solid var(--border-strong);
     color: var(--ink);
     font-family: inherit;
-    font-size: 15px;
+    font-size: 16px;
     outline: none;
     border-radius: var(--radius-lg);
     transition: border-color 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s cubic-bezier(0.16,1,0.3,1);
@@ -1105,8 +1114,25 @@
     .placeholder-card { width: min(74vw, 220px); }
     .conn-pill { width: min(74vw, 220px); min-width: unset; }
 
-    /* Search */
+    /* Search — sticky at bottom so always tappable */
     .search-wrap { gap: 8px; }
+    .input-wrap {
+      position: sticky;
+      bottom: 0;
+      background: var(--bg);
+      padding: 10px 0 14px;
+      margin: 0 -16px;
+      padding-left: 16px;
+      padding-right: 16px;
+      z-index: 50;
+      border-top: 1px solid var(--border);
+    }
+    @keyframes search-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); border-color: var(--accent); }
+      70%  { box-shadow: 0 0 0 8px rgba(245,158,11,0); border-color: var(--accent); }
+      100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+    }
+    .search-input.pulse { animation: search-pulse 0.6s ease-out; }
 
     /* Controls */
     .controls { gap: 8px; }
@@ -1721,11 +1747,6 @@
           <div style="font-size:40px;margin-bottom:12px;">🏟️</div>
           <div style="font-size:17px;font-weight:700;margin-bottom:8px;">Create room</div>
           <div style="font-size:13px;color:var(--ink-3);line-height:1.5;margin-bottom:16px;">Start a race and share the code with your opponent.</div>
-          <div style="display:flex;gap:6px;justify-content:center;margin-bottom:14px;">
-            <button class="diff-tab active" id="h2h-diff-easy" style="flex:1;font-size:12px;padding:8px 0;">Easy</button>
-            <button class="diff-tab" id="h2h-diff-medium" style="flex:1;font-size:12px;padding:8px 0;">Med</button>
-            <button class="diff-tab" id="h2h-diff-hard" style="flex:1;font-size:12px;padding:8px 0;">Hard</button>
-          </div>
           <button class="settings-save-btn" id="h2h-create-btn" style="width:100%;">Create room</button>
         </div>
         <!-- Join room -->
@@ -2466,7 +2487,12 @@ function renderChainRow() {
     els.chainRow.appendChild(makeArrow(0));
     const ph = document.createElement("div");
     ph.className = "placeholder-card";
-    ph.textContent = "Add a player";
+    ph.addEventListener('click', () => {
+      els.search.classList.add('pulse');
+      els.search.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => els.search.classList.remove('pulse'), 700);
+    });
+    ph.textContent = 'Add a player';
     els.chainRow.appendChild(ph);
   } else {
     bridges.forEach((node, i) => {
@@ -2542,10 +2568,16 @@ document.addEventListener('keydown', (e) => {
 els.search.addEventListener('focus', () => {
   const hint = $('search-kbd-hint');
   if (hint) hint.style.opacity = '0';
+  // Prevent iOS Safari from zooming in on input focus
+  document.querySelector('meta[name="viewport"]').setAttribute('content',
+    'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
 });
 els.search.addEventListener('blur', () => {
   const hint = $('search-kbd-hint');
   if (hint) hint.style.opacity = '';
+  // Restore normal zoom after keyboard dismisses
+  document.querySelector('meta[name="viewport"]').setAttribute('content',
+    'width=device-width, initial-scale=1.0');
 });
 
 function doSearch(q) {
@@ -2737,8 +2769,8 @@ function finishGame() {
     }, 550);
   }
 
-  // Only save for daily and archive modes (not practice)
-  if (state.mode !== 'practice') {
+  // Only save for daily and archive modes (not practice or h2h)
+  if (state.mode !== 'practice' && state.mode !== 'h2h') {
     const puzzleKey = state.mode === 'archive' ? state.archiveDayIndex : state.puzzleNum;
     const lsKey = `lineage:${state.difficulty}:${puzzleKey}`;
     const chainArr = [state.startPlayer.first_name + " " + state.startPlayer.last_name,
@@ -3357,7 +3389,6 @@ function generatePracticePair() {
     540,    // Hakeem Olajuwon
     552,    // Dennis Rodman
     2933,   // Scottie Pippen
-    2973,   // Shawn Kemp
     // ── Champions / All-Stars (2000s) ────────────────────────────────────
     971,    // Kevin Garnett
     1374,   // Gilbert Arenas
@@ -3424,6 +3455,42 @@ function generatePracticePair() {
     70,     // Jaylen Brown
     322,    // Donovan Mitchell
     666969, // Zion Williamson
+    // ── 2000s stars ──────────────────────────────────────────────────────
+    1027,   // Stephon Marbury
+    946,    // Jerry Stackhouse
+    1162,   // Peja Stojakovic
+    1242,   // Jason Terry
+    1199,   // Mike Bibby
+    1222,   // Andre Miller
+    1364,   // Joe Johnson
+    // ── 2010s ────────────────────────────────────────────────────────────
+    224,    // Andre Iguodala
+    219,    // Al Horford
+    223,    // Serge Ibaka
+    250,    // DeAndre Jordan
+    467,    // John Wall
+    357,    // Victor Oladipo
+    204,    // Gordon Hayward
+    136,    // Goran Dragic
+    315,    // Khris Middleton
+    200,    // Tobias Harris
+    318,    // Paul Millsap
+    // ── Current gen ──────────────────────────────────────────────────────
+    3547238,  // Anthony Edwards
+    175,      // Shai Gilgeous-Alexander
+    73,       // Jalen Brunson
+    61,       // Mikal Bridges
+    3547254,  // Tyrese Maxey
+    17896075, // Cade Cunningham
+    3547245,  // Tyrese Haliburton
+    38017683, // Paolo Banchero
+    17896076, // Evan Mobley
+    137,      // Andre Drummond
+    202,      // Josh Hart
+    409,      // Dennis Schroder
+    420,      // Marcus Smart
+    45,       // Patrick Beverley
+    6472,     // Isaiah Thomas
   ]);
 
   const allPlayers = Object.values(state.data.players);
@@ -3809,6 +3876,8 @@ function updateEyebrow() {
     const archDate = new Date(Date.UTC(2024,0,1) + state.archiveDayIndex * 86400000);
     const dateStr = archDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     txt.innerHTML = `<span class="mode-tag archive">Archive</span>${dateStr} · Puzzle #${state.archiveDayIndex} · <span id="difficulty-label">${state.difficulty.charAt(0).toUpperCase()+state.difficulty.slice(1)}</span>`;
+  } else if (state.mode === 'h2h') {
+    txt.innerHTML = `<span class="mode-tag practice">⚔️ 1v1 Race</span>`;
   } else {
     txt.innerHTML = `Daily <span id="daily-date">${todayDate()}</span> · Puzzle <span id="puzzle-num">#${state.puzzleNum}</span> · <span id="difficulty-label">${state.difficulty.charAt(0).toUpperCase()+state.difficulty.slice(1)}</span>`;
   }
@@ -5340,16 +5409,6 @@ function genRoomCode() {
   return code;
 }
 
-// H2H difficulty selector in lobby
-function setH2HDiff(diff) {
-  h2hState.diff = diff;
-  ['easy','medium','hard'].forEach(d => {
-    $(`h2h-diff-${d}`)?.classList.toggle('active', d === diff);
-  });
-}
-$('h2h-diff-easy')?.addEventListener('click', () => setH2HDiff('easy'));
-$('h2h-diff-medium')?.addEventListener('click', () => setH2HDiff('medium'));
-$('h2h-diff-hard')?.addEventListener('click', () => setH2HDiff('hard'));
 
 function loadH2HView() {
   const user = fbAuth.currentUser;
@@ -5395,33 +5454,27 @@ async function cleanupH2HRooms(uid) {
 }
 
 // ── Create room ───────────────────────────────────────────────────────────────
-$('h2h-create-btn')?.addEventListener('click', async () => {
+async function createH2HRoom() {
   const user = fbAuth.currentUser;
   if (!user) return;
-
-  const diff = h2hState.diff;
   if (!state.data) { alert('Game data not loaded. Please wait a moment and try again.'); return; }
-  // Pick the daily pair for the chosen difficulty (temporarily set difficulty)
-  const _prevDiff = state.difficulty;
-  state.difficulty = diff;
-  const pair = pickDailyPair();
-  state.difficulty = _prevDiff;
+
+  // Always use a fresh random pair — not tied to the daily puzzle
+  const pair = generatePracticePair();
 
   const btn = $('h2h-create-btn');
-  btn.disabled = true; btn.textContent = 'Creating…';
+  if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
 
   const code = genRoomCode();
   const roomData = {
     roomId: code,
-    diff,
-    puzzleNum: dayIndex(),
     startPlayerId: pair.a,
     endPlayerId: pair.b,
     hostUid: user.uid,
     hostName: user.displayName || 'Host',
     hostPhotoURL: user.photoURL || '',
     guestUid: null, guestName: null, guestPhotoURL: null,
-    status: 'waiting',   // 'waiting' | 'active' | 'finished'
+    status: 'waiting',
     hostChain: [], hostComplete: false, hostScore: 0, hostSteps: 0,
     guestChain: [], guestComplete: false, guestScore: 0, guestSteps: 0,
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -5431,17 +5484,17 @@ $('h2h-create-btn')?.addEventListener('click', async () => {
     await fbDb.collection('h2h_rooms').doc(code).set(roomData);
     h2hState.roomId = code;
     h2hState.role = 'host';
-    h2hState.diff = diff;
     h2hState.roomRef = fbDb.collection('h2h_rooms').doc(code);
 
     showH2HWaiting(code);
     listenH2HRoom(code);
-    btn.disabled = false; btn.textContent = 'Create room';
+    if (btn) { btn.disabled = false; btn.textContent = 'Create room'; }
   } catch(e) {
-    btn.disabled = false; btn.textContent = 'Create room';
+    if (btn) { btn.disabled = false; btn.textContent = 'Create room'; }
     alert('Failed to create room: ' + e.message);
   }
-});
+}
+$('h2h-create-btn')?.addEventListener('click', createH2HRoom);
 
 function showH2HWaiting(code) {
   $('h2h-lobby').style.display = 'none';
@@ -5517,9 +5570,11 @@ function listenH2HRoom(code) {
     if (!snap.exists) return;
     const data = snap.data();
 
-    // Host: guest just joined → start the game
-    if (h2hState.role === 'host' && data.status === 'active' && !h2hState.active) {
+    // Both players: start game when status becomes active (initial join or rematch)
+    if (data.status === 'active' && !h2hState.active) {
+      $('h2h-result-overlay').classList.remove('show'); // close result overlay if rematch
       startH2HGame(data);
+      return;
     }
 
     // Update the live panel
@@ -5537,6 +5592,9 @@ function listenH2HRoom(code) {
 
 function startH2HGame(roomData) {
   h2hState.active = true;
+  // Hide diff tabs immediately — before showView so they never flash
+  const diffRow = $('diff-tabs-row');
+  if (diffRow) diffRow.style.display = 'none';
   showView('game');
 
   // Set up the puzzle from the room
@@ -5547,8 +5605,8 @@ function startH2HGame(roomData) {
   if (!startPlayer || !endPlayer) return;
 
   // Reset game state
-  state.mode = 'daily';
-  state.difficulty = diff;
+  state.mode = 'h2h';
+  state.difficulty = diff || 'medium';
   state.archiveDayIndex = null;
   state.chain = [];
   state.connections = [];
@@ -5632,7 +5690,8 @@ function pushH2HComplete(score) {
 function showH2HResult(data) {
   // Prevent duplicate fires
   if ($('h2h-result-overlay').classList.contains('show')) return;
-  if (h2hState.unsubscribe) { h2hState.unsubscribe(); h2hState.unsubscribe = null; }
+  // Keep the listener alive so rematch can be detected — only mark game as inactive
+  h2hState.active = false;
 
   const user = fbAuth.currentUser;
   const isHost = h2hState.role === 'host';
@@ -5678,11 +5737,40 @@ $('h2h-result-close')?.addEventListener('click', () => {
   endH2HSession();
 });
 
-$('h2h-result-rematch')?.addEventListener('click', () => {
-  $('h2h-result-overlay').classList.remove('show');
-  endH2HSession();
-  showView('h2h');
-  loadH2HView();
+$('h2h-result-rematch')?.addEventListener('click', async () => {
+  if (!h2hState.roomRef) {
+    // No room ref — fall back to lobby
+    $('h2h-result-overlay').classList.remove('show');
+    endH2HSession();
+    showView('h2h');
+    loadH2HView();
+    return;
+  }
+
+  if (h2hState.role === 'host') {
+    // Host initiates rematch: pick a fresh random pair and reset the room
+    const btn = $('h2h-result-rematch');
+    btn.disabled = true; btn.textContent = 'Starting…';
+    try {
+      const pair = generatePracticePair();
+      await h2hState.roomRef.update({
+        startPlayerId: pair.a,
+        endPlayerId: pair.b,
+        hostChain: [], hostComplete: false, hostScore: 0, hostSteps: 0,
+        guestChain: [], guestComplete: false, guestScore: 0, guestSteps: 0,
+        status: 'active',
+      });
+      // Listener will fire and call startH2HGame for both players
+    } catch(e) {
+      btn.disabled = false; btn.textContent = 'Rematch';
+      alert('Failed to start rematch: ' + e.message);
+    }
+  } else {
+    // Guest: host must initiate — just show a waiting message
+    const btn = $('h2h-result-rematch');
+    btn.disabled = true; btn.textContent = 'Waiting for host…';
+    // The room listener (still alive) will auto-start when host resets
+  }
 });
 
 $('h2h-panel-exit')?.addEventListener('click', () => {
