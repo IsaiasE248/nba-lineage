@@ -10,13 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
 <script>
-  // Apply dark mode before first paint to prevent flash
-  (function(){
-    const saved = localStorage.getItem('nbl-theme');
-    if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-  })();
+  document.documentElement.setAttribute('data-theme', 'dark');
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -244,10 +238,6 @@
     border-radius: 999px;
     box-shadow: 0 2px 20px oklch(22% 0.008 80 / 0.09), 0 1px 0 oklch(100% 0 0 / 0.7) inset;
     transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-  }
-  [data-theme="dark"] .navbar {
-    background: oklch(18% 0.010 80 / 0.90);
-    box-shadow: 0 8px 32px oklch(0% 0 0 / 0.5), 0 1px 0 oklch(100% 0 0 / 0.05) inset;
   }
   .nav-inner {
     padding: 8px 14px;
@@ -1902,29 +1892,6 @@
       <div class="settings-msg" id="settings-profile-msg2"></div>
       </div>
 
-      <!-- Dark mode toggle -->
-      <div class="settings-card">
-        <div class="settings-card-title">Appearance</div>
-        <div class="settings-info-row">
-          <div>
-            <span style="font-size:14px;font-weight:600;color:var(--ink);">Dark mode</span>
-            <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">Override your system preference</div>
-          </div>
-          <button id="dark-mode-toggle" aria-label="Toggle dark mode" style="
-            position:relative; width:48px; height:26px; border-radius:999px;
-            border:none; cursor:pointer; padding:0; transition:background 0.2s;
-            background:var(--border-strong); flex-shrink:0;
-          ">
-            <span id="dark-mode-thumb" style="
-              position:absolute; top:3px; left:3px;
-              width:20px; height:20px; border-radius:50%;
-              background:var(--surface); transition:transform 0.2s, background 0.2s;
-              display:flex; align-items:center; justify-content:center;
-              font-size:11px; box-shadow:0 1px 3px oklch(22% 0.008 80 / 0.2);
-            ">☀️</span>
-          </button>
-        </div>
-      </div>
 
       <div class="settings-card">
         <div class="settings-card-title">Account</div>
@@ -6265,37 +6232,6 @@ const h2hChainObserver = new MutationObserver(() => {
 });
 h2hChainObserver.observe(els.chainRow, { childList: true });
 
-// ── Dark mode toggle ──────────────────────────────────────────────────────────
-function applyTheme(dark) {
-  const html = document.documentElement;
-  const toggle = $('dark-mode-toggle');
-  const thumb  = $('dark-mode-thumb');
-  if (dark) {
-    html.setAttribute('data-theme', 'dark');
-    if (toggle) toggle.style.background = 'var(--accent)';
-    if (thumb)  { thumb.style.transform = 'translateX(22px)'; thumb.textContent = '🌙'; }
-  } else {
-    html.removeAttribute('data-theme');
-    if (toggle) toggle.style.background = 'var(--border-strong)';
-    if (thumb)  { thumb.style.transform = 'translateX(0)'; thumb.textContent = '☀️'; }
-  }
-}
-
-// Sync toggle visual state when settings page opens
-function syncDarkModeToggle() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  applyTheme(isDark);
-}
-
-$('dark-mode-toggle')?.addEventListener('click', () => {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const next = !isDark;
-  localStorage.setItem('nbl-theme', next ? 'dark' : 'light');
-  applyTheme(next);
-});
-
-// Sync on page load (in case settings view is shown)
-syncDarkModeToggle();
 
 // ── Admin dashboard ───────────────────────────────────────────────────────────
 
