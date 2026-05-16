@@ -117,13 +117,6 @@
     box-shadow: 0 0 22px color-mix(in srgb, var(--team-color) 14%, transparent), 0 4px 20px oklch(0% 0 0 / 0.5);
   }
 
-  /* Dark mode: player card bg — overlay neutralizes inline team-color gradient set by JS */
-  [data-theme="dark"] .player-card .bg-gradient::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: oklch(10% 0.002 240 / 0.93);
-    pointer-events: none;
-  }
 
   /* Dark mode: chain arrows more visible */
   [data-theme="dark"] .chain-arrow { opacity: 0.85; font-size: 22px; }
