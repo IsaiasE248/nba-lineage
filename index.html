@@ -83,10 +83,10 @@
     --yellow-bg: oklch(78%  0.17   85 / 0.14);
   }
 
-  /* Dark mode: strong amber active state on nav */
+  /* Dark mode: active nav — dark pill, amber text */
   [data-theme="dark"] .nav-link.active {
-    background: var(--accent);
-    color: oklch(11% 0.002 240);
+    background: var(--surface-3);
+    color: var(--accent);
     font-weight: 700;
   }
   [data-theme="dark"] .navbar {
@@ -110,11 +110,11 @@
     box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.04);
   }
 
-  /* Dark mode: anchor card shells glow amber */
+  /* Dark mode: anchor card shells glow with team color */
   [data-theme="dark"] .player-card-shell:has(.player-card.start),
   [data-theme="dark"] .player-card-shell:has(.player-card.end) {
-    border-color: oklch(68% 0.19 57 / 0.45);
-    box-shadow: 0 0 24px oklch(68% 0.19 57 / 0.18), 0 4px 20px oklch(0% 0 0 / 0.5);
+    border-color: color-mix(in srgb, var(--team-color) 50%, transparent);
+    box-shadow: 0 0 28px color-mix(in srgb, var(--team-color) 28%, transparent), 0 4px 20px oklch(0% 0 0 / 0.5);
   }
 
   /* Dark mode: player card bg — overlay neutralizes inline team-color gradient set by JS */
@@ -274,7 +274,6 @@
     color: var(--accent-dark);
     background: var(--accent-glow);
   }
-  [data-theme="dark"] .nav-link.active { color: var(--accent-soft); }
 
   /* ── NAV MORE DROPDOWN ────────────────────────────────── */
   .nav-more-wrap { position: relative; }
@@ -614,7 +613,7 @@
   }
   [data-theme="dark"] .player-card.start, [data-theme="dark"] .player-card.end {
     background: var(--surface);
-    border-color: oklch(68% 0.19 57 / 0.35);
+    border-color: color-mix(in srgb, var(--team-color) 40%, transparent);
   }
 
   /* Remove button on bridge cards */
@@ -2690,6 +2689,7 @@ function makeCard(player, role) {
   const shell = document.createElement("div");
   shell.className = "player-card-shell";
   shell.style.position = "relative";
+  shell.style.setProperty('--team-color', c1);
   shell.appendChild(card);
 
   // X button — only on bridge cards (not start/end), only when puzzle not complete
