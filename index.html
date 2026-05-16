@@ -63,12 +63,12 @@
 
   /* ── DARK MODE — warm amber-dark, "court at night" ──────────── */
   [data-theme="dark"] {
-    /* Surfaces: genuinely warm amber-dark, not cool neutral */
-    --bg:        oklch(12%  0.028 62);
-    --bg-2:      oklch(16%  0.025 62);
-    --surface:   oklch(20%  0.026 62);
-    --surface-2: oklch(25%  0.024 62);
-    --surface-3: oklch(30%  0.022 62);
+    /* Surfaces: warm amber hue, chroma kept low at dark lightness to avoid red */
+    --bg:        oklch(12%  0.010 68);
+    --bg-2:      oklch(16%  0.012 68);
+    --surface:   oklch(20%  0.014 68);
+    --surface-2: oklch(25%  0.014 68);
+    --surface-3: oklch(30%  0.014 68);
     --border:       oklch(100% 0.006 80 / 0.09);
     --border-strong:oklch(100% 0.006 80 / 0.16);
     --ink:       oklch(95%  0.012 78);
@@ -92,11 +92,11 @@
   /* Dark mode: strong amber active state on nav */
   [data-theme="dark"] .nav-link.active {
     background: var(--accent);
-    color: oklch(12% 0.028 62);
+    color: oklch(12% 0.008 68);
     font-weight: 700;
   }
   [data-theme="dark"] .navbar {
-    background: oklch(16% 0.025 62 / 0.92);
+    background: oklch(16% 0.010 68 / 0.92);
     border-color: oklch(100% 0.006 80 / 0.10);
     box-shadow: 0 8px 32px oklch(0% 0 0 / 0.55), 0 1px 0 oklch(100% 0 0 / 0.06) inset;
   }
@@ -109,7 +109,7 @@
 
   /* Dark mode: chain area gets a framing treatment */
   [data-theme="dark"] .chain-row {
-    background: oklch(16% 0.028 62 / 0.60);
+    background: oklch(16% 0.010 68 / 0.60);
     border-radius: var(--radius-lg);
     border: 1px solid oklch(100% 0.006 80 / 0.06);
     padding: 20px 16px;
@@ -126,9 +126,9 @@
   /* Dark mode: player card bg — warm amber-dark gradient instead of cool blue */
   [data-theme="dark"] .player-card .bg-gradient {
     background: linear-gradient(160deg,
-      oklch(30% 0.06 62) 0%,
-      oklch(20% 0.04 62) 60%,
-      oklch(13% 0.02 62) 100%
+      oklch(30% 0.014 68) 0%,
+      oklch(20% 0.012 68) 60%,
+      oklch(13% 0.008 68) 100%
     );
   }
 
@@ -137,11 +137,11 @@
 
   /* Dark mode: complete panel — amber-charged */
   [data-theme="dark"] .complete {
-    background: oklch(18% 0.032 62);
+    background: oklch(18% 0.012 68);
     border-color: oklch(68% 0.19 57 / 0.28);
     box-shadow: 0 0 48px oklch(68% 0.19 57 / 0.10), 0 8px 40px oklch(0% 0 0 / 0.45);
   }
-  [data-theme="dark"] .score-cell { background: oklch(22% 0.026 62); border-color: oklch(100% 0.006 80 / 0.08); }
+  [data-theme="dark"] .score-cell { background: oklch(22% 0.014 68); border-color: oklch(100% 0.006 80 / 0.08); }
   [data-theme="dark"] .score-cell.total {
     background: oklch(68% 0.19 57 / 0.16);
     border-color: oklch(68% 0.19 57 / 0.42);
@@ -149,31 +149,31 @@
 
   /* Dark mode: search input — warm dark, not grey */
   [data-theme="dark"] .search-input {
-    background: oklch(20% 0.026 62);
+    background: oklch(20% 0.012 68);
     border-color: oklch(100% 0.006 80 / 0.16);
     box-shadow: 0 1px 4px oklch(0% 0 0 / 0.3);
   }
 
   /* Dark mode: results dropdown */
   [data-theme="dark"] .results {
-    background: oklch(20% 0.026 62);
+    background: oklch(20% 0.012 68);
   }
   [data-theme="dark"] .result-item:hover,
-  [data-theme="dark"] .result-item.active { background: oklch(25% 0.026 62); }
+  [data-theme="dark"] .result-item.active { background: oklch(25% 0.014 68); }
 
   /* Dark mode: controls buttons */
   [data-theme="dark"] .btn {
-    background: oklch(22% 0.024 62);
+    background: oklch(22% 0.014 68);
     border-color: oklch(100% 0.006 80 / 0.14);
   }
   [data-theme="dark"] .btn:hover {
-    background: oklch(27% 0.024 62);
+    background: oklch(27% 0.014 68);
     border-color: oklch(100% 0.006 80 / 0.24);
   }
 
   /* Dark mode: H2H panel */
   [data-theme="dark"] #h2h-panel {
-    background: oklch(18% 0.030 62);
+    background: oklch(18% 0.012 68);
     border-color: oklch(100% 0.006 80 / 0.12);
   }
 
@@ -183,14 +183,14 @@
   [data-theme="dark"] .help-popup .inner,
   [data-theme="dark"] .auth-modal,
   [data-theme="dark"] .h2h-result-modal {
-    background: oklch(18% 0.028 62);
+    background: oklch(18% 0.012 68);
     border-color: oklch(100% 0.006 80 / 0.14);
   }
 
   /* Dark mode: settings card */
-  [data-theme="dark"] .settings-card { background: oklch(18% 0.028 62); }
-  [data-theme="dark"] .settings-input { background: oklch(22% 0.026 62); color: var(--ink); }
-  [data-theme="dark"] .code-input { background: oklch(22% 0.026 62); color: var(--ink); }
+  [data-theme="dark"] .settings-card { background: oklch(18% 0.012 68); }
+  [data-theme="dark"] .settings-input { background: oklch(22% 0.014 68); color: var(--ink); }
+  [data-theme="dark"] .code-input { background: oklch(22% 0.014 68); color: var(--ink); }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   html, body {
