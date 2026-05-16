@@ -123,13 +123,12 @@
     box-shadow: 0 0 24px oklch(68% 0.19 57 / 0.18), 0 4px 20px oklch(0% 0 0 / 0.5);
   }
 
-  /* Dark mode: player card bg — warm amber-dark gradient instead of cool blue */
-  [data-theme="dark"] .player-card .bg-gradient {
-    background: linear-gradient(160deg,
-      oklch(30% 0.014 68) 0%,
-      oklch(20% 0.012 68) 60%,
-      oklch(13% 0.008 68) 100%
-    );
+  /* Dark mode: player card bg — overlay neutralizes inline team-color gradient set by JS */
+  [data-theme="dark"] .player-card .bg-gradient::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: oklch(10% 0.006 68 / 0.82);
+    pointer-events: none;
   }
 
   /* Dark mode: chain arrows more visible */
