@@ -61,27 +61,136 @@
     --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 
-  /* ── DARK MODE ─────────────────────────────────────────────── */
+  /* ── DARK MODE — warm amber-dark, "court at night" ──────────── */
   [data-theme="dark"] {
-    --bg:        oklch(14%  0.010 80);
-    --bg-2:      oklch(18%  0.010 80);
-    --surface:   oklch(21%  0.011 80);
-    --surface-2: oklch(25%  0.012 80);
-    --surface-3: oklch(29%  0.012 80);
-    --border:       oklch(100% 0.006 80 / 0.07);
-    --border-strong:oklch(100% 0.006 80 / 0.12);
-    --ink:       oklch(93%  0.008 82);
-    --ink-2:     oklch(67%  0.010 80);
-    --ink-3:     oklch(47%  0.010 80);
-    --ink-faint: oklch(30%  0.010 80);
-    /* accent stays the same — amber works on dark too */
+    /* Surfaces: genuinely warm amber-dark, not cool neutral */
+    --bg:        oklch(12%  0.028 62);
+    --bg-2:      oklch(16%  0.025 62);
+    --surface:   oklch(20%  0.026 62);
+    --surface-2: oklch(25%  0.024 62);
+    --surface-3: oklch(30%  0.022 62);
+    --border:       oklch(100% 0.006 80 / 0.09);
+    --border-strong:oklch(100% 0.006 80 / 0.16);
+    --ink:       oklch(95%  0.012 78);
+    --ink-2:     oklch(68%  0.014 72);
+    --ink-3:     oklch(48%  0.014 68);
+    --ink-faint: oklch(30%  0.016 65);
+    /* Accent: brighter in dark for contrast */
+    --accent:      oklch(68%  0.19  57);
+    --accent-soft: oklch(76%  0.17  62);
+    --accent-dark: oklch(55%  0.21  52);
+    --accent-glow: oklch(68%  0.19  57 / 0.16);
+    --accent-line: oklch(68%  0.19  57 / 0.38);
     --green:     oklch(62%  0.16  145);
-    --green-bg:  oklch(62%  0.16  145 / 0.12);
+    --green-bg:  oklch(62%  0.16  145 / 0.14);
     --red:       oklch(62%  0.18   27);
-    --red-bg:    oklch(62%  0.18   27 / 0.12);
+    --red-bg:    oklch(62%  0.18   27 / 0.14);
     --yellow:    oklch(78%  0.17   85);
-    --yellow-bg: oklch(78%  0.17   85 / 0.12);
+    --yellow-bg: oklch(78%  0.17   85 / 0.14);
   }
+
+  /* Dark mode: strong amber active state on nav */
+  [data-theme="dark"] .nav-link.active {
+    background: var(--accent);
+    color: oklch(12% 0.028 62);
+    font-weight: 700;
+  }
+  [data-theme="dark"] .navbar {
+    background: oklch(16% 0.025 62 / 0.92);
+    border-color: oklch(100% 0.006 80 / 0.10);
+    box-shadow: 0 8px 32px oklch(0% 0 0 / 0.55), 0 1px 0 oklch(100% 0 0 / 0.06) inset;
+  }
+
+  /* Dark mode: hero — bigger, more commanding */
+  [data-theme="dark"] .hero h1 {
+    font-size: clamp(50px, 8vw, 88px);
+    letter-spacing: -0.04em;
+  }
+
+  /* Dark mode: chain area gets a framing treatment */
+  [data-theme="dark"] .chain-row {
+    background: oklch(16% 0.028 62 / 0.60);
+    border-radius: var(--radius-lg);
+    border: 1px solid oklch(100% 0.006 80 / 0.06);
+    padding: 20px 16px;
+    box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.04);
+  }
+
+  /* Dark mode: anchor card shells glow amber */
+  [data-theme="dark"] .player-card-shell:has(.player-card.start),
+  [data-theme="dark"] .player-card-shell:has(.player-card.end) {
+    border-color: oklch(68% 0.19 57 / 0.45);
+    box-shadow: 0 0 24px oklch(68% 0.19 57 / 0.18), 0 4px 20px oklch(0% 0 0 / 0.5);
+  }
+
+  /* Dark mode: player card bg — warm amber-dark gradient instead of cool blue */
+  [data-theme="dark"] .player-card .bg-gradient {
+    background: linear-gradient(160deg,
+      oklch(30% 0.06 62) 0%,
+      oklch(20% 0.04 62) 60%,
+      oklch(13% 0.02 62) 100%
+    );
+  }
+
+  /* Dark mode: chain arrows more visible */
+  [data-theme="dark"] .chain-arrow { opacity: 0.85; font-size: 22px; }
+
+  /* Dark mode: complete panel — amber-charged */
+  [data-theme="dark"] .complete {
+    background: oklch(18% 0.032 62);
+    border-color: oklch(68% 0.19 57 / 0.28);
+    box-shadow: 0 0 48px oklch(68% 0.19 57 / 0.10), 0 8px 40px oklch(0% 0 0 / 0.45);
+  }
+  [data-theme="dark"] .score-cell { background: oklch(22% 0.026 62); border-color: oklch(100% 0.006 80 / 0.08); }
+  [data-theme="dark"] .score-cell.total {
+    background: oklch(68% 0.19 57 / 0.16);
+    border-color: oklch(68% 0.19 57 / 0.42);
+  }
+
+  /* Dark mode: search input — warm dark, not grey */
+  [data-theme="dark"] .search-input {
+    background: oklch(20% 0.026 62);
+    border-color: oklch(100% 0.006 80 / 0.16);
+    box-shadow: 0 1px 4px oklch(0% 0 0 / 0.3);
+  }
+
+  /* Dark mode: results dropdown */
+  [data-theme="dark"] .results {
+    background: oklch(20% 0.026 62);
+  }
+  [data-theme="dark"] .result-item:hover,
+  [data-theme="dark"] .result-item.active { background: oklch(25% 0.026 62); }
+
+  /* Dark mode: controls buttons */
+  [data-theme="dark"] .btn {
+    background: oklch(22% 0.024 62);
+    border-color: oklch(100% 0.006 80 / 0.14);
+  }
+  [data-theme="dark"] .btn:hover {
+    background: oklch(27% 0.024 62);
+    border-color: oklch(100% 0.006 80 / 0.24);
+  }
+
+  /* Dark mode: H2H panel */
+  [data-theme="dark"] #h2h-panel {
+    background: oklch(18% 0.030 62);
+    border-color: oklch(100% 0.006 80 / 0.12);
+  }
+
+  /* Dark mode: popup/modal backgrounds */
+  [data-theme="dark"] .popup-inner,
+  [data-theme="dark"] .stats-popup .inner,
+  [data-theme="dark"] .help-popup .inner,
+  [data-theme="dark"] .auth-modal,
+  [data-theme="dark"] .h2h-result-modal {
+    background: oklch(18% 0.028 62);
+    border-color: oklch(100% 0.006 80 / 0.14);
+  }
+
+  /* Dark mode: settings card */
+  [data-theme="dark"] .settings-card { background: oklch(18% 0.028 62); }
+  [data-theme="dark"] .settings-input { background: oklch(22% 0.026 62); color: var(--ink); }
+  [data-theme="dark"] .code-input { background: oklch(22% 0.026 62); color: var(--ink); }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   html, body {
@@ -118,8 +227,9 @@
   }
   [data-theme="dark"] body::after {
     background:
-      radial-gradient(ellipse 60% 40% at 80% 10%, oklch(63% 0.19 57 / 0.09), transparent 60%),
-      radial-gradient(ellipse 50% 35% at 15% 90%, oklch(63% 0.19 57 / 0.06), transparent 60%);
+      radial-gradient(ellipse 70% 45% at 85% 5%,  oklch(68% 0.19 57 / 0.14), transparent 60%),
+      radial-gradient(ellipse 55% 40% at 10% 92%, oklch(68% 0.19 57 / 0.10), transparent 60%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, oklch(68% 0.19 57 / 0.04), transparent 70%);
   }
 
   /* NAVBAR */
